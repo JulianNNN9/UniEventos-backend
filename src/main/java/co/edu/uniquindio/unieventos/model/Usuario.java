@@ -25,6 +25,7 @@ public class Usuario {
     private  String email;
     private String contrasenia;
     private Rol rol;
+    private boolean activa = false;
     private List<Cupon> cupones;
     private List<Compra> compras;
 

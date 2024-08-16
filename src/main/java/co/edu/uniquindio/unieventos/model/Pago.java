@@ -10,7 +10,7 @@ public class Pago {
     private MetodoPago metodoPago;
     private LocalDateTime fecha;
     private EstadoPago estado;
-    private double monto;
+    private Double monto;
 }
 
 enum MetodoPago { EFECTIVO, CREDITO, DEBITO }

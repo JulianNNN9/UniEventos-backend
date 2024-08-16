@@ -8,7 +8,7 @@ public class Item {
 
     private ObjectId idEvento;
     private ObjectId idLocalidad;
-    private int cantidad;
-    private double precioUnitario;
+    private Integer cantidad;
+    private Double precioUnitario;
 
 }

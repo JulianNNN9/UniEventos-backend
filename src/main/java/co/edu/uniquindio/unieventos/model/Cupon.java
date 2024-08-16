@@ -7,5 +7,8 @@ public class Cupon {
 
     private String codigo;
     private String nombre;
-    private double porcentajeDescuento;
+    private Double porcentajeDescuento;
+    private EstadoCupon estadoCupon;
 }
+
+enum EstadoCupon { DISPONIBLE, USADO }
