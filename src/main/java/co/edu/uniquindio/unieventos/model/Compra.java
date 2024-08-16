@@ -22,10 +22,10 @@ public class Compra {
 
     private ObjectId idUsuario;
     private List<Item> itemsCompra;
-    private double total;
+    private Double total;
     private LocalDateTime fecha;
+    private Cupon cupon;
     private Pago pago;
-    //Codigo QR
     private EstadoCompra estado;
 
 }
