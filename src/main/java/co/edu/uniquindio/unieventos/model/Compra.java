@@ -8,10 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Document("compras")
-@Getter
-@Setter
 @NoArgsConstructor
-@ToString
+@Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 
 public class Compra {
