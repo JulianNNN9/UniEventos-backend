@@ -7,10 +7,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Document("eventos")
-@Getter
-@Setter
 @NoArgsConstructor
-@ToString
+@Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 
 public class Evento {

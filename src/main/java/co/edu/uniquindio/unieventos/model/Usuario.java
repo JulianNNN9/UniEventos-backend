@@ -6,10 +6,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.List;
 
 @Document("usuarios")
-@Getter
-@Setter
 @NoArgsConstructor
-@ToString
+@Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 
 public class Usuario {
