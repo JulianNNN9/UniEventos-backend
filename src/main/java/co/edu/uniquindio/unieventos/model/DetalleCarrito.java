@@ -4,11 +4,9 @@ import lombok.Data;
 import org.bson.types.ObjectId;
 
 @Data
-public class Item {
+public class DetalleCarrito {
 
-    private ObjectId idEvento;
-    private String nombreLocalidad;
     private Integer cantidad;
-    private Double precioUnitario;
-
+    private String nombreLocalidad;
+    private ObjectId idEvento;
 }
