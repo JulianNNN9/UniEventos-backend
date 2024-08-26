@@ -19,11 +19,10 @@ public class Usuario {
     private String nombreCompleto;
     private String direccion;
     private String telefono;
-    private  String email;
+    private String email;
     private String contrasenia;
     private Rol rol;
     private Estado estado;
-    private List<Compra> compras;
     private CodigoValidacion codigoRegistro;
     private CodigoValidacion codigoRecuperacionContrasenia;
 
@@ -31,4 +30,4 @@ public class Usuario {
 
 enum Rol { CLIENTE, ADMINISTRADOR }
 
-enum Estado { ACTIVA, INACTIVA, ELIMINADA}
+enum Estado { ACTIVA, INACTIVA, ELIMINADA }
