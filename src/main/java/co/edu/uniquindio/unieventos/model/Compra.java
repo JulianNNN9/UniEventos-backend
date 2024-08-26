@@ -22,7 +22,7 @@ public class Compra {
     private Double total;
     private LocalDateTime fecha;
     private ObjectId cupon;
-    private Pago pago;
+    private ObjectId pago;
     private String codigoPasarela;
     private EstadoCompra estado;
 
