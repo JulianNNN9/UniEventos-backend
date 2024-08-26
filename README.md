@@ -9,7 +9,6 @@
     <li><strong>MongoDB</strong>: Base de datos NoSQL para almacenamiento de datos.</li>
     <li><strong>Spring Security</strong>: Para la autenticación y autorización.</li>
     <li><strong>Gradle</strong>: Sistema de construcción automatizado.</li>
-    <li><strong>REST API</strong>: Para la comunicación con el frontend.</li>
 </ul>
 
 <p align="left">
