@@ -11,7 +11,6 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-
 public class Compra {
 
     @Id
@@ -22,8 +21,9 @@ public class Compra {
     private List<Item> itemsCompra;
     private Double total;
     private LocalDateTime fecha;
-    private Cupon cupon;
+    private ObjectId cupon;
     private Pago pago;
+    private String codigoPasarela;
     private EstadoCompra estado;
 
 }

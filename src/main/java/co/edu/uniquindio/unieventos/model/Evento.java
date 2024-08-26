@@ -10,7 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-
 public class Evento {
 
     @Id
@@ -24,6 +23,11 @@ public class Evento {
     private TipoEvento tipoEvento;
     private LocalDateTime fecha;
     private List<Localidad> localidades;
+    private String imagenPortada;
+    private String imagenLocalidades;
+    private EstadoEvento estadoEvento;
 }
 
 enum TipoEvento { CONCIERTO, TEATRO, DEPORTE, FESTIVAL, OTRO }
+
+enum EstadoEvento { ACTIVO, INACTIVO }

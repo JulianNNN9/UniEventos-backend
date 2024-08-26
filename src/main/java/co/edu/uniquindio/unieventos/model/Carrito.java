@@ -6,19 +6,21 @@ import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import java.time.LocalDateTime;
+import java.util.List;
 
-@Document("reportes")
+@Document("carritos")
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Reporte {
+public class Carrito {
 
     @Id
     @EqualsAndHashCode.Include
     private String id;
 
-    private Evento idEvento;//Cambiar a objectid
-    private Usuario idAdministrador;//Cambiar a objectid
-    private Double porcentajeVendidoPorLocalidad;
-    private Double totalGanado;
+    private LocalDateTime fecha;
+    private List<DetalleCarrito> itemsCarrito;
+    private ObjectId idUsuario;
+
 }

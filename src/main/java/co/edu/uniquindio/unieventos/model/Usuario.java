@@ -9,7 +9,6 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-
 public class Usuario {
 
     @Id
@@ -23,10 +22,13 @@ public class Usuario {
     private  String email;
     private String contrasenia;
     private Rol rol;
-    private boolean activa = false;
-    private List<Cupon> cupones;
+    private Estado estado;
     private List<Compra> compras;
+    private CodigoValidacion codigoRegistro;
+    private CodigoValidacion codigoRecuperacionContrasenia;
 
 }
 
 enum Rol { CLIENTE, ADMINISTRADOR }
+
+enum Estado { ACTIVA, INACTIVA, ELIMINADA}

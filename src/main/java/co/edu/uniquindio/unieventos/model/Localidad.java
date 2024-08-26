@@ -6,7 +6,7 @@ import lombok.Data;
 public class Localidad {
 
     private String nombre;
-    private String precio;
-    private String capacidadMaxima;
-    private String capacidadRestante;
+    private Double precio;
+    private Integer capacidadMaxima;
+    private Integer entradasVendidas;
 }
