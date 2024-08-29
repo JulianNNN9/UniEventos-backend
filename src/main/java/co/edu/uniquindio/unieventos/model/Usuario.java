@@ -1,12 +1,16 @@
 package co.edu.uniquindio.unieventos.model;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalDate;
 
 @Document("usuarios")
 @NoArgsConstructor
 @Data
+@SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Usuario {
 
@@ -21,7 +25,8 @@ public class Usuario {
     private String email;
     private String contrasenia;
     private Rol rol;
-    private Estado estado;
+    private EstadoUsuario estadoUsuario;
+    private LocalDate fechaRegistro;
     private CodigoValidacion codigoRegistro;
     private CodigoValidacion codigoRecuperacionContrasenia;
 
@@ -29,4 +34,4 @@ public class Usuario {
 
 enum Rol { CLIENTE, ADMINISTRADOR }
 
-enum Estado { ACTIVA, INACTIVA, ELIMINADA }
+enum EstadoUsuario { ACTIVA, INACTIVA, ELIMINADA }

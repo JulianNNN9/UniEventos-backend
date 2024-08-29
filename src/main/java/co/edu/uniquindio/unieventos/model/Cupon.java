@@ -3,14 +3,16 @@ package co.edu.uniquindio.unieventos.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import java.time.LocalDate;
 
-import java.time.LocalDateTime;
 
 @Document("carritos")
 @NoArgsConstructor
 @Data
+@SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Cupon {
 
@@ -23,7 +25,7 @@ public class Cupon {
     private Double porcentajeDescuento;
     private EstadoCupon estadoCupon;
     private TipoCupon tipoCupon;
-    private LocalDateTime fechaVencimiento;
+    private LocalDate fechaVencimiento;
 }
 
 enum EstadoCupon { DISPONIBLE, USADO }

@@ -1,15 +1,19 @@
 package co.edu.uniquindio.unieventos.model;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Document("compras")
 @NoArgsConstructor
 @Data
+@SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Compra {
 
@@ -20,7 +24,7 @@ public class Compra {
     private ObjectId idUsuario;
     private List<Item> itemsCompra;
     private Double total;
-    private LocalDateTime fecha;
+    private LocalDate fechaCompra;
     private ObjectId cupon;
     private ObjectId pago;
     private String codigoPasarela;

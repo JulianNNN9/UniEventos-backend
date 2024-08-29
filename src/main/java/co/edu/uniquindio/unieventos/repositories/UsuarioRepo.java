@@ -1,4 +1,4 @@
-package co.edu.uniquindio.unieventos.repositorios;
+package co.edu.uniquindio.unieventos.repositories;
 
 import co.edu.uniquindio.unieventos.model.Usuario;
 import org.springframework.data.mongodb.repository.MongoRepository;
