@@ -6,7 +6,7 @@ import org.bson.types.ObjectId;
 
 @Data
 @SuperBuilder
-public class Item {
+public class ItemCompra {
 
     private ObjectId idEvento;
     private String nombreLocalidad;

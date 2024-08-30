@@ -1,17 +1,24 @@
 package co.edu.uniquindio.unieventos.services;
 
+import co.edu.uniquindio.unieventos.dto.evento.CrearEventoDTO;
+import co.edu.uniquindio.unieventos.dto.evento.EditarEventoDTO;
+import co.edu.uniquindio.unieventos.dto.evento.InformacionEventoDTO;
+import co.edu.uniquindio.unieventos.dto.evento.ItemEventoDTO;
+
+import java.util.List;
+
 public interface EventoService {
 
-    void crearEvento();
+    String crearEvento(CrearEventoDTO crearEventoDTO);
 
-    void editarEvento();
+    String editarEvento(EditarEventoDTO editarEventoDTO);
 
-    void eliminarEvento();
+    String eliminarEvento(String id);
 
-    void listarEventos();
+    InformacionEventoDTO obtenerInformacionEvento();
 
-    void obtenerInformacionEvento();
+    List<ItemEventoDTO> listarEventos();
 
-    void filtrarEvento();
+    List<ItemEventoDTO> filtrarEvento();
 
 }
