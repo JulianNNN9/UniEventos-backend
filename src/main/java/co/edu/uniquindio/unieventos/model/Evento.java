@@ -32,6 +32,3 @@ public class Evento {
     private EstadoEvento estadoEvento;
 }
 
-enum TipoEvento { CONCIERTO, TEATRO, DEPORTE, FESTIVAL, OTRO }
-
-enum EstadoEvento { ACTIVO, INACTIVO }
