@@ -1,8 +1,9 @@
 package co.edu.uniquindio.unieventos.dto.cuenta;
 
-public record CambiarContraseniaDTO(
+public record RecuperarContraseniaDTO(
 
-        String contraseniaAntigua,
+        String codigoVerificacion,
         String contraseniaNueva
+
 ) {
 }

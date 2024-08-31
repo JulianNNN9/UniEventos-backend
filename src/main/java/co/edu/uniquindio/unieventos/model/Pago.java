@@ -21,11 +21,11 @@ public class Pago {
     @EqualsAndHashCode.Include
     private String id;
 
-    //Implementar pasarela de pago
-    private MetodoPago metodoPago;
+    private String tipoPago;
+    private String detalleEstado;
+    private String codigoAutorizacion;
     private LocalDate fechaPago;
-    private String estadoPago;
-    private Double monto;
+    private Double valorTransaccion;
+    private String estado;
 }
 
-enum MetodoPago { EFECTIVO, CREDITO, DEBITO }

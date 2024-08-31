@@ -28,6 +28,3 @@ public class Cupon {
     private LocalDate fechaVencimiento;
 }
 
-enum EstadoCupon { DISPONIBLE, USADO }
-
-enum TipoCupon { UNICO, GENERAL }
