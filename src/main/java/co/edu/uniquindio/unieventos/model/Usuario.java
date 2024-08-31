@@ -32,6 +32,3 @@ public class Usuario {
 
 }
 
-enum Rol { CLIENTE, ADMINISTRADOR }
-
-enum EstadoUsuario { ACTIVA, INACTIVA, ELIMINADA }

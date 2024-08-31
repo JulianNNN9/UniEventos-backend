@@ -12,10 +12,12 @@ public interface CuentaService {
 
     InformacionCuentaDTO obtenerInformacionCuenta(String id) throws Exception;
 
-    String enviarCodigoRecuperacionCuenta(String correo);
+    String enviarCodigoRecuperacionCuenta(String correo) throws Exception;
 
-    String cambiarContrasenia(CambiarContraseniaDTO cambiarContraseniaDTO) throws Exception;
+    String recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception;
 
-    String iniciarSesion(IniciarSesionDTO iniciarSesionDTO);
+    String cambiarContrasenia() throws Exception;
+
+    String iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception;
 
 }
