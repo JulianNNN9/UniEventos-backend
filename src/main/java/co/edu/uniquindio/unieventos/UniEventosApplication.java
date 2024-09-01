@@ -7,7 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class UniEventosApplication {
 
     public static void main(String[] args) {
+        System.out.println("Hola mundo!");
         SpringApplication.run(UniEventosApplication.class, args);
+
     }
 
 }
