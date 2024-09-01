@@ -42,12 +42,3 @@ dependencies {
 test {
     useJUnitPlatform()
 }
-
-// Esta propiedad es un arreglo de strings que indica los directorios donde buscar los archivos Java.
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src/main/java/co/edu/uniquindio.unieventos']
-        }
-    }
-}
