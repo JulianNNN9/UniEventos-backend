@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+        .email-container {
+            background-color: #cce7ff; /* Azul más claro */
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .email-content {
+            background-color: #e0f7fa; /* Azul claro más claro */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center; /* Centrar el contenido */
+        }
+        .email-code-container {
+            background-color: #ffffff; /* Blanco para el código */
+            padding: 10px; /* Ajustar el padding */
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+            display: inline-block; /* Ajustar al tamaño del contenido */
+            width: 80%; /* Expandir horizontalmente */
+        }
+        .email-code {
+            display: inline-block;
+            font-size: 18px;
+            white-space: pre-wrap; /* Mantener el formato del código */
+        }
+        .email-footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #777777;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="email-content">
+        <h2 th:text="${subject}">Subject goes here</h2>
+        <p th:text="${body}">Message body goes here</p>
+        <div class="email-code-container">
+            <pre class="email-code" th:text="${code}">Código aquí</pre>
+        </div>
+    </div>
+    <div class="email-footer">
+        <p>Este es un mensaje automático. No responda a este correo.</p>
+    </div>
+</div>
+</body>
+</html>

@@ -10,11 +10,16 @@ import co.edu.uniquindio.unieventos.model.Rol;
 import co.edu.uniquindio.unieventos.model.Usuario;
 import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
+import jakarta.mail.MessagingException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.Random;
 
@@ -23,10 +28,13 @@ import java.util.Random;
 public class UsuarioServiceImple implements UsuarioService {
 
     private final UsuarioRepo usuarioRepo;
+    private final EmailServiceImple emailServiceImple;
 
-    public UsuarioServiceImple(UsuarioRepo usuarioRepo) {
+    public UsuarioServiceImple(UsuarioRepo usuarioRepo, EmailServiceImple emailServiceImple) {
         this.usuarioRepo = usuarioRepo;
+        this.emailServiceImple = emailServiceImple;
     }
+
 
     @Override
     public String crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws UsuarioEcontradoException, EmailEncontradoException {
@@ -61,7 +69,17 @@ public class UsuarioServiceImple implements UsuarioService {
                 )
         .build();
 
-        //TODO Enviar correo del codigo generado
+        // Enviar el correo con el código de activación usando la plantilla
+        Map<String, Object> templateModel = new HashMap<>();
+        templateModel.put("subject", "Bienvenido a UniEventos");
+        templateModel.put("body", "Gracias por registrarte en UniEventos. Tu código de confirmación es:");
+        templateModel.put("code", nuevoUsuario.getCodigoRegistro().getCodigo());
+
+        try {
+            emailServiceImple.sendTemplateEmail(nuevoUsuario.getEmail(), "Confirma tu correo", templateModel);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
 
         Usuario usuarioGuardado = usuarioRepo.save(nuevoUsuario);
 
