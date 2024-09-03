@@ -1,37 +1,42 @@
 package co.edu.uniquindio.unieventos.services.implementacion;
 
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
+import co.edu.uniquindio.unieventos.exceptions.usuario.EmailEncontradoException;
+import co.edu.uniquindio.unieventos.exceptions.usuario.UsuarioEcontradoException;
+import co.edu.uniquindio.unieventos.exceptions.usuario.UsuarioNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.CodigoValidacion;
 import co.edu.uniquindio.unieventos.model.EstadoUsuario;
 import co.edu.uniquindio.unieventos.model.Rol;
 import co.edu.uniquindio.unieventos.model.Usuario;
 import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
-import co.edu.uniquindio.unieventos.services.interfaces.CuentaService;
+import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
 @Transactional
-public class CuentaServiceImple implements CuentaService {
+public class UsuarioServiceImple implements UsuarioService {
 
     private final UsuarioRepo usuarioRepo;
 
-    public CuentaServiceImple(UsuarioRepo usuarioRepo) {
+    public UsuarioServiceImple(UsuarioRepo usuarioRepo) {
         this.usuarioRepo = usuarioRepo;
     }
 
     @Override
-    public String crearCuenta(CrearCuentaDTO crearCuentaDTO) throws Exception {
+    public String crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws UsuarioEcontradoException, EmailEncontradoException {
 
         if (existeCedula(crearCuentaDTO.cedula())){
-            throw new Exception("Esta cédula ya existe");
+            throw new UsuarioEcontradoException();
         }
 
         if (existeEmail(crearCuentaDTO.email())){
-            throw new Exception("Esta email ya existe");
+            throw new EmailEncontradoException();
         }
 
         //C
@@ -46,21 +51,21 @@ public class CuentaServiceImple implements CuentaService {
                 .contrasenia(crearCuentaDTO.contrasenia())
                 .rol(Rol.CLIENTE)
                 .estadoUsuario(EstadoUsuario.INACTIVA)
-                .fechaRegistro(LocalDate.now())
+                .fechaRegistro(LocalDateTime.now())
                 .codigoRegistro(
 
                         CodigoValidacion.builder()
                             .codigo(codigoValidacion)
-                            .fechaCreacion(LocalDate.now())
+                            .fechaCreacion(LocalDateTime.now())
                         .build()
                 )
         .build();
 
         //TODO Enviar correo del codigo generado
 
-        usuarioRepo.save(nuevoUsuario);
+        Usuario usuarioGuardado = usuarioRepo.save(nuevoUsuario);
 
-        return "";
+        return usuarioGuardado.getId();
     }
 
     private boolean existeEmail(String email) {
@@ -86,18 +91,48 @@ public class CuentaServiceImple implements CuentaService {
     }
 
     @Override
-    public String editarCuenta(EditarCuentaDTO editarCuentaDTO) throws Exception {
+    public String editarUsuario(EditarUsuarioDTO editarCuentaDTO) throws UsuarioNoEncontradoException {
+        Optional<Usuario> optionalUsuario = usuarioRepo.findById("editarCuentaDTO.codigo()");
+        if(optionalUsuario.isEmpty()){
+            throw new UsuarioNoEncontradoException();
+        }
+
+        Usuario usuario = optionalUsuario.get();
+        usuario.setNombreCompleto( editarCuentaDTO.nombreCompleto() );
+        usuario.setDireccion( editarCuentaDTO.direccion() );
+        usuario.setTelefono( editarCuentaDTO.telefono() );
+
+        usuarioRepo.save(usuario);
+
         return "";
     }
 
     @Override
-    public String eliminarCuenta(String id) throws Exception {
+    public String eliminarUsuario(String id) throws UsuarioNoEncontradoException {
+        Optional<Usuario> optionalUsuario = usuarioRepo.findById( id );
+        if(optionalUsuario.isEmpty()){
+            throw new UsuarioNoEncontradoException();
+        }
+        Usuario usuario = optionalUsuario.get();
+        usuario.setEstadoUsuario(EstadoUsuario.INACTIVA);
+        usuarioRepo.save(usuario);
         return "";
     }
 
     @Override
-    public InformacionCuentaDTO obtenerInformacionCuenta(String id) throws Exception {
-        return null;
+    public InformacionUsuarioDTO obtenerInformacionUsuario(String id) throws UsuarioNoEncontradoException {
+        Optional<Usuario> optionalUsuario = usuarioRepo.findById( id );
+        if(optionalUsuario.isEmpty()){
+            throw new UsuarioNoEncontradoException();
+        }
+        Usuario usuario = optionalUsuario.get();
+        return new InformacionUsuarioDTO(
+                usuario.getCedula(),
+                usuario.getNombreCompleto(),
+                usuario.getDireccion(),
+                usuario.getTelefono(),
+                usuario.getEmail()
+        );
     }
 
     @Override

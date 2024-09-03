@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Document("usuarios")
 @NoArgsConstructor
@@ -26,7 +27,7 @@ public class Usuario {
     private String contrasenia;
     private Rol rol;
     private EstadoUsuario estadoUsuario;
-    private LocalDate fechaRegistro;
+    private LocalDateTime fechaRegistro;
     private CodigoValidacion codigoRegistro;
     private CodigoValidacion codigoRecuperacionContrasenia;
 

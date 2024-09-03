@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Document("compras")
@@ -23,7 +24,7 @@ public class Compra {
     private ObjectId idUsuario;
     private List<ItemCompra> itemsCompra;
     private Double total;
-    private LocalDate fechaCompra;
+    private LocalDateTime fechaCompra;
     private ObjectId cupon;
     private ObjectId pago;
     private String codigoPasarela;
