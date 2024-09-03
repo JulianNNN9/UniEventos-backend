@@ -15,7 +15,9 @@ public interface UsuarioService {
 
     InformacionUsuarioDTO obtenerInformacionUsuario(String id) throws UsuarioNoEncontradoException;
 
-    String enviarCodigoRecuperacionCuenta(String correo) throws Exception;
+    String enviarCodigoRecuperacionCuenta(EnviarCodigoAlCorreoDTO enviarCodigoRecuperacionCuentaDTO) throws Exception;
+
+    String enviarCodigoActivacionCuenta(EnviarCodigoAlCorreoDTO enviarCodigoActivacionCuentaDTO) throws Exception;
 
     String recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception;
 
