@@ -1,4 +1,4 @@
-package co.edu.uniquindio.unieventos.services;
+package co.edu.uniquindio.unieventos.services.interfaces;
 
 import co.edu.uniquindio.unieventos.dto.evento.CrearEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.EditarEventoDTO;

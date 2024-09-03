@@ -1,4 +1,4 @@
-package co.edu.uniquindio.unieventos.services;
+package co.edu.uniquindio.unieventos.services.interfaces;
 
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
 
@@ -16,7 +16,7 @@ public interface CuentaService {
 
     String recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception;
 
-    String cambiarContrasenia() throws Exception;
+    String cambiarContrasenia(CambiarContraseniaDTO cambiarContraseniaDTO) throws Exception;
 
     String iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception;
 
