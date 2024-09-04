@@ -9,7 +9,6 @@ public record ItemEventoDTO(
         String nombreEvento,
         String direccionEvento,
         String ciudadEvento,
-        LocalDate fechaEvento,
-        EstadoEvento estadoEvento
+        LocalDate fechaEvento
 ) {
 }

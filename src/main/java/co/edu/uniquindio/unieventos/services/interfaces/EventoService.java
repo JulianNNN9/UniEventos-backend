@@ -15,7 +15,7 @@ public interface EventoService {
 
     String eliminarEvento(String id);
 
-    InformacionEventoDTO obtenerInformacionEvento();
+    InformacionEventoDTO obtenerInformacionEvento(String idEvento);
 
     List<ItemEventoDTO> listarEventos();
 
