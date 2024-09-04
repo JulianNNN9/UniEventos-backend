@@ -13,4 +13,5 @@ public interface UsuarioRepo extends MongoRepository<Usuario, String> {
     Optional<Usuario> findByCedula(String cedula);
 
     Optional<Usuario> findByEmail(String email);
+
 }

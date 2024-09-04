@@ -1,6 +1,7 @@
 package co.edu.uniquindio.unieventos.services.implementacion;
 
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
+import co.edu.uniquindio.unieventos.exceptions.usuario.ContraseniaNoCoincidenException;
 import co.edu.uniquindio.unieventos.exceptions.usuario.EmailEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.usuario.UsuarioEcontradoException;
 import co.edu.uniquindio.unieventos.exceptions.usuario.UsuarioNoEncontradoException;
@@ -15,12 +16,15 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Random;
 
 @Service
@@ -47,8 +51,7 @@ public class UsuarioServiceImple implements UsuarioService {
             throw new EmailEncontradoException();
         }
 
-        //C
-        String codigoValidacion = generarCodigoValidacion();
+        String codigoActivacionCuenta = generarCodigoValidacion();
 
         Usuario nuevoUsuario = Usuario.builder()
                 .cedula(crearCuentaDTO.cedula())
@@ -63,7 +66,7 @@ public class UsuarioServiceImple implements UsuarioService {
                 .codigoRegistro(
 
                         CodigoValidacion.builder()
-                            .codigo(codigoValidacion)
+                            .codigo(codigoActivacionCuenta)
                             .fechaCreacion(LocalDateTime.now())
                         .build()
                 )
@@ -79,6 +82,7 @@ public class UsuarioServiceImple implements UsuarioService {
             emailServiceImple.sendTemplateEmail(nuevoUsuario.getEmail(), "Confirma tu correo", templateModel);
         } catch (MessagingException e) {
             e.printStackTrace();
+
         }
 
         Usuario usuarioGuardado = usuarioRepo.save(nuevoUsuario);
@@ -110,7 +114,9 @@ public class UsuarioServiceImple implements UsuarioService {
 
     @Override
     public String editarUsuario(EditarUsuarioDTO editarCuentaDTO) throws UsuarioNoEncontradoException {
+
         Optional<Usuario> optionalUsuario = usuarioRepo.findById("editarCuentaDTO.codigo()");
+
         if(optionalUsuario.isEmpty()){
             throw new UsuarioNoEncontradoException();
         }
@@ -127,10 +133,13 @@ public class UsuarioServiceImple implements UsuarioService {
 
     @Override
     public String eliminarUsuario(String id) throws UsuarioNoEncontradoException {
-        Optional<Usuario> optionalUsuario = usuarioRepo.findById( id );
+
+        Optional<Usuario> optionalUsuario = usuarioRepo.findById(id);
+
         if(optionalUsuario.isEmpty()){
             throw new UsuarioNoEncontradoException();
         }
+
         Usuario usuario = optionalUsuario.get();
         usuario.setEstadoUsuario(EstadoUsuario.INACTIVA);
         usuarioRepo.save(usuario);
@@ -139,10 +148,13 @@ public class UsuarioServiceImple implements UsuarioService {
 
     @Override
     public InformacionUsuarioDTO obtenerInformacionUsuario(String id) throws UsuarioNoEncontradoException {
+
         Optional<Usuario> optionalUsuario = usuarioRepo.findById( id );
+
         if(optionalUsuario.isEmpty()){
             throw new UsuarioNoEncontradoException();
         }
+
         Usuario usuario = optionalUsuario.get();
         return new InformacionUsuarioDTO(
                 usuario.getCedula(),
@@ -154,13 +166,221 @@ public class UsuarioServiceImple implements UsuarioService {
     }
 
     @Override
-    public String enviarCodigoRecuperacionCuenta(String correo) throws Exception {
-        return "";
+    public String enviarCodigoRecuperacionCuenta(EnviarCodigoAlCorreoDTO enviarCodigoRecuperacionCuentaDTO) throws Exception {
+
+        String destinatario = enviarCodigoRecuperacionCuentaDTO.correo();
+        String asunto = "Recuperación de Contraseña - UniEventos";
+        // Cuerpo del mensaje en HTML
+        String cuerpoMensaje = String.format(
+                "<html>" +
+                        "<head>" +
+                        "<style>" +
+                        ".container {" +
+                        "font-family: Arial, sans-serif;" +
+                        "text-align: center;" +
+                        "margin: 0 auto;" +
+                        "padding: 20px;" +
+                        "width: 80%%;" +  // Usa '%%' para representar '%' en una cadena format.
+                        "max-width: 600px;" +
+                        "border: 1px solid #ddd;" +
+                        "border-radius: 8px;" +
+                        "background-color: #f9f9f9;" +
+                        "}" +
+                        ".header {" +
+                        "font-size: 24px;" +
+                        "color: #333;" +
+                        "margin-bottom: 20px;" +
+                        "}" +
+                        ".content {" +
+                        "font-size: 16px;" +
+                        "color: #555;" +
+                        "margin-bottom: 30px;" +
+                        "}" +
+                        ".footer {" +
+                        "font-size: 14px;" +
+                        "color: #777;" +
+                        "margin-top: 30px;" +
+                        "}" +
+                        ".image-container {" +
+                        "text-align: center;" +
+                        "margin-top: 20px;" +
+                        "}" +
+                        "</style>" +
+                        "</head>" +
+                        "<body>" +
+                        "<div class='container'>" +
+                        "<div class='header'>" +
+                        "Recuperación de Contraseña - UniEventos" +
+                        "</div>" +
+                        "<div class='content'>" +
+                        "<p>Hemos recibido una solicitud para restablecer tu contraseña.</p>" +
+                        "<p>Tu código de recuperación es: <strong>%s</strong></p>" +
+                        "<p>Este código expira en 15 minutos, así que asegúrate de usarlo antes de que expire.</p>" +
+                        "</div>" +
+                        "<div class='footer'>" +
+                        "<p>Si no solicitaste un cambio de contraseña, por favor ignora este correo.</p>" +
+                        "<p>Gracias por confiar en UniEventos.</p>" +
+                        "</div>" +
+                        "<div class='image-container'>" +
+                        "<img src='URL_DE_LA_IMAGEN' alt='Imagen de UniEventos' style='max-width: 100%%; height: auto;'>" +
+                        "</div>" +
+                        "</div>" +
+                        "</body>" +
+                        "</html>",
+                enviarCodigoRecuperacionCuentaDTO.codigo()
+        );
+
+        // Configuración del servidor de correo
+        Properties propiedades = new Properties();
+        propiedades.put("mail.smtp.host", "smtp.gmail.com"); // Cambia esto por tu servidor SMTP
+        propiedades.put("mail.smtp.port", "587"); // Cambia esto por el puerto adecuado
+        propiedades.put("mail.smtp.auth", "true");
+        propiedades.put("mail.smtp.starttls.enable", "true");
+
+        // Autenticación del correo
+        String usuario = "tuEmail@example.com";
+        String contrasena = "tuContraseña";
+
+        Session sesion = Session.getInstance(propiedades, new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(usuario, contrasena);
+            }
+        });
+
+        try {
+            Message mensaje = new MimeMessage(sesion);
+            mensaje.setFrom(new InternetAddress(usuario));
+            mensaje.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
+            mensaje.setSubject(asunto);
+            mensaje.setContent(cuerpoMensaje, "text/html; charset=utf-8");
+
+            Transport.send(mensaje);
+            return "Correo de recuperación enviado exitosamente";
+
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al enviar el correo de recuperación", e);
+        }
+    }
+
+    @Override
+    public String enviarCodigoActivacionCuenta(EnviarCodigoAlCorreoDTO enviarCodigoActivacionCuentaDTO) throws Exception {
+
+        String destinatario = enviarCodigoActivacionCuentaDTO.correo();
+        String asunto = "Activación de Cuenta";
+        String cuerpoMensaje = String.format(
+                "<html>" +
+                        "<head>" +
+                        "<style>" +
+                        ".container {" +
+                        "font-family: Arial, sans-serif;" +
+                        "text-align: center;" +
+                        "margin: 0 auto;" +
+                        "padding: 20px;" +
+                        "width: 80%%;" +  // Usa '%%' para representar '%' en una cadena format.
+                        "max-width: 600px;" +
+                        "border: 1px solid #ddd;" +
+                        "border-radius: 8px;" +
+                        "background-color: #f9f9f9;" +
+                        "}" +
+                        ".header {" +
+                        "font-size: 24px;" +
+                        "color: #333;" +
+                        "margin-bottom: 20px;" +
+                        "}" +
+                        ".content {" +
+                        "font-size: 16px;" +
+                        "color: #555;" +
+                        "margin-bottom: 30px;" +
+                        "}" +
+                        ".footer {" +
+                        "font-size: 14px;" +
+                        "color: #777;" +
+                        "margin-top: 30px;" +
+                        "}" +
+                        ".image-container {" +
+                        "text-align: center;" +
+                        "margin-top: 20px;" +
+                        "}" +
+                        "</style>" +
+                        "</head>" +
+                        "<body>" +
+                        "<div class='container'>" +
+                        "<div class='header'>" +
+                        "Bienvenido a UniEventos" +
+                        "</div>" +
+                        "<div class='content'>" +
+                        "<p>Gracias por registrarte en nuestra página. Estamos emocionados de que formes parte de nuestra comunidad.</p>" +
+                        "<p>Tu código de activación es: <strong>%s</strong></p>" +
+                        "<p>Este código expira en 15 minutos, así que asegúrate de activarlo antes de que expire.</p>" +
+                        "</div>" +
+                        "<div class='footer'>" +
+                        "<p>¡Gracias por elegir UniEventos! Esperamos verte pronto.</p>" +
+                        "</div>" +
+                        "<div class='image-container'>" +
+                        "<img src='URL_DE_LA_IMAGEN' alt='Imagen de UniEventos' style='max-width: 100%%; height: auto;'>" +
+                        "</div>" +
+                        "</div>" +
+                        "</body>" +
+                        "</html>",
+                enviarCodigoActivacionCuentaDTO.codigo()
+        );
+
+        // Configuración del servidor de correo
+        Properties propiedades = new Properties();
+        propiedades.put("mail.smtp.host", "smtp.gmail.com"); // Cambia esto por tu servidor SMTP
+        propiedades.put("mail.smtp.port", "587"); // Cambia esto por el puerto adecuado
+        propiedades.put("mail.smtp.auth", "true");
+        propiedades.put("mail.smtp.starttls.enable", "true");
+
+        // Autenticación del correo
+        String usuario = "tuEmail@example.com";
+        String contrasena = "tuContraseña";
+
+        Session sesion = Session.getInstance(propiedades, new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(usuario, contrasena);
+            }
+        });
+
+        try {
+
+            Message mensaje = new MimeMessage(sesion);
+            mensaje.setFrom(new InternetAddress(usuario));
+            mensaje.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
+            mensaje.setSubject(asunto);
+            mensaje.setContent(cuerpoMensaje, "text/html; charset=utf-8");
+
+            Transport.send(mensaje);
+            return "Correo enviado exitosamente";
+
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al enviar el correo", e);
+        }
+
     }
 
     @Override
     public String recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception {
-        return "";
+
+        Optional<Usuario> optionalUsuario = usuarioRepo.findById("editarCuentaDTO.codigo()");
+
+        if(optionalUsuario.isEmpty()){
+            throw new UsuarioNoEncontradoException();
+        }
+
+        Usuario usuario = optionalUsuario.get();
+
+        if (!Objects.equals(recuperarContraseniaDTO.contraseniaNueva(), recuperarContraseniaDTO.confirmarContraseniaNueva())){
+            throw new ContraseniaNoCoincidenException();
+        }
+
+        if (usuario.getCodigoRecuperacionContrasenia().getCodigo().equals(recuperarContraseniaDTO.codigoVerificacion())){
+            usuario.setContrasenia(recuperarContraseniaDTO.contraseniaNueva());
+        }
+
+        return "Contrasenia recuperada exitosamente";
     }
 
     @Override
