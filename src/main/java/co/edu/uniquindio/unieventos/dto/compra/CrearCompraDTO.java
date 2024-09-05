@@ -9,8 +9,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record CrearCompraDTO(
+
         @NotNull(message = "El ID del usuario no puede estar vacío")
-        ObjectId idUsuario,
+        String idUsuario,
 
         @NotEmpty(message = "La lista de items de compra no puede estar vacía")
         List<@NotNull(message = "Los items de compra no pueden ser nulos") ItemCompra> itemsCompra,
@@ -23,10 +24,10 @@ public record CrearCompraDTO(
         LocalDateTime fechaCompra,
 
         @NotNull(message = "El ID del cupón no puede estar vacío")
-        ObjectId cupon,
+        String cupon,
 
         @NotNull(message = "El ID del pago no puede estar vacío")
-        ObjectId pago,
+        String pago,
 
         @NotBlank(message = "El código de pasarela no puede estar vacío")
         @Size(max = 100, message = "El código de pasarela no puede tener más de 100 caracteres")

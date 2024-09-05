@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @SuperBuilder
 public class CodigoValidacion {
 
-    private LocalDateTime fechaCreacion;
     private String codigo;
+    private LocalDateTime fechaCreacion;
 }
+

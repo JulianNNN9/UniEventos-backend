@@ -13,4 +13,7 @@ public interface UsuarioRepo extends MongoRepository<Usuario, String> {
 
     Optional<Usuario> findByEmail(String email);
 
+    @Query("{email: ?0, contrasenia: ?1}")
+    Optional<Usuario> validarInicioSesion(String email, String password);
+
 }
