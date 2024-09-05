@@ -17,8 +17,6 @@ public interface UsuarioService {
 
     String enviarCodigoRecuperacionCuenta(EnviarCodigoAlCorreoDTO enviarCodigoRecuperacionCuentaDTO) throws Exception;
 
-    String enviarCodigoActivacionCuenta(EnviarCodigoAlCorreoDTO enviarCodigoActivacionCuentaDTO) throws Exception;
-
     String recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception;
 
     String cambiarContrasenia(CambiarContraseniaDTO cambiarContraseniaDTO) throws Exception;

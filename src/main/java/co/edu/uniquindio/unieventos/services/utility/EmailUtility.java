@@ -1,5 +1,4 @@
-package co.edu.uniquindio.unieventos.services.implementacion;
-import org.springframework.beans.factory.annotation.Autowired;
+package co.edu.uniquindio.unieventos.services.utility;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -11,13 +10,13 @@ import jakarta.mail.internet.MimeMessage;
 import java.util.Map;
 
 @Service
-public class EmailServiceImple {
+public class EmailUtility {
 
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
 
-    public EmailServiceImple(JavaMailSender mailSender, TemplateEngine templateEngine) {
+    public EmailUtility(JavaMailSender mailSender, TemplateEngine templateEngine) {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
     }

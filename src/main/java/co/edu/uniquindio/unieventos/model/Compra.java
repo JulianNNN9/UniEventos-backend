@@ -21,12 +21,12 @@ public class Compra {
     @EqualsAndHashCode.Include
     private String id;
 
-    private ObjectId idUsuario;
+    private String idUsuario;
     private List<ItemCompra> itemsCompra;
     private Double total;
     private LocalDateTime fechaCompra;
-    private ObjectId cupon;
-    private ObjectId pago;
+    private String cupon;
+    private String pago;
     private String codigoPasarela;
     private EstadoCompra estado;
 
