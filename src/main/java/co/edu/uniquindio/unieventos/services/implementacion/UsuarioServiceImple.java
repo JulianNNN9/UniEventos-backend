@@ -1,10 +1,7 @@
 package co.edu.uniquindio.unieventos.services.implementacion;
 
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
-import co.edu.uniquindio.unieventos.exceptions.usuario.ContraseniaNoCoincidenException;
-import co.edu.uniquindio.unieventos.exceptions.usuario.EmailEncontradoException;
-import co.edu.uniquindio.unieventos.exceptions.usuario.UsuarioEcontradoException;
-import co.edu.uniquindio.unieventos.exceptions.usuario.UsuarioNoEncontradoException;
+import co.edu.uniquindio.unieventos.exceptions.*;
 import co.edu.uniquindio.unieventos.model.CodigoValidacion;
 import co.edu.uniquindio.unieventos.model.EstadoUsuario;
 import co.edu.uniquindio.unieventos.model.Rol;
@@ -35,25 +32,26 @@ public class UsuarioServiceImple implements UsuarioService {
         this.emailUtility = emailUtility;
     }
 
-    private Usuario getUsuario(String id) throws UsuarioNoEncontradoException {
+    private Usuario getUsuario(String id) throws Exception {
+
         Optional<Usuario> optionalUsuario = usuarioRepo.findById(id);
 
         if(optionalUsuario.isEmpty()){
-            throw new UsuarioNoEncontradoException();
+            throw new RecursoNoEncontradoException("Usuario no encontrado.");
         }
 
         return optionalUsuario.get();
     }
 
     @Override
-    public String crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws UsuarioEcontradoException, EmailEncontradoException {
+    public String crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws Exception {
 
         if (existeCedula(crearCuentaDTO.cedula())){
-            throw new UsuarioEcontradoException();
+            throw new RecursoEncontradoException("El cedula ya existe");
         }
 
         if (existeEmail(crearCuentaDTO.email())){
-            throw new EmailEncontradoException();
+            throw new RecursoEncontradoException("Este email ya existe.");
         }
 
         String codigoActivacionCuenta = generarCodigoValidacion();
@@ -106,6 +104,7 @@ public class UsuarioServiceImple implements UsuarioService {
     private String generarCodigoValidacion(){
 
         String cadena = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
         StringBuilder codigo = new StringBuilder();
 
         Random random = new Random();
@@ -118,7 +117,7 @@ public class UsuarioServiceImple implements UsuarioService {
     }
 
     @Override
-    public String editarUsuario(EditarUsuarioDTO editarCuentaDTO) throws UsuarioNoEncontradoException {
+    public String editarUsuario(EditarUsuarioDTO editarCuentaDTO) throws Exception {
 
         Usuario usuario = getUsuario(editarCuentaDTO.idUsuario());
         
@@ -132,7 +131,7 @@ public class UsuarioServiceImple implements UsuarioService {
     }
 
     @Override
-    public String eliminarUsuario(String id) throws UsuarioNoEncontradoException {
+    public String eliminarUsuario(String id) throws Exception {
 
         Usuario usuario = getUsuario(id);
 
@@ -144,7 +143,7 @@ public class UsuarioServiceImple implements UsuarioService {
     }
 
     @Override
-    public InformacionUsuarioDTO obtenerInformacionUsuario(String id) throws UsuarioNoEncontradoException {
+    public InformacionUsuarioDTO obtenerInformacionUsuario(String id) throws Exception {
 
         Usuario usuario = getUsuario(id);
         
@@ -188,18 +187,18 @@ public class UsuarioServiceImple implements UsuarioService {
         Usuario usuario = getUsuario(recuperarContraseniaDTO.idUsuario());
 
         if (!Objects.equals(recuperarContraseniaDTO.contraseniaNueva(), recuperarContraseniaDTO.confirmarContraseniaNueva())){
-            throw new ContraseniaNoCoincidenException();
+            throw new ContraseniaNoCoincidenException("Las contraseñas no coindicen.");
         }
 
         if (usuario.getCodigoRecuperacionContrasenia().getFechaCreacion().plusMinutes(15).isAfter(LocalDateTime.now())){
-            throw new Exception();
+            throw new CodigoExpiradoException("El código expiró");
         }
 
-        if (usuario.getCodigoRecuperacionContrasenia().getCodigo().equals(recuperarContraseniaDTO.codigoVerificacion())){
-            usuario.setContrasenia(recuperarContraseniaDTO.contraseniaNueva());
-        } else {
-            throw new Exception();
+        if (!usuario.getCodigoRecuperacionContrasenia().getCodigo().equals(recuperarContraseniaDTO.codigoVerificacion())){
+            throw new CodigoInvalidoException("El código es incorrecto");
         }
+
+        usuario.setContrasenia(recuperarContraseniaDTO.contraseniaNueva());
 
         usuarioRepo.save(usuario);
 
@@ -211,15 +210,15 @@ public class UsuarioServiceImple implements UsuarioService {
 
         Usuario usuario = getUsuario(cambiarContraseniaDTO.idUsuario());
 
-        if (cambiarContraseniaDTO.contraseniaAntigua().equals(usuario.getContrasenia())){
-            if (cambiarContraseniaDTO.contraseniaAntigua().equals(cambiarContraseniaDTO.confirmarContraseniaNueva())){
-                usuario.setContrasenia(usuario.getContrasenia());
-            } else {
-                throw new ContraseniaNoCoincidenException();
-            }
-        } else {
-            throw new Exception();
+        if (!cambiarContraseniaDTO.contraseniaAntigua().equals(usuario.getContrasenia())){
+            throw new ContraseniaNoCoincidenException("Las contraseña es incorrecta.");
         }
+
+        if (!cambiarContraseniaDTO.contraseniaNueva().equals(cambiarContraseniaDTO.confirmarContraseniaNueva())){
+            throw new ContraseniaNoCoincidenException("Las contraseñas no coindicen.");
+        }
+
+        usuario.setContrasenia(usuario.getContrasenia());
 
         return "Contrasenia cambiada exitosamente";
     }
@@ -230,7 +229,7 @@ public class UsuarioServiceImple implements UsuarioService {
         Optional<Usuario> optionalUsuario = usuarioRepo.validarInicioSesion(iniciarSesionDTO.email(), iniciarSesionDTO.contrasenia());
 
         if (optionalUsuario.isEmpty()){
-            throw new UsuarioNoEncontradoException();
+            throw new RecursoNoEncontradoException("Las credenciales no coinciden en el sistema");
         }
 
         return "TOKEN_JWT";

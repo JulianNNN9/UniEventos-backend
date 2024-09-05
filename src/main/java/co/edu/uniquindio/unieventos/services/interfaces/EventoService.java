@@ -9,16 +9,18 @@ import java.util.List;
 
 public interface EventoService {
 
-    String crearEvento(CrearEventoDTO crearEventoDTO);
+    String crearEvento(CrearEventoDTO crearEventoDTO) throws Exception;
 
-    String editarEvento(EditarEventoDTO editarEventoDTO);
+    String editarEvento(EditarEventoDTO editarEventoDTO) throws Exception;
 
-    String eliminarEvento(String id);
+    String eliminarEvento(String idEvento) throws Exception;
 
-    InformacionEventoDTO obtenerInformacionEvento(String idEvento);
+    String desactivarEvento(String idEvento) throws Exception;
 
-    List<ItemEventoDTO> listarEventos();
+    InformacionEventoDTO obtenerInformacionEvento(String idEvento) throws Exception;
 
-    List<ItemEventoDTO> filtrarEvento();
+    List<ItemEventoDTO> listarEventos() throws Exception;
+
+    List<ItemEventoDTO> filtrarEvento() throws Exception;
 
 }

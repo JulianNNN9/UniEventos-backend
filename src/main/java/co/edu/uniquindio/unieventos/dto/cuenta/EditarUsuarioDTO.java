@@ -7,8 +7,8 @@ public record EditarUsuarioDTO(
 
         String idUsuario,
         @NotBlank @Length(max = 30) String nombreCompleto,
-        @Length(max = 50) String direccion,
-        @Length(max = 10) String telefono
+        @NotBlank @Length(max = 50) String direccion,
+        @NotBlank @Length(max = 10) String telefono
 
 ) {
 }

@@ -1,14 +1,13 @@
 package co.edu.uniquindio.unieventos.services.implementacion;
 
 import co.edu.uniquindio.unieventos.dto.cupon.*;
+import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.model.Cupon;
 import co.edu.uniquindio.unieventos.model.EstadoCupon;
 import co.edu.uniquindio.unieventos.repositories.CuponRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
-import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -28,7 +27,7 @@ public class CuponServiceImple implements CuponService {
         Optional<Cupon> cuponExistente = cuponRepo.findByCodigo(crearCuponDTO.codigo());
 
         if (cuponExistente.isEmpty()) {
-            throw new Exception("El cupon ya existe.");
+            throw new RecursoEncontradoException("El cupon ya existe.");
         }
 
         Cupon cupon = Cupon.builder()
@@ -42,7 +41,7 @@ public class CuponServiceImple implements CuponService {
 
         cuponRepo.save(cupon);
 
-        return cupon.getId();
+        return "Cupon creado exitosamente.";
     }
 
     @Override
@@ -50,38 +49,34 @@ public class CuponServiceImple implements CuponService {
 
         Optional<Cupon> cuponExistente = cuponRepo.findById(crearCuponDTO.codigo());
 
-        if (cuponExistente.isPresent()) {
-
-            Cupon cupon = cuponExistente.get();
-
-            cupon.setCodigo(crearCuponDTO.codigo());
-            cupon.setNombre(crearCuponDTO.nombre());
-            cupon.setPorcentajeDescuento(crearCuponDTO.porcentajeDescuento());
-            cupon.setEstadoCupon(crearCuponDTO.estadoCupon());
-            cupon.setTipoCupon(crearCuponDTO.tipoCupon());
-            cupon.setFechaVencimiento(crearCuponDTO.fechaVencimiento());
-
-            cuponRepo.save(cupon);
-
-            return cupon.getId();
-
-        } else {
+        if (cuponExistente.isEmpty()) {
             throw new Exception("Cupón no encontrado con el ID: " + crearCuponDTO.codigo());
         }
+
+        Cupon cupon = cuponExistente.get();
+
+        cupon.setCodigo(crearCuponDTO.codigo());
+        cupon.setNombre(crearCuponDTO.nombre());
+        cupon.setPorcentajeDescuento(crearCuponDTO.porcentajeDescuento());
+        cupon.setEstadoCupon(crearCuponDTO.estadoCupon());
+        cupon.setTipoCupon(crearCuponDTO.tipoCupon());
+        cupon.setFechaVencimiento(crearCuponDTO.fechaVencimiento());
+
+        cuponRepo.save(cupon);
+
+        return cupon.getId();
     }
 
     @Override
     public String eliminarCupon(String idCupon) throws Exception {
 
-        if (cuponRepo.existsById(idCupon)) {
-
-            cuponRepo.deleteById(idCupon);
-
-            return "Cupón eliminado con éxito.";
-
-        } else {
+        if (!cuponRepo.existsById(idCupon)) {
             throw new Exception("Cupón no encontrado con el ID: " + idCupon);
         }
+
+        cuponRepo.deleteById(idCupon);
+
+        return "Cupón eliminado con éxito.";
     }
 
     @Override
@@ -89,23 +84,18 @@ public class CuponServiceImple implements CuponService {
 
         Optional<Cupon> cuponExistente = cuponRepo.findByCodigo(codigoCupon);
 
-        if (cuponExistente.isPresent()) {
+        if (cuponExistente.isEmpty()) {
+            throw new Exception("Cupón no encontrado con el código: " + codigoCupon);
+        }
 
-            Cupon cupon = cuponExistente.get();
+        Cupon cupon = cuponExistente.get();
 
-            if (cupon.getEstadoCupon() == EstadoCupon.DISPONIBLE &&
-                    cupon.getFechaVencimiento().isAfter(LocalDate.now())) {
-
-                return "Cupón válido.";
-
-            } else {
-
-                return "Cupón inválido o expirado.";
-            }
+        if (cupon.getEstadoCupon() == EstadoCupon.DISPONIBLE &&
+                cupon.getFechaVencimiento().isAfter(LocalDate.now())) {
+            return "Cupón válido.";
 
         } else {
-
-            throw new Exception("Cupón no encontrado con el código: " + codigoCupon);
+            return "Cupón inválido o expirado.";
         }
     }
 

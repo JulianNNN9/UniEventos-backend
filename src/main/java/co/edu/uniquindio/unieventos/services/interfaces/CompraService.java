@@ -8,16 +8,16 @@ import java.util.List;
 
 public interface CompraService {
 
-    String crearCompra(CrearCompraDTO crearCompraDTO);
+    String crearCompra(CrearCompraDTO crearCompraDTO) throws Exception;
 
-    String actualizarCompra(ActualizarCompraDTO actualizarCompraDTO);
+    String actualizarCompra(ActualizarCompraDTO actualizarCompraDTO) throws Exception;
 
-    Compra obtenerCompra(String idCompra);
+    Compra obtenerCompra(String idCompra) throws Exception;
 
-    List<Compra> obtenerComprasUsuario(String idUsuario);
+    List<Compra> obtenerComprasUsuario(String idUsuario) throws Exception;
 
-    String cancelarCompra(String idCompra);
+    String cancelarCompra(String idCompra) throws Exception;
 
-    String realizarCompra(String idCompra);
+    String realizarCompra(String idCompra) throws Exception;
 
 }
