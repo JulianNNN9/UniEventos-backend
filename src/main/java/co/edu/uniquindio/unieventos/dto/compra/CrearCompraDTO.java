@@ -3,8 +3,6 @@ package co.edu.uniquindio.unieventos.dto.compra;
 import co.edu.uniquindio.unieventos.model.EstadoCompra;
 import co.edu.uniquindio.unieventos.model.ItemCompra;
 import jakarta.validation.constraints.*;
-import org.bson.types.ObjectId;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,7 +21,6 @@ public record CrearCompraDTO(
         @NotNull(message = "La fecha de compra no puede estar vacía")
         LocalDateTime fechaCompra,
 
-        @NotNull(message = "El ID del cupón no puede estar vacío")
         String cupon,
 
         @NotNull(message = "El ID del pago no puede estar vacío")

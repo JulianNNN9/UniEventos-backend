@@ -9,6 +9,6 @@ public interface CarritoService {
 
     String eliminarDelCarrito(EliminarDelCarritoDTO eliminarDelCarritoDTO) throws Exception;
 
-    String crearCarrito() throws Exception;
+    String crearCarrito(String idUsuario) throws Exception;
 
 }

@@ -2,6 +2,7 @@ package co.edu.uniquindio.unieventos.services.implementacion;
 
 import co.edu.uniquindio.unieventos.dto.compra.ActualizarCompraDTO;
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
+import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.Compra;
 import co.edu.uniquindio.unieventos.model.EstadoCompra;
 import co.edu.uniquindio.unieventos.repositories.CompraRepo;
@@ -9,7 +10,6 @@ import co.edu.uniquindio.unieventos.services.interfaces.CompraService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -42,7 +42,7 @@ public class CompraServiceImple implements CompraService {
     }
 
     @Override
-    public String actualizarCompra(ActualizarCompraDTO actualizarCompraDTO) {
+    public String actualizarCompra(ActualizarCompraDTO actualizarCompraDTO) throws Exception {
 
         Optional<Compra> compraExistente = compraRepo.findById(actualizarCompraDTO.id());
 
@@ -56,11 +56,11 @@ public class CompraServiceImple implements CompraService {
             if (actualizarCompraDTO.total() != null) {
                 compra.setTotal(actualizarCompraDTO.total());
             }
-            if (actualizarCompraDTO.cupon() != null) {
-                compra.setCupon(actualizarCompraDTO.cupon());
+            if (actualizarCompraDTO.idCupon() != null) {
+                compra.setCupon(actualizarCompraDTO.idCupon());
             }
-            if (actualizarCompraDTO.pago() != null) {
-                compra.setPago(actualizarCompraDTO.pago());
+            if (actualizarCompraDTO.idPago() != null) {
+                compra.setPago(actualizarCompraDTO.idPago());
             }
             if (actualizarCompraDTO.codigoPasarela() != null) {
                 compra.setCodigoPasarela(actualizarCompraDTO.codigoPasarela());
@@ -73,34 +73,41 @@ public class CompraServiceImple implements CompraService {
 
             return compra.getId();
         } else {
-            throw new NoSuchElementException("Compra no encontrada con el ID: " + actualizarCompraDTO.id());
+            throw new RecursoNoEncontradoException("Compra no encontrada con el ID: " + actualizarCompraDTO.id());
         }
     }
 
     @Override
-    public Compra obtenerCompra(String idCompra) {
-        return null;
+    public Compra obtenerCompra(String idCompra) throws Exception {
+
+        Optional<Compra> compraExistente = compraRepo.findById(idCompra);
+
+        if (compraExistente.isEmpty()) {
+            throw new RecursoNoEncontradoException("Compra no encontrada con el ID: " + idCompra);
+        }
+
+        return compraExistente.get();
     }
 
     @Override
-    public List<Compra> obtenerComprasUsuario(String idUsuario) {
+    public List<Compra> obtenerComprasUsuario(String idUsuario) throws Exception{
 
-        Optional<List<Compra>> comprasExistente = compraRepo.findByIdUsuario(idUsuario);
+        Optional<List<Compra>> comprasExistente = compraRepo.findAllByIdUsuario(idUsuario);
 
         if (comprasExistente.isEmpty()) {
-            throw new NoSuchElementException("Usuario no encontrado");
+            throw new RecursoNoEncontradoException("Usuario no encontrado con el ID: " + idUsuario);
         }
 
         return comprasExistente.get();
     }
 
     @Override
-    public String cancelarCompra(String idCompra) {
+    public String cancelarCompra(String idCompra) throws Exception {
 
         Optional<Compra> compraExistente = compraRepo.findById(idCompra);
 
         if (compraExistente.isEmpty()) {
-            throw new NoSuchElementException("Compra no encontrado con el ID: " + idCompra);
+            throw new RecursoNoEncontradoException("Compra no encontrado con el ID: " + idCompra);
         }
 
         Compra compra = compraExistente.get();

@@ -3,11 +3,12 @@ package co.edu.uniquindio.unieventos.dto.evento;
 import co.edu.uniquindio.unieventos.model.EstadoEvento;
 import co.edu.uniquindio.unieventos.model.Localidad;
 import jakarta.validation.constraints.*;
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record EditarEventoDTO(
+
+        String idEvento,
 
         @NotBlank(message = "El nombre del evento no puede estar vacío")
         @Size(max = 100, message = "El nombre del evento no puede tener más de 100 caracteres")
@@ -26,7 +27,7 @@ public record EditarEventoDTO(
         String descripcionEvento,
 
         @PastOrPresent(message = "La fecha del evento debe ser hoy o en el pasado")
-        LocalDate fechaEvento,
+        LocalDateTime fechaEvento,
 
         @NotEmpty(message = "Debe haber al menos una localidad")
         List<Localidad> localidades,

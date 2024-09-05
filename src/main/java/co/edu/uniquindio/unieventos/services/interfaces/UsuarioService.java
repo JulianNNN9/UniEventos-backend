@@ -1,19 +1,16 @@
 package co.edu.uniquindio.unieventos.services.interfaces;
 
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
-import co.edu.uniquindio.unieventos.exceptions.usuario.EmailEncontradoException;
-import co.edu.uniquindio.unieventos.exceptions.usuario.UsuarioEcontradoException;
-import co.edu.uniquindio.unieventos.exceptions.usuario.UsuarioNoEncontradoException;
 
 public interface UsuarioService {
 
-    String crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws UsuarioEcontradoException, EmailEncontradoException;
+    String crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws Exception;
 
-    String editarUsuario(EditarUsuarioDTO editarCuentaDTO) throws UsuarioNoEncontradoException;
+    String editarUsuario(EditarUsuarioDTO editarCuentaDTO) throws Exception;
 
-    String eliminarUsuario(String id) throws UsuarioNoEncontradoException;
+    String eliminarUsuario(String id) throws Exception;
 
-    InformacionUsuarioDTO obtenerInformacionUsuario(String id) throws UsuarioNoEncontradoException;
+    InformacionUsuarioDTO obtenerInformacionUsuario(String id) throws Exception;
 
     String enviarCodigoRecuperacionCuenta(EnviarCodigoAlCorreoDTO enviarCodigoRecuperacionCuentaDTO) throws Exception;
 
