@@ -4,6 +4,7 @@ import co.edu.uniquindio.unieventos.dto.evento.CrearEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.EditarEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.InformacionEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.ItemEventoDTO;
+import co.edu.uniquindio.unieventos.model.FiltrosEventos;
 
 import java.util.List;
 
@@ -19,6 +20,6 @@ public interface EventoService {
 
     List<ItemEventoDTO> listarEventos();
 
-    List<ItemEventoDTO> filtrarEvento();
+    List<ItemEventoDTO> filtrarEvento(List<FiltrosEventos> tipoFiltrosSeleccionados, List<Enum<?>> valoresFiltrosSeleccionados);
 
 }

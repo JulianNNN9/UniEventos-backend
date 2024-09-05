@@ -7,6 +7,7 @@ import co.edu.uniquindio.unieventos.dto.evento.InformacionEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.ItemEventoDTO;
 import co.edu.uniquindio.unieventos.model.EstadoEvento;
 import co.edu.uniquindio.unieventos.model.Evento;
+import co.edu.uniquindio.unieventos.model.FiltrosEventos;
 import co.edu.uniquindio.unieventos.repositories.EventoRepo;
 import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class EventoServiceImple implements EventoService {
 
     private final EventoRepo eventoRepo;
+
     public EventoServiceImple(EventoRepo eventoRepo) {
         this.eventoRepo = eventoRepo;
     }
@@ -121,9 +124,69 @@ public class EventoServiceImple implements EventoService {
                 .collect(Collectors.toList());
     }
 
+    /*Este metodo recibe como parámetro los filtros seleccionados por el usuario, en
+    puede recibir de uno a tres tipos de filtros (Ciudad, Nombre y Tipo). Tenemos
+    también una lista de enumeraciones, las cuales serán los valores seleccionados de
+    cada tipo de filtro. Para que se lleve un orden, idealmente, se llevará así
+    1. Nombre, 2. Ciudad, 3, Tipo. Para que los filtros no se intercambien.
+     */
+    // Importante: Se debe seguir al pie de la letra el orden de los filtros
     @Override
-    public List<ItemEventoDTO> filtrarEvento() {
-        // Implementación pendiente de acuerdo con los filtros requeridos.
-        return null;
+    public List<ItemEventoDTO> filtrarEvento(List<FiltrosEventos> tipoFiltrosSeleccionados, List<Enum<?>> valoresFiltrosSeleccionados) {
+        List<ItemEventoDTO> eventosFiltrados = new ArrayList<>();
+        int cantidadFiltros = tipoFiltrosSeleccionados.size();
+        if (cantidadFiltros != 0) {
+
+            if (cantidadFiltros == 1) {
+                eventosFiltrados = filtrarPorUno(tipoFiltrosSeleccionados.get(0), valoresFiltrosSeleccionados.get(0));
+            }
+            if (cantidadFiltros == 2) {
+                eventosFiltrados = filtrarPorDos(tipoFiltrosSeleccionados.get(0), tipoFiltrosSeleccionados.get(1), valoresFiltrosSeleccionados.get(0), valoresFiltrosSeleccionados.get(1));
+            }
+            if (cantidadFiltros == 3) {
+                eventosFiltrados = filtrarPorTres(tipoFiltrosSeleccionados.get(0), tipoFiltrosSeleccionados.get(1), tipoFiltrosSeleccionados.get(2), valoresFiltrosSeleccionados.get(0), valoresFiltrosSeleccionados.get(1), valoresFiltrosSeleccionados.get(2));
+            }
+        }
+
+        return eventosFiltrados;
     }
+
+    // Metodos de filtrado de eventos
+    private List<ItemEventoDTO> filtrarPorUno(FiltrosEventos filtro, Enum<?> valor) {
+        List<ItemEventoDTO> eventosFiltrados = new ArrayList<>();
+        if (filtro == FiltrosEventos.CIUDAD) {
+            eventosFiltrados = eventoRepo.findByCiudadEvento(valor.name());
+        }
+        if (filtro == FiltrosEventos.NOMBRE) {
+            eventosFiltrados = eventoRepo.findByNombreEvento(valor.name());
+        }
+        if (filtro == FiltrosEventos.TIPO) {
+            eventosFiltrados = eventoRepo.findByTipoEvento(valor.name());
+        }
+
+        return eventosFiltrados;
+    }
+
+    private List<ItemEventoDTO> filtrarPorDos(FiltrosEventos filtro1, FiltrosEventos filtro2, Enum<?> valor1, Enum<?> valor2) {
+        List<ItemEventoDTO> eventosFiltrados = new ArrayList<>();
+        if (filtro1 == FiltrosEventos.NOMBRE && filtro2 == FiltrosEventos.TIPO) {
+            eventosFiltrados = eventoRepo.findByNombreEventoAndTipoEvento(valor1.name(), valor2.name());
+        }
+        if (filtro1 == FiltrosEventos.CIUDAD && filtro2 == FiltrosEventos.TIPO) {
+            eventosFiltrados = eventoRepo.findByCiudadEventoAndTipoEvento(valor1.name(), valor2.name());
+        }
+        if (filtro1 == FiltrosEventos.NOMBRE && filtro2 == FiltrosEventos.TIPO) {
+            eventosFiltrados = eventoRepo.findByNombreEventoAndTipoEvento(valor1.name(), valor2.name());
+        }
+        return eventosFiltrados;
+    }
+
+    private List<ItemEventoDTO> filtrarPorTres(FiltrosEventos filtro1, FiltrosEventos filtro2, FiltrosEventos filtro3, Enum<?> valor1, Enum<?> valor2, Enum<?> valor3) {
+        List<ItemEventoDTO> eventosFiltrados = new ArrayList<>();
+        eventosFiltrados = eventoRepo.findByNombreEventoAndCiudadEventoAndAndTipoEvento(valor1.name(), valor2.name(), valor3.name());
+        return eventosFiltrados;
+    }
+    // Fin metodos de filtrado de eventos
 }
+
+// ToDo: Revisar si el metodo de filtrado funciona ^^
