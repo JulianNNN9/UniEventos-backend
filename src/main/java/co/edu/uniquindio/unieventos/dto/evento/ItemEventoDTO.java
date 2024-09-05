@@ -1,14 +1,12 @@
 package co.edu.uniquindio.unieventos.dto.evento;
 
-import co.edu.uniquindio.unieventos.model.EstadoEvento;
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record ItemEventoDTO(
 
         String nombreEvento,
         String direccionEvento,
         String ciudadEvento,
-        LocalDate fechaEvento
+        LocalDateTime fechaEvento
 ) {
 }

@@ -5,10 +5,11 @@ import co.edu.uniquindio.unieventos.dto.evento.CrearEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.EditarEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.InformacionEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.ItemEventoDTO;
+import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
+import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.EstadoEvento;
 import co.edu.uniquindio.unieventos.model.Evento;
 import co.edu.uniquindio.unieventos.repositories.EventoRepo;
-import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,8 +43,34 @@ public class EventoServiceImple implements EventoService {
                 .localidades(crearEventoDTO.localidades())
                 .imagenPortada(crearEventoDTO.imagenPortada())
                 .imagenLocalidades(crearEventoDTO.imagenLocalidades())
-                .estadoEvento(EstadoEvento.ACTIVO) // Se establece un estado inicial al crear
+                .estadoEvento(EstadoEvento.ACTIVO)
                 .build();
+
+        eventoRepo.save(evento);
+
+        return "Evento creado exitosamente.";
+    }
+
+    @Override
+    public String editarEvento(EditarEventoDTO editarEventoDTO) throws Exception{
+
+        Optional<Evento> eventoExistente = eventoRepo.findById(editarEventoDTO.idEvento());
+
+        if (eventoExistente.isEmpty()) {
+            throw new RecursoEncontradoException("Evento no encontrado con el ID: " + editarEventoDTO.idEvento());
+        }
+
+        Evento evento = eventoExistente.get();
+
+        evento.setNombreEvento(editarEventoDTO.nombreEvento());
+        evento.setDireccionEvento(editarEventoDTO.direccionEvento());
+        evento.setCiudadEvento(editarEventoDTO.ciudadEvento());
+        evento.setDescripcionEvento(editarEventoDTO.descripcionEvento());
+        evento.setFechaEvento(editarEventoDTO.fechaEvento());
+        evento.setLocalidades(editarEventoDTO.localidades());
+        evento.setImagenPortada(editarEventoDTO.imagenPortada());
+        evento.setImagenLocalidades(editarEventoDTO.imagenLocalidades());
+        evento.setEstadoEvento(editarEventoDTO.estadoEvento());
 
         eventoRepo.save(evento);
 
@@ -51,59 +78,55 @@ public class EventoServiceImple implements EventoService {
     }
 
     @Override
-    public String editarEvento(EditarEventoDTO editarEventoDTO) {
+    public String eliminarEvento(String idEvento) throws Exception{
 
-        Optional<Evento> eventoExistente = eventoRepo.findById(editarEventoDTO.nombreEvento());
-
-        if (eventoExistente.isPresent()) {
-            Evento evento = eventoExistente.get();
-            evento.setDireccionEvento(editarEventoDTO.direccionEvento());
-            evento.setCiudadEvento(editarEventoDTO.ciudadEvento());
-            evento.setDescripcionEvento(editarEventoDTO.descripcionEvento());
-            evento.setFechaEvento(LocalDateTime.of(editarEventoDTO.fechaEvento(), LocalTime.MIDNIGHT));
-            evento.setLocalidades(editarEventoDTO.localidades());
-            evento.setImagenPortada(editarEventoDTO.imagenPortada());
-            evento.setImagenLocalidades(editarEventoDTO.imagenLocalidades());
-            evento.setEstadoEvento(editarEventoDTO.estadoEvento());
-
-            eventoRepo.save(evento);
-            return evento.getId();
-
-        } else {
-            return "Evento no encontrado.";
+        if (!eventoRepo.existsById(idEvento)) {
+            throw new RecursoNoEncontradoException("Evento no encontrado con el ID: " + idEvento);
         }
+
+        eventoRepo.deleteById(idEvento);
+
+        return "Evento eliminado con éxito.";
     }
 
     @Override
-    public String eliminarEvento(String id) {
+    public String desactivarEvento(String idEvento) throws Exception {
 
-        if (eventoRepo.existsById(id)) {
+        Optional<Evento> eventoExistente = eventoRepo.findById(idEvento);
 
-            eventoRepo.deleteById(id);
-            return "Evento eliminado con éxito.";
-        } else {
-            return "Evento no encontrado.";
+        if (eventoExistente.isEmpty()) {
+            throw new RecursoNoEncontradoException("Evento no encontrado con el ID: " + idEvento);
         }
+
+        Evento evento = eventoExistente.get();
+
+        evento.setEstadoEvento(EstadoEvento.INACTIVO);
+
+        eventoRepo.save(evento);
+
+        return "Evento desactivado exitosamente.";
     }
 
     @Override
-    public InformacionEventoDTO obtenerInformacionEvento(String idEvento) {
+    public InformacionEventoDTO obtenerInformacionEvento(String idEvento) throws Exception {
+
         Optional<Evento> eventoOpt = eventoRepo.findById(idEvento);
 
-        if (eventoOpt.isPresent()) {
-            Evento evento = eventoOpt.get();
-            return new InformacionEventoDTO(
-                    evento.getNombreEvento(),
-                    evento.getDireccionEvento(),
-                    evento.getCiudadEvento(),
-                    evento.getDescripcionEvento(),
-                    evento.getFechaEvento().toLocalDate(),  // Convertir LocalDateTime a LocalDate
-                    evento.getLocalidades(),
-                    evento.getEstadoEvento()
-            );
-        } else {
-            throw new NoSuchElementException("Evento no encontrado con el ID: " + idEvento);
+        if (eventoOpt.isEmpty()) {
+            throw new RecursoNoEncontradoException("Evento no encontrado con el ID: " + idEvento);
         }
+
+        Evento evento = eventoOpt.get();
+
+        return new InformacionEventoDTO(
+                evento.getNombreEvento(),
+                evento.getDireccionEvento(),
+                evento.getCiudadEvento(),
+                evento.getDescripcionEvento(),
+                evento.getFechaEvento(),
+                evento.getLocalidades(),
+                evento.getEstadoEvento()
+        );
     }
 
     @Override
@@ -116,7 +139,7 @@ public class EventoServiceImple implements EventoService {
                         evento.getId(),
                         evento.getNombreEvento(),
                         evento.getCiudadEvento(),
-                        evento.getFechaEvento().toLocalDate()
+                        evento.getFechaEvento()
                 ))
                 .collect(Collectors.toList());
     }
