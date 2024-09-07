@@ -21,7 +21,9 @@ public interface EventoService {
     InformacionEventoDTO obtenerInformacionEvento(String idEvento) throws Exception;
 
     List<ItemEventoDTO> filtrarEvento(List<FiltrosEventos> tipoFiltrosSeleccionados, List<Enum<?>> valoresFiltrosSeleccionados);
-    
+
+    List<ItemEventoDTO> buscarEvento(String valorCampoDeBusqueda);
+
     List<ItemEventoDTO> listarEventos() throws Exception;
 
 }
