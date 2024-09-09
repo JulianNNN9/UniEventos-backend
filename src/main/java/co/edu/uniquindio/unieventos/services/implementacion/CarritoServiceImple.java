@@ -6,6 +6,7 @@ import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.Carrito;
 import co.edu.uniquindio.unieventos.model.DetalleCarrito;
 import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
+import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CarritoService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,9 +17,11 @@ import java.util.stream.Collectors;
 public class CarritoServiceImple implements CarritoService {
 
     private final CarritoRepo carritoRepo;
+    private final UsuarioRepo usuarioRepo;
 
-    public CarritoServiceImple(CarritoRepo carritoRepo) {
+    public CarritoServiceImple(CarritoRepo carritoRepo, UsuarioRepo usuarioRepo) {
         this.carritoRepo = carritoRepo;
+        this.usuarioRepo = usuarioRepo;
     }
 
     @Override
@@ -67,15 +70,21 @@ public class CarritoServiceImple implements CarritoService {
     @Override
     public String crearCarrito(String idUsuario) {
 
-        Carrito carrito = Carrito.builder()
-                .fecha(LocalDateTime.now())
-                .itemsCarrito(new ArrayList<>())
-                .idUsuario(idUsuario)
-                .build();
+        //Validar que el id del usuario exista
+        if (usuarioRepo.findById(idUsuario).isPresent()){
+            Carrito carrito = Carrito.builder()
+                    .fecha(LocalDateTime.now())
+                    .itemsCarrito(new ArrayList<>())
+                    .idUsuario(idUsuario)
+                    .build();
 
-        carritoRepo.save(carrito);
+            carritoRepo.save(carrito);
 
-        return "Carrito creado exitosamente";
+            return "Carrito creado exitosamente";
+        }
+        else{
+            return "El usuario no existe";
+        }
     }
 
 }

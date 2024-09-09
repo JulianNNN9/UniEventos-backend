@@ -79,11 +79,9 @@ public class CuponServiceImple implements CuponService {
         return "Cupón eliminado con éxito.";
     }
 
-    @Override
-    public String validarCupon(String codigoCupon) throws Exception {
 
-        Optional<Cupon> cuponExistente = cuponRepo.findByCodigo(codigoCupon);
 
+<<<<<<< Updated upstream
         if (cuponExistente.isEmpty()) {
             throw new Exception("Cupón no encontrado con el código: " + codigoCupon);
         }
@@ -98,5 +96,7 @@ public class CuponServiceImple implements CuponService {
             return "Cupón inválido o expirado.";
         }
     }
+=======
+>>>>>>> Stashed changes
 
 }
