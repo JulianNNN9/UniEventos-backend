@@ -6,35 +6,28 @@ import co.edu.uniquindio.unieventos.dto.carrito.EliminarDelCarritoDTO;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.Carrito;
 import co.edu.uniquindio.unieventos.model.DetalleCarrito;
+import co.edu.uniquindio.unieventos.model.Usuario;
 import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
 import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CarritoService;
+import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
+import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 public class CarritoServiceImple implements CarritoService {
 
     private final CarritoRepo carritoRepo;
-    private final UsuarioRepo usuarioRepo;
-
-    public CarritoServiceImple(CarritoRepo carritoRepo, UsuarioRepo usuarioRepo) {
-        this.carritoRepo = carritoRepo;
-        this.usuarioRepo = usuarioRepo;
-    }
+    private final UsuarioService usuarioService;
 
     @Override
     public String agregarAlCarrito(AgregarItemDTO agregarItemDTO) throws Exception {
 
-        Optional<Carrito> carritoExistente = carritoRepo.findById(agregarItemDTO.idCarrito());
-
-        if (carritoExistente.isEmpty()) {
-            throw new RecursoNoEncontradoException("Carrito no encontrado con el ID: " + agregarItemDTO.idCarrito());
-        }
-
-        Carrito carrito = carritoExistente.get();
+        Carrito carrito = obtenerCarrito(agregarItemDTO.idCarrito());
 
         carrito.getItemsCarrito().add(agregarItemDTO.detalleCarrito());
 
@@ -44,15 +37,21 @@ public class CarritoServiceImple implements CarritoService {
     }
 
     @Override
-    public String eliminarDelCarrito(EliminarDelCarritoDTO eliminarDelCarritoDTO) throws Exception {
+    public Carrito obtenerCarrito(String idCarrito) throws Exception {
 
-        Optional<Carrito> carritoExistente = carritoRepo.findById(eliminarDelCarritoDTO.idCarrito());
+        Optional<Carrito> carritoExistente = carritoRepo.findById(idCarrito);
 
         if (carritoExistente.isEmpty()) {
-            throw new RecursoNoEncontradoException("Carrito no encontrado con el ID: " + eliminarDelCarritoDTO.idCarrito());
+            throw new RecursoNoEncontradoException("Carrito no encontrado con el ID: " + idCarrito);
         }
 
-        Carrito carrito = carritoExistente.get();
+        return carritoExistente.get();
+    }
+
+    @Override
+    public String eliminarDelCarrito(EliminarDelCarritoDTO eliminarDelCarritoDTO) throws Exception {
+
+        Carrito carrito = obtenerCarrito(eliminarDelCarritoDTO.idCarrito());
 
         List<DetalleCarrito> itemsFiltrados = carrito.getItemsCarrito().stream()
                 .filter(item -> !(item.getNombreLocalidad().equals(eliminarDelCarritoDTO.nombreLocalidad()) &&
@@ -70,13 +69,7 @@ public class CarritoServiceImple implements CarritoService {
     @Override
     public String editarCarrito(EditarCarritoDTO editarCarritoDTO) throws Exception {
 
-        Optional<Carrito> carritoExistente = carritoRepo.findById(editarCarritoDTO.idCarrito());
-
-        if (carritoExistente.isEmpty()) {
-            throw new RecursoNoEncontradoException("Carrito no encontrado con el ID: " + editarCarritoDTO.idCarrito());
-        }
-
-        Carrito carrito = carritoExistente.get();
+        Carrito carrito = obtenerCarrito(editarCarritoDTO.idCarrito());
 
         Optional<DetalleCarrito> itemFiltrado = carrito.getItemsCarrito().stream()
                 .filter(detalleCarrito -> (detalleCarrito.getNombreLocalidad().equals(editarCarritoDTO.nombreLocalidad()) &&
@@ -94,23 +87,19 @@ public class CarritoServiceImple implements CarritoService {
     }
 
     @Override
-    public String crearCarrito(String idUsuario) {
+    public String crearCarrito(String idUsuario) throws Exception {
 
-        //Validar que el id del usuario exista
+        Usuario usuario = usuarioService.obtenerUsuario(idUsuario);
 
-        if (usuarioRepo.findById(idUsuario).isPresent()){
-            Carrito carrito = Carrito.builder()
-                    .fecha(LocalDateTime.now())
-                    .itemsCarrito(new ArrayList<>())
-                    .idUsuario(idUsuario)
-                    .build();
-            carritoRepo.save(carrito);
+        Carrito carrito = Carrito.builder()
+                .fecha(LocalDateTime.now())
+                .itemsCarrito(new ArrayList<>())
+                .idUsuario(usuario.getId())
+                .build();
 
-            return "Carrito creado exitosamente";
-        }
-        else{
-            return "El usuario no existe";
-        }
+        carritoRepo.save(carrito);
+
+        return "Carrito creado exitosamente";
     }
 
 }

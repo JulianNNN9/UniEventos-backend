@@ -1,6 +1,5 @@
 package co.edu.uniquindio.unieventos.services.interfaces;
 
-import co.edu.uniquindio.unieventos.dto.compra.ActualizarCompraDTO;
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
 import co.edu.uniquindio.unieventos.model.Compra;
 

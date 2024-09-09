@@ -7,9 +7,9 @@ public interface UsuarioService {
 
     String crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws Exception;
 
-    String editarUsuario(EditarUsuarioDTO editarCuentaDTO) throws Exception;
+    void editarUsuario(EditarUsuarioDTO editarCuentaDTO) throws Exception;
 
-    String eliminarUsuario(String id) throws Exception;
+    void eliminarUsuario(String id) throws Exception;
 
     InformacionUsuarioDTO obtenerInformacionUsuario(String id) throws Exception;
 
@@ -21,5 +21,5 @@ public interface UsuarioService {
 
     String iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception;
 
-    Usuario getUsuario(String id) throws Exception;
+    Usuario obtenerUsuario(String id) throws Exception;
 }

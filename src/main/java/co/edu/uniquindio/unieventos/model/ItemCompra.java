@@ -8,7 +8,7 @@ import org.bson.types.ObjectId;
 @SuperBuilder
 public class ItemCompra {
 
-    private ObjectId idEvento;
+    private String idEvento;
     private String nombreLocalidad;
     private Integer cantidad;
     private Double precioUnitario;

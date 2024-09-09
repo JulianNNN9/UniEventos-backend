@@ -1,18 +1,19 @@
 package co.edu.uniquindio.unieventos.services.implementacion;
 
-import co.edu.uniquindio.unieventos.dto.compra.ActualizarCompraDTO;
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
+import co.edu.uniquindio.unieventos.exceptions.CuponUsadoException;
+import co.edu.uniquindio.unieventos.exceptions.EntradasInsuficientesException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.*;
 import co.edu.uniquindio.unieventos.repositories.CompraRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CompraService;
 import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
+import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,7 @@ public class CompraServiceImple implements CompraService {
     private final CompraRepo compraRepo;
     private final CuponService cuponService;
     private final UsuarioService usuarioService;
+    private final EventoService eventoService;
 
     @Override
     public String crearCompra(CrearCompraDTO crearCompraDTO) throws Exception {
@@ -34,9 +36,11 @@ public class CompraServiceImple implements CompraService {
         if(cupon.getTipoCupon() == TipoCupon.UNICO){
 
             if(cupon.getEstadoCupon() == EstadoCupon.ACTIVO){
+
                 cupon.setEstadoCupon(EstadoCupon.INACTIVO);
+
             }else{
-                throw new Exception("Este cupón ya fue usado por otra persona");
+                throw new CuponUsadoException("Este cupón ya fue usado por otra persona");
             }
 
         }else{
@@ -49,9 +53,38 @@ public class CompraServiceImple implements CompraService {
 
         }
 
-        //TODO Validar entradas restantes
+        List<ItemCompra> itemsCompra = crearCompraDTO.itemsCompra();
 
-        Usuario usuario = usuarioService.getUsuario(crearCompraDTO.idUsuario());
+        // Iterar sobre cada item de la compra
+        for (ItemCompra item : itemsCompra) {
+
+            String idEvento = item.getIdEvento();
+            String nombreLocalidad = item.getNombreLocalidad();
+            Integer cantidad = item.getCantidad();
+
+            // Buscar el evento correspondiente
+            Evento evento = eventoService.obtenerEvento(item.getIdEvento());
+
+            // Buscar la localidad en el evento
+            Localidad localidad = evento.getLocalidades().stream()
+                    .filter(loc -> loc.getNombreLocalidad().equals(nombreLocalidad))
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new RecursoNoEncontradoException("Localidad no encontrada: " + nombreLocalidad + " en el evento: " + idEvento));
+
+            // Verificar si hay suficientes entradas restantes
+            if (localidad.getEntradasRestantes() < cantidad) {
+                throw new EntradasInsuficientesException("No hay suficientes entradas restantes para la localidad: " + nombreLocalidad);
+            }
+
+            // Restar la cantidad de entradas
+            localidad.setEntradasRestantes(localidad.getEntradasRestantes() - cantidad);
+
+            //actulizar el evento
+            eventoService.saveEvento(evento);
+        }
+
+        Usuario usuario = usuarioService.obtenerUsuario(crearCompraDTO.idUsuario());
 
         Compra compra = Compra.builder()
                 .idUsuario(usuario.getId())
@@ -81,34 +114,42 @@ public class CompraServiceImple implements CompraService {
 
     @Override
     public List<Compra> obtenerComprasUsuario(String idUsuario) throws Exception{
-
-        List<Compra> comprasExistente = compraRepo.findAllByIdUsuario(idUsuario);
-
-        if (comprasExistente.isEmpty()) {
-            throw new RecursoNoEncontradoException("Usuario no encontrado con el ID: " + idUsuario);
-        }
-
-        return comprasExistente;
+        return compraRepo.findAllByIdUsuario(idUsuario);
     }
 
     @Override
     public String cancelarCompra(String idCompra) throws Exception {
 
-        Optional<Compra> compraExistente = compraRepo.findById(idCompra);
-
-        if (compraExistente.isEmpty()) {
-            throw new RecursoNoEncontradoException("Compra no encontrado con el ID: " + idCompra);
-        }
-
-        Compra compra = compraExistente.get();
+        Compra compra = obtenerCompra(idCompra);
 
         compra.setEstado(EstadoCompra.CANCELADA);
 
-        //TODO Liberar las entradas (volver a hacerlas disponibles)
+        for (ItemCompra item : compra.getItemsCompra()) {
+
+            String idEvento = item.getIdEvento();
+            String nombreLocalidad = item.getNombreLocalidad();
+            Integer cantidad = item.getCantidad();
+
+            // Buscar el evento correspondiente
+            Evento evento = eventoService.obtenerEvento(item.getIdEvento());
+
+            // Buscar la localidad en el evento
+            Localidad localidad = evento.getLocalidades().stream()
+                    .filter(loc -> loc.getNombreLocalidad().equals(nombreLocalidad))
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new Exception("Localidad no encontrada: " + nombreLocalidad + " en el evento: " + idEvento));
+
+            // Devolver las entradas canceladas
+            localidad.setEntradasRestantes(localidad.getEntradasRestantes() + cantidad);
+
+            // Guardar el evento con las entradas actualizadas
+            eventoService.saveEvento(evento);
+        }
 
         compraRepo.save(compra);
 
-        return "";
+        return "Compra cancelada exitosamente,";
     }
 
     @Override
