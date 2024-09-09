@@ -1,4 +1,4 @@
-package co.edu.uniquindio.unieventos.controllers;
+package co.edu.uniquindio.unieventos.services.utility;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.util.Base64;
 
 @Service
-public class QRCodeService {
+public class QRCodeUtility {
 
     private static final String QR_CODE_IMAGE_PATH = "./qrcodes/";
 
