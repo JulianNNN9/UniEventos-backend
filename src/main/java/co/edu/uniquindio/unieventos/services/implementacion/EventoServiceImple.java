@@ -11,24 +11,21 @@ import co.edu.uniquindio.unieventos.model.EstadoEvento;
 import co.edu.uniquindio.unieventos.model.Evento;
 import co.edu.uniquindio.unieventos.repositories.EventoRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class EventoServiceImple implements EventoService {
 
     private final EventoRepo eventoRepo;
-    public EventoServiceImple(EventoRepo eventoRepo) {
-        this.eventoRepo = eventoRepo;
-    }
 
     @Override
     public String crearEvento(CrearEventoDTO crearEventoDTO) {
@@ -54,13 +51,7 @@ public class EventoServiceImple implements EventoService {
     @Override
     public String editarEvento(EditarEventoDTO editarEventoDTO) throws Exception{
 
-        Optional<Evento> eventoExistente = eventoRepo.findById(editarEventoDTO.idEvento());
-
-        if (eventoExistente.isEmpty()) {
-            throw new RecursoEncontradoException("Evento no encontrado con el ID: " + editarEventoDTO.idEvento());
-        }
-
-        Evento evento = eventoExistente.get();
+        Evento evento = obtenerEvento(editarEventoDTO.idEvento());
 
         evento.setNombreEvento(editarEventoDTO.nombreEvento());
         evento.setDireccionEvento(editarEventoDTO.direccionEvento());
@@ -78,27 +69,9 @@ public class EventoServiceImple implements EventoService {
     }
 
     @Override
-    public String eliminarEvento(String idEvento) throws Exception{
+    public String eliminarEvento(String idEvento) throws Exception {
 
-        if (!eventoRepo.existsById(idEvento)) {
-            throw new RecursoNoEncontradoException("Evento no encontrado con el ID: " + idEvento);
-        }
-
-        eventoRepo.deleteById(idEvento); //NO USAR DELETE, CAMIBIAR ESTADO (ELIMINADO)
-
-        return "Evento eliminado con éxito.";
-    }
-
-    @Override
-    public String desactivarEvento(String idEvento) throws Exception {
-
-        Optional<Evento> eventoExistente = eventoRepo.findById(idEvento);
-
-        if (eventoExistente.isEmpty()) {
-            throw new RecursoNoEncontradoException("Evento no encontrado con el ID: " + idEvento);
-        }
-
-        Evento evento = eventoExistente.get();
+        Evento evento = obtenerEvento(idEvento);
 
         evento.setEstadoEvento(EstadoEvento.INACTIVO);
 
@@ -110,13 +83,7 @@ public class EventoServiceImple implements EventoService {
     @Override
     public InformacionEventoDTO obtenerInformacionEvento(String idEvento) throws Exception {
 
-        Optional<Evento> eventoOpt = eventoRepo.findById(idEvento);
-
-        if (eventoOpt.isEmpty()) {
-            throw new RecursoNoEncontradoException("Evento no encontrado con el ID: " + idEvento);
-        }
-
-        Evento evento = eventoOpt.get();
+        Evento evento = obtenerEvento(idEvento);
 
         return new InformacionEventoDTO(
                 evento.getNombreEvento(),
@@ -148,5 +115,22 @@ public class EventoServiceImple implements EventoService {
     public List<ItemEventoDTO> filtrarEvento() {
         // Implementación pendiente de acuerdo con los filtros requeridos.
         return null;
+    }
+
+    @Override
+    public Evento obtenerEvento(String idEvento) throws Exception {
+
+        Optional<Evento> eventoExistente = eventoRepo.findById(idEvento);
+
+        if (eventoExistente.isEmpty()) {
+            throw new RecursoNoEncontradoException("No encontrado con el ID: " + idEvento);
+        }
+
+        return eventoExistente.get();
+    }
+
+    @Override
+    public void saveEvento(Evento evento) {
+        eventoRepo.save(evento);
     }
 }

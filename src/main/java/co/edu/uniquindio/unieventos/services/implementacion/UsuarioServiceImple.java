@@ -33,7 +33,7 @@ public class UsuarioServiceImple implements UsuarioService {
     }
 
     @Override
-    public Usuario getUsuario(String id) throws Exception {
+    public Usuario obtenerUsuario(String id) throws Exception {
 
         Optional<Usuario> optionalUsuario = usuarioRepo.findById(id);
 
@@ -118,35 +118,31 @@ public class UsuarioServiceImple implements UsuarioService {
     }
 
     @Override
-    public String editarUsuario(EditarUsuarioDTO editarCuentaDTO) throws Exception {
+    public void editarUsuario(EditarUsuarioDTO editarCuentaDTO) throws Exception {
 
-        Usuario usuario = getUsuario(editarCuentaDTO.idUsuario());
+        Usuario usuario = obtenerUsuario(editarCuentaDTO.idUsuario());
         
         usuario.setNombreCompleto( editarCuentaDTO.nombreCompleto() );
         usuario.setDireccion( editarCuentaDTO.direccion() );
         usuario.setTelefono( editarCuentaDTO.telefono() );
 
         usuarioRepo.save(usuario);
-
-        return "Su cuenta se ha actualizado correctamente";
     }
 
     @Override
-    public String eliminarUsuario(String id) throws Exception {
+    public void eliminarUsuario(String id) throws Exception {
 
-        Usuario usuario = getUsuario(id);
+        Usuario usuario = obtenerUsuario(id);
 
         usuario.setEstadoUsuario(EstadoUsuario.ELIMINADA);
         
         usuarioRepo.save(usuario);
-        
-        return "Usuario se ha eliminado correctamente";
     }
 
     @Override
     public InformacionUsuarioDTO obtenerInformacionUsuario(String id) throws Exception {
 
-        Usuario usuario = getUsuario(id);
+        Usuario usuario = obtenerUsuario(id);
         
         return new InformacionUsuarioDTO(
                 usuario.getCedula(),
@@ -185,7 +181,7 @@ public class UsuarioServiceImple implements UsuarioService {
     @Override
     public String recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception {
 
-        Usuario usuario = getUsuario(recuperarContraseniaDTO.idUsuario());
+        Usuario usuario = obtenerUsuario(recuperarContraseniaDTO.idUsuario());
 
         if (!Objects.equals(recuperarContraseniaDTO.contraseniaNueva(), recuperarContraseniaDTO.confirmarContraseniaNueva())){
             throw new ContraseniaNoCoincidenException("Las contraseñas no coindicen.");
@@ -209,7 +205,7 @@ public class UsuarioServiceImple implements UsuarioService {
     @Override
     public String cambiarContrasenia(CambiarContraseniaDTO cambiarContraseniaDTO) throws Exception {
 
-        Usuario usuario = getUsuario(cambiarContraseniaDTO.idUsuario());
+        Usuario usuario = obtenerUsuario(cambiarContraseniaDTO.idUsuario());
 
         if (!cambiarContraseniaDTO.contraseniaAntigua().equals(usuario.getContrasenia())){
             throw new ContraseniaNoCoincidenException("Las contraseña es incorrecta.");
