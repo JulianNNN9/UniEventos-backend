@@ -10,6 +10,6 @@ public interface CuponService {
     String editarCupon(CrearEditarCuponDTO crearCuponDTO)throws Exception;
 
     String eliminarCupon(String idCupon)throws Exception;
-
+  
     Cupon obtenerCupon(String id) throws Exception;
 }

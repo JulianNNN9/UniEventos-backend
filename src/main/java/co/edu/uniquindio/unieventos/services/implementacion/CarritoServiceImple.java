@@ -8,6 +8,7 @@ import co.edu.uniquindio.unieventos.model.Carrito;
 import co.edu.uniquindio.unieventos.model.DetalleCarrito;
 import co.edu.uniquindio.unieventos.model.Usuario;
 import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
+import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CarritoService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
 import lombok.RequiredArgsConstructor;

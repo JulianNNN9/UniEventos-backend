@@ -5,6 +5,7 @@ import co.edu.uniquindio.unieventos.dto.evento.EditarEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.InformacionEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.ItemEventoDTO;
 import co.edu.uniquindio.unieventos.model.Evento;
+import co.edu.uniquindio.unieventos.model.FiltrosEventos;
 
 import java.util.List;
 
@@ -18,9 +19,11 @@ public interface EventoService {
 
     InformacionEventoDTO obtenerInformacionEvento(String idEvento) throws Exception;
 
-    List<ItemEventoDTO> listarEventos() throws Exception;
+    List<ItemEventoDTO> filtrarEvento(List<FiltrosEventos> tipoFiltrosSeleccionados, List<Enum<?>> valoresFiltrosSeleccionados);
 
-    List<ItemEventoDTO> filtrarEvento() throws Exception;
+    List<ItemEventoDTO> buscarEvento(String valorCampoDeBusqueda);
+
+    List<ItemEventoDTO> listarEventos() throws Exception;
 
     Evento obtenerEvento(String idEvento) throws Exception;
 
