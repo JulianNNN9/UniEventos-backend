@@ -78,27 +78,6 @@ public class CuponServiceImple implements CuponService {
 
         return "Cupón eliminado con éxito.";
     }
-
-
-
-<<<<<<< Updated upstream
-        if (cuponExistente.isEmpty()) {
-            throw new Exception("Cupón no encontrado con el código: " + codigoCupon);
-        }
-
-        Cupon cupon = cuponExistente.get();
-
-        //VALIDAR EL TIPO DE CUPÓN
-
-        if (cupon.getEstadoCupon() == EstadoCupon.ACTIVO &&
-                cupon.getFechaVencimiento().isAfter(LocalDate.now())) {
-            return "Cupón válido.";
-
-        } else {
-            return "Cupón inválido o expirado.";
-        }
-    }
-=======
->>>>>>> Stashed changes
+    
 
 }
