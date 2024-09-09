@@ -6,7 +6,7 @@ import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
-public record Crear_EditarCuponDTO(
+public record CrearEditarCuponDTO(
 
         @NotBlank(message = "El código no puede estar vacío")
         @Size(max = 20, message = "El código no puede exceder los 20 caracteres")

@@ -32,7 +32,8 @@ public class UsuarioServiceImple implements UsuarioService {
         this.emailUtility = emailUtility;
     }
 
-    private Usuario getUsuario(String id) throws Exception {
+    @Override
+    public Usuario getUsuario(String id) throws Exception {
 
         Optional<Usuario> optionalUsuario = usuarioRepo.findById(id);
 
@@ -234,4 +235,5 @@ public class UsuarioServiceImple implements UsuarioService {
 
         return "TOKEN_JWT";
     }
+
 }

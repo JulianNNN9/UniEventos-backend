@@ -2,11 +2,14 @@ package co.edu.uniquindio.unieventos.services.implementacion;
 
 import co.edu.uniquindio.unieventos.dto.compra.ActualizarCompraDTO;
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
+import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
-import co.edu.uniquindio.unieventos.model.Compra;
-import co.edu.uniquindio.unieventos.model.EstadoCompra;
+import co.edu.uniquindio.unieventos.model.*;
 import co.edu.uniquindio.unieventos.repositories.CompraRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CompraService;
+import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
+import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,69 +19,52 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class CompraServiceImple implements CompraService {
 
     private final CompraRepo compraRepo;
-
-    public CompraServiceImple(CompraRepo compraRepo) {
-        this.compraRepo = compraRepo;
-    }
+    private final CuponService cuponService;
+    private final UsuarioService usuarioService;
 
     @Override
-    public String crearCompra(CrearCompraDTO crearCompraDTO) {
+    public String crearCompra(CrearCompraDTO crearCompraDTO) throws Exception {
 
-        //VALIDAR QUE EL CUPON A REDIMIR NO HAYA SIOD USANDO ANTES POR EL USUARIO
-        //SI ES DE UNICO USO, CMBIAR EL ESTADO DEL CUPÓN A INACTIVO
-        //validar crearCompraDTO.idUsuario()
+        Cupon cupon = cuponService.obtenerCupon(crearCompraDTO.codigoCupon());
+
+        if(cupon.getTipoCupon() == TipoCupon.UNICO){
+
+            if(cupon.getEstadoCupon() == EstadoCupon.ACTIVO){
+                cupon.setEstadoCupon(EstadoCupon.INACTIVO);
+            }else{
+                throw new Exception("Este cupón ya fue usado por otra persona");
+            }
+
+        }else{
+
+            Optional<Compra> compraOptional = compraRepo.findByCodigoCuponAndIdUsuario(crearCompraDTO.codigoCupon(), crearCompraDTO.idUsuario());
+
+            if (compraOptional.isPresent()) {
+                throw new RecursoEncontradoException("Este cupon ya ha sido redimido.");
+            }
+
+        }
+
+        //TODO Validar entradas restantes
+
+        Usuario usuario = usuarioService.getUsuario(crearCompraDTO.idUsuario());
 
         Compra compra = Compra.builder()
-                .idUsuario(crearCompraDTO.idUsuario())
+                .idUsuario(usuario.getId())
                 .itemsCompra(crearCompraDTO.itemsCompra())
                // .total() //calcular el total acá
                 .fechaCompra(LocalDateTime.now())
-                .cupon(crearCompraDTO.cupon())
+                .codigoCupon(crearCompraDTO.codigoCupon())
                 .estado(EstadoCompra.PENDIENTE)
                 .build();
 
         compraRepo.save(compra);
 
         return compra.getId();
-    }
-
-    @Override
-    public String actualizarCompra(ActualizarCompraDTO actualizarCompraDTO) throws Exception {
-
-        Optional<Compra> compraExistente = compraRepo.findById(actualizarCompraDTO.id());
-
-        if (compraExistente.isPresent()) {
-
-            Compra compra = compraExistente.get();
-
-            if (actualizarCompraDTO.itemsCompra() != null) {
-                compra.setItemsCompra(actualizarCompraDTO.itemsCompra());
-            }
-            if (actualizarCompraDTO.total() != null) {
-                compra.setTotal(actualizarCompraDTO.total());
-            }
-            if (actualizarCompraDTO.idCupon() != null) {
-                compra.setCupon(actualizarCompraDTO.idCupon());
-            }
-            if (actualizarCompraDTO.idPago() != null) {
-                compra.setPago(actualizarCompraDTO.idPago());
-            }
-            if (actualizarCompraDTO.codigoPasarela() != null) {
-                compra.setCodigoPasarela(actualizarCompraDTO.codigoPasarela());
-            }
-            if (actualizarCompraDTO.estado() != null) {
-                compra.setEstado(actualizarCompraDTO.estado());
-            }
-
-            compraRepo.save(compra);
-
-            return compra.getId();
-        } else {
-            throw new RecursoNoEncontradoException("Compra no encontrada con el ID: " + actualizarCompraDTO.id());
-        }
     }
 
     @Override
@@ -118,7 +104,7 @@ public class CompraServiceImple implements CompraService {
 
         compra.setEstado(EstadoCompra.CANCELADA);
 
-        //Liberar las entradas (volver a hacerlas disponibles)
+        //TODO Liberar las entradas (volver a hacerlas disponibles)
 
         compraRepo.save(compra);
 

@@ -1,6 +1,7 @@
 package co.edu.uniquindio.unieventos.services.interfaces;
 
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
+import co.edu.uniquindio.unieventos.model.Usuario;
 
 public interface UsuarioService {
 
@@ -20,4 +21,5 @@ public interface UsuarioService {
 
     String iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception;
 
+    Usuario getUsuario(String id) throws Exception;
 }

@@ -12,4 +12,6 @@ public interface CompraRepo extends MongoRepository<Compra, String> {
 
     List<Compra> findAllByIdUsuario(String idUsuario);
 
+    Optional<Compra> findByCodigoCuponAndIdUsuario(String codigoCupon, String idUsuario);
+
 }
