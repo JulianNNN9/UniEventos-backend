@@ -9,6 +9,8 @@ import co.edu.uniquindio.unieventos.repositories.CompraRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CompraService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,15 +27,17 @@ public class CompraServiceImple implements CompraService {
     @Override
     public String crearCompra(CrearCompraDTO crearCompraDTO) {
 
+        //VALIDAR QUE EL CUPON A REDIMIR NO HAYA SIOD USANDO ANTES POR EL USUARIO
+        //SI ES DE UNICO USO, CMBIAR EL ESTADO DEL CUPÓN A INACTIVO
+        //validar crearCompraDTO.idUsuario()
+
         Compra compra = Compra.builder()
                 .idUsuario(crearCompraDTO.idUsuario())
                 .itemsCompra(crearCompraDTO.itemsCompra())
-                .total(crearCompraDTO.total())
-                .fechaCompra(crearCompraDTO.fechaCompra())
+               // .total() //calcular el total acá
+                .fechaCompra(LocalDateTime.now())
                 .cupon(crearCompraDTO.cupon())
-                .pago(crearCompraDTO.pago())
-                .codigoPasarela(crearCompraDTO.codigoPasarela())
-                .estado(crearCompraDTO.estado())
+                .estado(EstadoCompra.PENDIENTE)
                 .build();
 
         compraRepo.save(compra);
@@ -92,13 +96,13 @@ public class CompraServiceImple implements CompraService {
     @Override
     public List<Compra> obtenerComprasUsuario(String idUsuario) throws Exception{
 
-        Optional<List<Compra>> comprasExistente = compraRepo.findAllByIdUsuario(idUsuario);
+        List<Compra> comprasExistente = compraRepo.findAllByIdUsuario(idUsuario);
 
         if (comprasExistente.isEmpty()) {
             throw new RecursoNoEncontradoException("Usuario no encontrado con el ID: " + idUsuario);
         }
 
-        return comprasExistente.get();
+        return comprasExistente;
     }
 
     @Override
@@ -113,6 +117,8 @@ public class CompraServiceImple implements CompraService {
         Compra compra = compraExistente.get();
 
         compra.setEstado(EstadoCompra.CANCELADA);
+
+        //Liberar las entradas (volver a hacerlas disponibles)
 
         compraRepo.save(compra);
 

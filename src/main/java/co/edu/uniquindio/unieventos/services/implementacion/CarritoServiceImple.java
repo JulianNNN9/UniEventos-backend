@@ -71,13 +71,13 @@ public class CarritoServiceImple implements CarritoService {
     public String crearCarrito(String idUsuario) {
 
         //Validar que el id del usuario exista
+
         if (usuarioRepo.findById(idUsuario).isPresent()){
             Carrito carrito = Carrito.builder()
                     .fecha(LocalDateTime.now())
                     .itemsCarrito(new ArrayList<>())
                     .idUsuario(idUsuario)
                     .build();
-
             carritoRepo.save(carrito);
 
             return "Carrito creado exitosamente";
