@@ -11,6 +11,4 @@ public interface CuponService {
 
     String eliminarCupon(String idCupon)throws Exception;
 
-    String validarCupon(String codigoCupon) throws Exception;
-
 }

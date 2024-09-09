@@ -87,7 +87,18 @@ public class EventoServiceImple implements EventoService {
             throw new RecursoNoEncontradoException("Evento no encontrado con el ID: " + idEvento);
         }
 
-        eventoRepo.deleteById(idEvento); //NO USAR DELETE, CAMIBIAR ESTADO (ELIMINADO)
+        Optional<Evento> eventoExistente = eventoRepo.findById(idEvento);
+
+        if (eventoExistente.isEmpty()) {
+            throw new RecursoNoEncontradoException("Evento no encontrado con el ID: " + idEvento);
+        }
+
+        Evento evento = eventoExistente.get();
+
+        evento.setEstadoEvento(EstadoEvento.ELIMINADO);
+
+        eventoRepo.save(evento);
+
 
         return "Evento eliminado con éxito.";
     }
