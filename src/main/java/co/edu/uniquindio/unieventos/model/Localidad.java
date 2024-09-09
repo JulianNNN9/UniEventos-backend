@@ -10,5 +10,5 @@ public class Localidad {
     private String nombreLocalidad;
     private Double precioLocalidad;
     private Integer capacidadMaxima;
-    private Integer entradasVendidas;
+    private Integer entradasRestantes;
 }

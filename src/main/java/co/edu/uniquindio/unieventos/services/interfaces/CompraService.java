@@ -10,8 +10,6 @@ public interface CompraService {
 
     String crearCompra(CrearCompraDTO crearCompraDTO) throws Exception;
 
-    String actualizarCompra(ActualizarCompraDTO actualizarCompraDTO) throws Exception;
-
     Compra obtenerCompra(String idCompra) throws Exception;
 
     List<Compra> obtenerComprasUsuario(String idUsuario) throws Exception;

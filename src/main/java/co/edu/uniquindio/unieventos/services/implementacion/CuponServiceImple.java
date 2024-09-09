@@ -3,12 +3,11 @@ package co.edu.uniquindio.unieventos.services.implementacion;
 import co.edu.uniquindio.unieventos.dto.cupon.*;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.model.Cupon;
-import co.edu.uniquindio.unieventos.model.EstadoCupon;
 import co.edu.uniquindio.unieventos.repositories.CuponRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDate;
+
 import java.util.Optional;
 
 @Service
@@ -22,7 +21,7 @@ public class CuponServiceImple implements CuponService {
     }
 
     @Override
-    public String crearCupon(Crear_EditarCuponDTO crearCuponDTO) throws Exception {
+    public String crearCupon(CrearEditarCuponDTO crearCuponDTO) throws Exception {
 
         Optional<Cupon> cuponExistente = cuponRepo.findByCodigo(crearCuponDTO.codigo());
 
@@ -45,7 +44,7 @@ public class CuponServiceImple implements CuponService {
     }
 
     @Override
-    public String editarCupon(Crear_EditarCuponDTO crearCuponDTO) throws Exception {
+    public String editarCupon(CrearEditarCuponDTO crearCuponDTO) throws Exception {
 
         Optional<Cupon> cuponExistente = cuponRepo.findById(crearCuponDTO.codigo());
 
@@ -80,25 +79,15 @@ public class CuponServiceImple implements CuponService {
     }
 
     @Override
-    public String validarCupon(String codigoCupon) throws Exception {
+    public Cupon obtenerCupon(String codigo) throws Exception {
 
-        Optional<Cupon> cuponExistente = cuponRepo.findByCodigo(codigoCupon);
+        Optional<Cupon> cuponExistente = cuponRepo.findByCodigo(codigo);
 
         if (cuponExistente.isEmpty()) {
-            throw new Exception("Cupón no encontrado con el código: " + codigoCupon);
+            throw new Exception("Cupón no encontrado con el código: " + codigo);
         }
 
-        Cupon cupon = cuponExistente.get();
-
-        //VALIDAR EL TIPO DE CUPÓN
-
-        if (cupon.getEstadoCupon() == EstadoCupon.ACTIVO &&
-                cupon.getFechaVencimiento().isAfter(LocalDate.now())) {
-            return "Cupón válido.";
-
-        } else {
-            return "Cupón inválido o expirado.";
-        }
+        return cuponExistente.get();
     }
 
 }

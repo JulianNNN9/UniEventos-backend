@@ -1,6 +1,7 @@
 package co.edu.uniquindio.unieventos.services.implementacion;
 
 import co.edu.uniquindio.unieventos.dto.carrito.AgregarItemDTO;
+import co.edu.uniquindio.unieventos.dto.carrito.EditarCarritoDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.EliminarDelCarritoDTO;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.Carrito;
@@ -26,18 +27,17 @@ public class CarritoServiceImple implements CarritoService {
 
         Optional<Carrito> carritoExistente = carritoRepo.findById(agregarItemDTO.idCarrito());
 
-        if (carritoExistente.isPresent()) {
-
-            Carrito carrito = carritoExistente.get();
-
-            carrito.getItemsCarrito().add(agregarItemDTO.detalleCarrito());
-
-            carritoRepo.save(carrito);
-
-            return "Item agregado al carrito con éxito.";
-        } else {
+        if (carritoExistente.isEmpty()) {
             throw new RecursoNoEncontradoException("Carrito no encontrado con el ID: " + agregarItemDTO.idCarrito());
         }
+
+        Carrito carrito = carritoExistente.get();
+
+        carrito.getItemsCarrito().add(agregarItemDTO.detalleCarrito());
+
+        carritoRepo.save(carrito);
+
+        return "Item agregado al carrito con éxito.";
     }
 
     @Override
@@ -45,23 +45,49 @@ public class CarritoServiceImple implements CarritoService {
 
         Optional<Carrito> carritoExistente = carritoRepo.findById(eliminarDelCarritoDTO.idCarrito());
 
-        if (carritoExistente.isPresent()) {
-
-            Carrito carrito = carritoExistente.get();
-
-            List<DetalleCarrito> itemsFiltrados = carrito.getItemsCarrito().stream()
-                    .filter(item -> !(item.getNombreLocalidad().equals(eliminarDelCarritoDTO.nombreLocalidad()) &&
-                            item.getIdEvento().equals(eliminarDelCarritoDTO.idEvento())))
-                    .collect(Collectors.toList());
-
-            carrito.setItemsCarrito(itemsFiltrados);
-
-            carritoRepo.save(carrito);
-
-            return "Item eliminado del carrito con éxito.";
-        } else {
+        if (carritoExistente.isEmpty()) {
             throw new RecursoNoEncontradoException("Carrito no encontrado con el ID: " + eliminarDelCarritoDTO.idCarrito());
         }
+
+        Carrito carrito = carritoExistente.get();
+
+        List<DetalleCarrito> itemsFiltrados = carrito.getItemsCarrito().stream()
+                .filter(item -> !(item.getNombreLocalidad().equals(eliminarDelCarritoDTO.nombreLocalidad()) &&
+                        item.getIdEvento().equals(eliminarDelCarritoDTO.idEvento())))
+                .collect(Collectors.toList());
+
+        carrito.setItemsCarrito(itemsFiltrados);
+
+        carritoRepo.save(carrito);
+
+        return "Item eliminado del carrito con éxito.";
+
+    }
+
+    @Override
+    public String editarCarrito(EditarCarritoDTO editarCarritoDTO) throws Exception {
+
+        Optional<Carrito> carritoExistente = carritoRepo.findById(editarCarritoDTO.idCarrito());
+
+        if (carritoExistente.isEmpty()) {
+            throw new RecursoNoEncontradoException("Carrito no encontrado con el ID: " + editarCarritoDTO.idCarrito());
+        }
+
+        Carrito carrito = carritoExistente.get();
+
+        Optional<DetalleCarrito> itemFiltrado = carrito.getItemsCarrito().stream()
+                .filter(detalleCarrito -> (detalleCarrito.getNombreLocalidad().equals(editarCarritoDTO.nombreLocalidad()) &&
+                        detalleCarrito.getIdEvento().equals(editarCarritoDTO.idEvento())))
+                .findFirst();
+
+        if (itemFiltrado.isPresent()){
+            DetalleCarrito detalleCarrito = itemFiltrado.get();
+            detalleCarrito.setCantidad(editarCarritoDTO.cantidadActulizada());
+        }
+
+        carritoRepo.save(carrito);
+
+        return "Carrito editado exitosamente.";
     }
 
     @Override

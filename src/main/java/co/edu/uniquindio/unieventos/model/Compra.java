@@ -25,9 +25,7 @@ public class Compra {
     private List<ItemCompra> itemsCompra;
     private Double total;
     private LocalDateTime fechaCompra;
-    private String cupon;
-    private String pago;
-    private String codigoPasarela;
+    private String codigoCupon;
     private EstadoCompra estado;
 
 }
