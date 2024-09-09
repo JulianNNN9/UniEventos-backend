@@ -67,6 +67,8 @@ public class CarritoServiceImple implements CarritoService {
     @Override
     public String crearCarrito(String idUsuario) {
 
+        //Validar que el id del usuario exista
+
         Carrito carrito = Carrito.builder()
                 .fecha(LocalDateTime.now())
                 .itemsCarrito(new ArrayList<>())

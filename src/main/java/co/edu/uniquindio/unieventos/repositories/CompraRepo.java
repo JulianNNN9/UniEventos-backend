@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface CompraRepo extends MongoRepository<Compra, String> {
 
-    Optional<List<Compra>> findAllByIdUsuario(String idUsuario);
+    List<Compra> findAllByIdUsuario(String idUsuario);
 
 }

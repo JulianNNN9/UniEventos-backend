@@ -90,7 +90,9 @@ public class CuponServiceImple implements CuponService {
 
         Cupon cupon = cuponExistente.get();
 
-        if (cupon.getEstadoCupon() == EstadoCupon.DISPONIBLE &&
+        //VALIDAR EL TIPO DE CUPÓN
+
+        if (cupon.getEstadoCupon() == EstadoCupon.ACTIVO &&
                 cupon.getFechaVencimiento().isAfter(LocalDate.now())) {
             return "Cupón válido.";
 

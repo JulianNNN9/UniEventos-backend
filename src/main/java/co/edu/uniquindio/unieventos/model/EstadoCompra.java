@@ -1,3 +1,3 @@
 package co.edu.uniquindio.unieventos.model;
 
-public enum EstadoCompra { COMPLETADA, CANCELADA, RECHAZADA }
+public enum EstadoCompra { COMPLETADA, CANCELADA, RECHAZADA, PENDIENTE }
