@@ -36,7 +36,8 @@ public class UsuarioServicioTest {
     public void actualizarTest() throws Exception{
         String idUsuario = "66a2a9aaa8620e3c1c5437be";
         EditarUsuarioDTO editarUsuarioDTO = new EditarUsuarioDTO(
-                "Pepito perez",
+                "000000",
+                "Pepito Perez",
                 "Nueva dirección",
                 "3012223333"
         );
