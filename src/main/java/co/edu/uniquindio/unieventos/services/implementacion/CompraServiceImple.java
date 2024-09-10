@@ -31,6 +31,10 @@ public class CompraServiceImple implements CompraService {
     @Override
     public String crearCompra(CrearCompraDTO crearCompraDTO) throws Exception {
 
+        /*
+            VALIDACIÓN DEL CUPON
+         */
+
         Cupon cupon = cuponService.obtenerCupon(crearCompraDTO.codigoCupon());
 
         if(cupon.getTipoCupon() == TipoCupon.UNICO){
@@ -52,6 +56,10 @@ public class CompraServiceImple implements CompraService {
             }
 
         }
+
+        /*
+            VALIDACIÓN DE ENTRADAS PARA LA LOCALIDAD
+         */
 
         List<ItemCompra> itemsCompra = crearCompraDTO.itemsCompra();
 
@@ -113,7 +121,7 @@ public class CompraServiceImple implements CompraService {
     }
 
     @Override
-    public List<Compra> obtenerComprasUsuario(String idUsuario) throws Exception{
+    public List<Compra> obtenerComprasUsuario(String idUsuario){
         return compraRepo.findAllByIdUsuario(idUsuario);
     }
 
@@ -123,6 +131,10 @@ public class CompraServiceImple implements CompraService {
         Compra compra = obtenerCompra(idCompra);
 
         compra.setEstado(EstadoCompra.CANCELADA);
+
+        /*
+            DEVOLVER LAS ENTRADAS COMPRADAS NUEVAMENTE A LA LOCALIDAD
+         */
 
         for (ItemCompra item : compra.getItemsCompra()) {
 
