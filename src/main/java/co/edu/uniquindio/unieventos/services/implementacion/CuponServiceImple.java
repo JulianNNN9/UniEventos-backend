@@ -3,8 +3,10 @@ package co.edu.uniquindio.unieventos.services.implementacion;
 import co.edu.uniquindio.unieventos.dto.cupon.*;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.model.Cupon;
+import co.edu.uniquindio.unieventos.model.EstadoCupon;
 import co.edu.uniquindio.unieventos.repositories.CuponRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,20 +14,17 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class CuponServiceImple implements CuponService {
 
     private final CuponRepo cuponRepo;
-
-    public CuponServiceImple(CuponRepo cuponRepo) {
-        this.cuponRepo = cuponRepo;
-    }
 
     @Override
     public String crearCupon(CrearEditarCuponDTO crearCuponDTO) throws Exception {
 
         Optional<Cupon> cuponExistente = cuponRepo.findByCodigo(crearCuponDTO.codigo());
 
-        if (cuponExistente.isEmpty()) {
+        if (cuponExistente.isPresent()) {
             throw new RecursoEncontradoException("El cupon ya existe.");
         }
 
@@ -46,7 +45,7 @@ public class CuponServiceImple implements CuponService {
     @Override
     public String editarCupon(CrearEditarCuponDTO crearCuponDTO) throws Exception {
 
-        Optional<Cupon> cuponExistente = cuponRepo.findById(crearCuponDTO.codigo());
+        Optional<Cupon> cuponExistente = cuponRepo.findByCodigo(crearCuponDTO.codigo());
 
         if (cuponExistente.isEmpty()) {
             throw new Exception("Cupón no encontrado con el ID: " + crearCuponDTO.codigo());
@@ -69,11 +68,11 @@ public class CuponServiceImple implements CuponService {
     @Override
     public String eliminarCupon(String idCupon) throws Exception {
 
-        if (!cuponRepo.existsById(idCupon)) {
-            throw new Exception("Cupón no encontrado con el ID: " + idCupon);
-        }
+        Cupon cupon = obtenerCupon(idCupon);
 
-        cuponRepo.deleteById(idCupon);
+        cupon.setEstadoCupon(EstadoCupon.ELIMINADO);
+
+        cuponRepo.save(cupon);
 
         return "Cupón eliminado con éxito.";
     }

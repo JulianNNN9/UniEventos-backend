@@ -5,7 +5,6 @@ import co.edu.uniquindio.unieventos.dto.evento.CrearEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.EditarEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.InformacionEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.ItemEventoDTO;
-import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.EstadoEvento;
 import co.edu.uniquindio.unieventos.model.Evento;
@@ -75,11 +74,11 @@ public class EventoServiceImple implements EventoService {
 
         Evento evento = obtenerEvento(idEvento);
 
-        evento.setEstadoEvento(EstadoEvento.INACTIVO);
+        evento.setEstadoEvento(EstadoEvento.ELIMINADO);
 
         eventoRepo.save(evento);
 
-        return "Evento desactivado exitosamente.";
+        return "Evento eliminado exitosamente.";
     }
 
     @Override
@@ -113,30 +112,6 @@ public class EventoServiceImple implements EventoService {
                 .collect(Collectors.toList());
     }
 
-    /*Este metodo recibe como parámetro los filtros seleccionados por el usuario, en
-    puede recibir de uno a tres tipos de filtros (Ciudad y Tipo). Tenemos
-    también una lista de enumeraciones, las cuales serán los valores seleccionados de
-    cada tipo de filtro. Para que se lleve un orden, idealmente, se llevará así
-    1. Ciudad, 2. Tipo. Para que los filtros no se intercambien.
-     */
-    // Importante: Se debe seguir al pie de la letra el orden de los filtros
-    @Override
-    public List<ItemEventoDTO> filtrarEvento(List<FiltrosEventos> tipoFiltrosSeleccionados, List<Enum<?>> valoresFiltrosSeleccionados) {
-        List<ItemEventoDTO> eventosFiltrados = new ArrayList<>();
-        int cantidadFiltros = tipoFiltrosSeleccionados.size();
-        if (cantidadFiltros != 0) {
-
-            if (cantidadFiltros == 1) {
-                eventosFiltrados = filtrarPorUno(tipoFiltrosSeleccionados.get(0), valoresFiltrosSeleccionados.get(0));
-            }
-            if (cantidadFiltros == 2) {
-                eventosFiltrados = filtrarPorDos(tipoFiltrosSeleccionados.get(0), tipoFiltrosSeleccionados.get(1), valoresFiltrosSeleccionados.get(0), valoresFiltrosSeleccionados.get(1));
-            }
-        }
-
-        return eventosFiltrados;
-    }
-
     @Override
     public Evento obtenerEvento(String idEvento) throws Exception {
 
@@ -152,6 +127,35 @@ public class EventoServiceImple implements EventoService {
     @Override
     public void saveEvento(Evento evento) {
         eventoRepo.save(evento);
+    }
+
+    /**
+     * Este metodo recibe como parámetro los filtros seleccionados por el usuario, en
+     *     puede recibir de uno a tres tipos de filtros (Ciudad y Tipo). Tenemos
+     *     también una lista de enumeraciones, las cuales serán los valores seleccionados de
+     *     cada tipo de filtro. Para que se lleve un orden, idealmente, se llevará así
+     *     1. Ciudad, 2. Tipo. Para que los filtros no se intercambien.
+     * Importante: Se debe seguir al pie de la letra el orden de los filtros
+     * @param tipoFiltrosSeleccionados ...
+     * @param valoresFiltrosSeleccionados ...
+     * @return ...
+     */
+
+    @Override
+    public List<ItemEventoDTO> filtrarEvento(List<FiltrosEventos> tipoFiltrosSeleccionados, List<Enum<?>> valoresFiltrosSeleccionados) {
+        List<ItemEventoDTO> eventosFiltrados = new ArrayList<>();
+        int cantidadFiltros = tipoFiltrosSeleccionados.size();
+        if (cantidadFiltros != 0) {
+
+            if (cantidadFiltros == 1) {
+                eventosFiltrados = filtrarPorUno(tipoFiltrosSeleccionados.get(0), valoresFiltrosSeleccionados.get(0));
+            }
+            if (cantidadFiltros == 2) {
+                eventosFiltrados = filtrarPorDos(tipoFiltrosSeleccionados.get(0), tipoFiltrosSeleccionados.get(1), valoresFiltrosSeleccionados.get(0), valoresFiltrosSeleccionados.get(1));
+            }
+        }
+
+        return eventosFiltrados;
     }
 
     public List<ItemEventoDTO> buscarEvento(String valorCampoDeBusqueda) {

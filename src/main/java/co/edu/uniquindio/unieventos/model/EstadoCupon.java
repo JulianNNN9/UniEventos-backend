@@ -1,3 +1,3 @@
 package co.edu.uniquindio.unieventos.model;
 
-public enum EstadoCupon { ACTIVO, INACTIVO }
+public enum EstadoCupon { ACTIVO, INACTIVO, ELIMINADO }

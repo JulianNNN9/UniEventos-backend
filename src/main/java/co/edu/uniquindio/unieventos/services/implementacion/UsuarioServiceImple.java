@@ -10,6 +10,7 @@ import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
 import co.edu.uniquindio.unieventos.services.utility.EmailUtility;
 import jakarta.mail.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -21,28 +22,11 @@ import java.util.Random;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class UsuarioServiceImple implements UsuarioService {
 
     private final UsuarioRepo usuarioRepo;
-    
     private final EmailUtility emailUtility;
-
-    public UsuarioServiceImple(UsuarioRepo usuarioRepo, EmailUtility emailUtility) {
-        this.usuarioRepo = usuarioRepo;
-        this.emailUtility = emailUtility;
-    }
-
-    @Override
-    public Usuario obtenerUsuario(String id) throws Exception {
-
-        Optional<Usuario> optionalUsuario = usuarioRepo.findById(id);
-
-        if(optionalUsuario.isEmpty()){
-            throw new RecursoNoEncontradoException("Usuario no encontrado.");
-        }
-
-        return optionalUsuario.get();
-    }
 
     @Override
     public String crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws Exception {
@@ -89,32 +73,9 @@ public class UsuarioServiceImple implements UsuarioService {
 
         }
 
-        Usuario usuarioGuardado = usuarioRepo.save(nuevoUsuario);
+        usuarioRepo.save(nuevoUsuario);
 
-        return usuarioGuardado.getId();
-    }
-
-    private boolean existeEmail(String email) {
-        return usuarioRepo.findByEmail(email).isPresent();
-    }
-
-    private boolean existeCedula(String cedula) {
-        return usuarioRepo.findByCedula(cedula).isPresent();
-    }
-
-    private String generarCodigoValidacion(){
-
-        String cadena = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-        StringBuilder codigo = new StringBuilder();
-
-        Random random = new Random();
-
-        for (int i = 0; i < 6; i++) {
-            codigo.append(cadena.charAt(random.nextInt(cadena.length())));
-        }
-
-        return codigo.toString();
+        return "Usuario creado exitosamente.";
     }
 
     @Override
@@ -223,13 +184,52 @@ public class UsuarioServiceImple implements UsuarioService {
     @Override
     public String iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception {
 
-        Optional<Usuario> optionalUsuario = usuarioRepo.validarInicioSesion(iniciarSesionDTO.email(), iniciarSesionDTO.contrasenia());
+        Optional<Usuario> optionalUsuario = usuarioRepo.findByEmailAndContrasenia(iniciarSesionDTO.email(), iniciarSesionDTO.contrasenia());
 
         if (optionalUsuario.isEmpty()){
             throw new RecursoNoEncontradoException("Las credenciales no coinciden en el sistema");
         }
 
+        Usuario usuario = optionalUsuario.get();
+
+        if (usuario.getEstadoUsuario() == EstadoUsuario.INACTIVA || usuario.getEstadoUsuario() == EstadoUsuario.ELIMINADA){
+            throw new CuentaInactivaEliminadaException("Esta cuenta aún no ha sido activada o ha sido eliminada.");
+        }
+
         return "TOKEN_JWT";
+    }
+
+    @Override
+    public Usuario obtenerUsuario(String id) throws Exception {
+
+        Optional<Usuario> optionalUsuario = usuarioRepo.findById(id);
+
+        if(optionalUsuario.isEmpty()){
+            throw new RecursoNoEncontradoException("Usuario no encontrado.");
+        }
+
+        return optionalUsuario.get();
+    }
+
+    private boolean existeEmail(String email) {
+        return usuarioRepo.findByEmail(email).isPresent();
+    }
+
+    private boolean existeCedula(String cedula) { return usuarioRepo.findByCedula(cedula).isPresent(); }
+
+    private String generarCodigoValidacion(){
+
+        String cadena = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        StringBuilder codigo = new StringBuilder();
+
+        Random random = new Random();
+
+        for (int i = 0; i < 6; i++) {
+            codigo.append(cadena.charAt(random.nextInt(cadena.length())));
+        }
+
+        return codigo.toString();
     }
 
 }
