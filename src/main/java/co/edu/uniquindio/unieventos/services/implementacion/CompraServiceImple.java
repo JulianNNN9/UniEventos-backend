@@ -11,11 +11,23 @@ import co.edu.uniquindio.unieventos.services.interfaces.CompraService;
 import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
 import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
+import com.mercadopago.MercadoPagoConfig;
+import com.mercadopago.client.payment.PaymentClient;
+import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
+import com.mercadopago.client.preference.PreferenceClient;
+import com.mercadopago.client.preference.PreferenceItemRequest;
+import com.mercadopago.client.preference.PreferenceRequest;
+import com.mercadopago.resources.payment.Payment;
+import com.mercadopago.resources.preference.Preference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -165,8 +177,130 @@ public class CompraServiceImple implements CompraService {
     }
 
     @Override
-    public String realizarCompra(String idCompra) {
-        //TODO Llamar metodo de la pararela
-        return "";
+    public Preference realizarPago(String idCompra) throws Exception {
+
+
+        // Obtener la orden guardada en la base de datos y los ítems de la orden
+        Compra compraGuardada = obtenerCompra(idCompra);
+        List<PreferenceItemRequest> itemsPasarela = new ArrayList<>();
+
+
+        // Recorrer los items de la orden y crea los ítems de la pasarela
+        for(ItemCompra item : compraGuardada.getItemsCompra()){
+
+
+            // Obtener el evento y la localidad del ítem
+            Evento evento = eventoService.obtenerEvento(item.getIdEvento());
+            Localidad localidad = evento.obtenerLocalidad(item.getNombreLocalidad());
+
+
+            // Crear el item de la pasarela
+            PreferenceItemRequest itemRequest =
+                    PreferenceItemRequest.builder()
+                            .id(evento.getId())
+                            .title(evento.getNombreEvento())
+                            .pictureUrl(evento.getImagenPortada())
+                            .categoryId(evento.getTipoEvento().name())
+                            .quantity(item.getCantidad())
+                            .currencyId("COP")
+                            .unitPrice(BigDecimal.valueOf(localidad.getPrecioLocalidad()))
+                            .build();
+
+
+            itemsPasarela.add(itemRequest);
+        }
+
+
+        // Configurar las credenciales de MercadoPago
+        MercadoPagoConfig.setAccessToken("ACCESS_TOKEN");
+
+
+        // Configurar las urls de retorno de la pasarela (Frontend)
+        PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
+                .success("URL PAGO EXITOSO")
+                .failure("URL PAGO FALLIDO")
+                .pending("URL PAGO PENDIENTE")
+                .build();
+
+
+        // Construir la preferencia de la pasarela con los ítems, metadatos y urls de retorno
+        PreferenceRequest preferenceRequest = PreferenceRequest.builder()
+                .backUrls(backUrls)
+                .items(itemsPasarela)
+                .metadata(Map.of("id_orden", compraGuardada.getId()))
+                .notificationUrl("URL NOTIFICACION")
+                .build();
+
+
+        // Crear la preferencia en la pasarela de MercadoPago
+        PreferenceClient client = new PreferenceClient();
+        Preference preference = client.create(preferenceRequest);
+
+
+        // Guardar el código de la pasarela en la orden
+        compraGuardada.setCodigoPasarela( preference.getId() );
+        compraRepo.save(compraGuardada);
+
+
+        return preference;
     }
+
+    @Override
+    public void recibirNotificacionMercadoPago(Map<String, Object> request) {
+        try {
+
+
+            // Obtener el tipo de notificación
+            Object tipo = request.get("type");
+
+
+            // Si la notificación es de un pago entonces obtener el pago y la orden asociada
+            if ("payment".equals(tipo)) {
+
+
+                // Capturamos el JSON que viene en el request y lo convertimos a un String
+                String input = request.get("data").toString();
+
+
+                // Extraemos los números de la cadena, es decir, el id del pago
+                String idPago = input.replaceAll("\\D+", "");
+
+
+                // Se crea el cliente de MercadoPago y se obtiene el pago con el id
+                PaymentClient client = new PaymentClient();
+                Payment payment = client.get( Long.parseLong(idPago) );
+
+
+                // Obtener el id de la orden asociada al pago que viene en los metadatos
+                String idCompra = payment.getMetadata().get("id_orden").toString();
+
+
+                // Se obtiene la orden guardada en la base de datos y se le asigna el pago
+                Compra compra = obtenerCompra(idCompra);
+                Pago pago = crearPago(payment);
+                compra.setPago(pago);
+                compraRepo.save(compra);
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Pago crearPago(Payment payment) {
+        Pago pago = new Pago();
+        pago.setId(payment.getId().toString());
+        pago.setFechaPago( payment.getDateCreated().toLocalDateTime() );
+        pago.setEstado(payment.getStatus());
+        pago.setDetalleEstado(payment.getStatusDetail());
+        pago.setTipoPago(payment.getPaymentTypeId());
+        pago.setMoneda(payment.getCurrencyId());
+        pago.setCodigoAutorizacion(payment.getAuthorizationCode());
+        pago.setValorTransaccion(payment.getTransactionAmount().doubleValue());
+        return pago;
+    }
+
+
+
 }
