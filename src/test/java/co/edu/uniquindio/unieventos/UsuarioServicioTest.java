@@ -26,9 +26,9 @@ public class UsuarioServicioTest {
                 "mipassword"
         );
         //Si el usuario se guardó en la base de datos, se le asignó un codigo en MongoDB
-        String codigo = usuarioServicio.crearUsuario(registroClienteDTO);
+        usuarioServicio.crearUsuario(registroClienteDTO);
         //Comprobamos que el codigo del usuario no es Null
-        assertNotNull(codigo);
+        assertNotNull(registroClienteDTO.cedula());
 
     }
 

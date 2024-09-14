@@ -11,12 +11,17 @@ import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CarritoService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Service
+@Transactional
 @RequiredArgsConstructor
 public class CarritoServiceImple implements CarritoService {
 

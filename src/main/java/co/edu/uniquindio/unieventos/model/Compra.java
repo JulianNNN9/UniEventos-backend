@@ -27,6 +27,8 @@ public class Compra {
     private LocalDateTime fechaCompra;
     private String codigoCupon;
     private EstadoCompra estado;
+    private String codigoPasarela;
+    private Pago pago;
 
 }
 

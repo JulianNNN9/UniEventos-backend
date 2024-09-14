@@ -8,14 +8,10 @@ import co.edu.uniquindio.unieventos.model.Rol;
 import co.edu.uniquindio.unieventos.model.Usuario;
 import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
-import co.edu.uniquindio.unieventos.services.utility.EmailUtility;
-import jakarta.mail.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -26,10 +22,9 @@ import java.util.Random;
 public class UsuarioServiceImple implements UsuarioService {
 
     private final UsuarioRepo usuarioRepo;
-    private final EmailUtility emailUtility;
 
     @Override
-    public String crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws Exception {
+    public void crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws Exception {
 
         if (existeCedula(crearCuentaDTO.cedula())){
             throw new RecursoEncontradoException("El cedula ya existe");
@@ -60,22 +55,9 @@ public class UsuarioServiceImple implements UsuarioService {
                 )
         .build();
 
-        // Enviar el correo con el código de activación usando la plantilla
-        Map<String, Object> templateModel = new HashMap<>();
-        templateModel.put("subject", "Bienvenido a UniEventos");
-        templateModel.put("body", "Gracias por registrarte en UniEventos. Tu código de confirmación es:");
-        templateModel.put("code", nuevoUsuario.getCodigoRegistro().getCodigo());
-
-        try {
-            emailUtility.sendTemplateEmail(nuevoUsuario.getEmail(), "Confirma tu correo", templateModel);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-
-        }
-
         usuarioRepo.save(nuevoUsuario);
 
-        return "Usuario creado exitosamente.";
+
     }
 
     @Override
@@ -115,7 +97,7 @@ public class UsuarioServiceImple implements UsuarioService {
     }
 
     @Override
-    public String enviarCodigoRecuperacionCuenta(EnviarCodigoAlCorreoDTO enviarCodigoRecuperacionCuentaDTO) throws Exception {
+    public void enviarCodigoRecuperacionCuenta(EnviarCodigoAlCorreoDTO enviarCodigoRecuperacionCuentaDTO) throws Exception {
 
         Optional<Usuario> optionalUsuario = usuarioRepo.findByEmail(enviarCodigoRecuperacionCuentaDTO.correo());
 
@@ -125,22 +107,19 @@ public class UsuarioServiceImple implements UsuarioService {
 
         Usuario usuario = optionalUsuario.get();
 
-        String codigoRecuperacionCuenta = generarCodigoValidacion();
 
         //TODO enviar codigo el usuario por correo
 
         usuario.setCodigoRecuperacionContrasenia(CodigoValidacion.builder()
-                .codigo(codigoRecuperacionCuenta)
+                .codigo("a")
                 .fechaCreacion(LocalDateTime.now())
                 .build());
 
         usuarioRepo.save(usuario);
-
-        return "Codigo enviado, expira en 15 minutos";
     }
 
     @Override
-    public String recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception {
+    public void recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception {
 
         Usuario usuario = obtenerUsuario(recuperarContraseniaDTO.idUsuario());
 
@@ -159,12 +138,10 @@ public class UsuarioServiceImple implements UsuarioService {
         usuario.setContrasenia(recuperarContraseniaDTO.contraseniaNueva());
 
         usuarioRepo.save(usuario);
-
-        return "Contrasenia recuperada exitosamente";
     }
 
     @Override
-    public String cambiarContrasenia(CambiarContraseniaDTO cambiarContraseniaDTO) throws Exception {
+    public void cambiarContrasenia(CambiarContraseniaDTO cambiarContraseniaDTO) throws Exception {
 
         Usuario usuario = obtenerUsuario(cambiarContraseniaDTO.idUsuario());
 
@@ -178,7 +155,7 @@ public class UsuarioServiceImple implements UsuarioService {
 
         usuario.setContrasenia(usuario.getContrasenia());
 
-        return "Contrasenia cambiada exitosamente";
+        usuarioRepo.save(usuario);
     }
 
     @Override

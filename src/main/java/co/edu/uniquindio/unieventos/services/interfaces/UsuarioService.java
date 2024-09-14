@@ -5,7 +5,7 @@ import co.edu.uniquindio.unieventos.model.Usuario;
 
 public interface UsuarioService {
 
-    String crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws Exception;
+    void crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws Exception;
 
     void editarUsuario(EditarUsuarioDTO editarCuentaDTO) throws Exception;
 
@@ -13,11 +13,11 @@ public interface UsuarioService {
 
     InformacionUsuarioDTO obtenerInformacionUsuario(String id) throws Exception;
 
-    String enviarCodigoRecuperacionCuenta(EnviarCodigoAlCorreoDTO enviarCodigoRecuperacionCuentaDTO) throws Exception;
+    void enviarCodigoRecuperacionCuenta(EnviarCodigoAlCorreoDTO enviarCodigoRecuperacionCuentaDTO) throws Exception;
 
-    String recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception;
+    void recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception;
 
-    String cambiarContrasenia(CambiarContraseniaDTO cambiarContraseniaDTO) throws Exception;
+    void cambiarContrasenia(CambiarContraseniaDTO cambiarContraseniaDTO) throws Exception;
 
     String iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception;
 

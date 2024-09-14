@@ -27,5 +27,6 @@ public class Pago {
     private LocalDateTime fechaPago;
     private Double valorTransaccion;
     private String estado;
+    private String moneda;
 }
 
