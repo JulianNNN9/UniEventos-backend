@@ -1,5 +1,7 @@
 package co.edu.uniquindio.unieventos.services.implementacion;
 
+import co.edu.uniquindio.unieventos.config.JWTUtils;
+import co.edu.uniquindio.unieventos.dto.TokenDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
 import co.edu.uniquindio.unieventos.exceptions.*;
 import co.edu.uniquindio.unieventos.model.CodigoValidacion;
@@ -9,9 +11,11 @@ import co.edu.uniquindio.unieventos.model.Usuario;
 import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -22,6 +26,7 @@ import java.util.Random;
 public class UsuarioServiceImple implements UsuarioService {
 
     private final UsuarioRepo usuarioRepo;
+    private final JWTUtils jwtUtils;
 
     @Override
     public void crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws Exception {
@@ -42,7 +47,7 @@ public class UsuarioServiceImple implements UsuarioService {
                 .direccion(crearCuentaDTO.direccion())
                 .telefono(crearCuentaDTO.telefono())
                 .email(crearCuentaDTO.email())
-                .contrasenia(crearCuentaDTO.contrasenia())
+                .contrasenia(encriptarPassword(crearCuentaDTO.contrasenia()))
                 .rol(Rol.CLIENTE)
                 .estadoUsuario(EstadoUsuario.INACTIVA)
                 .fechaRegistro(LocalDateTime.now())
@@ -159,7 +164,7 @@ public class UsuarioServiceImple implements UsuarioService {
     }
 
     @Override
-    public String iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception {
+    public TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception {
 
         Optional<Usuario> optionalUsuario = usuarioRepo.findByEmailAndContrasenia(iniciarSesionDTO.email(), iniciarSesionDTO.contrasenia());
 
@@ -173,7 +178,16 @@ public class UsuarioServiceImple implements UsuarioService {
             throw new CuentaInactivaEliminadaException("Esta cuenta aún no ha sido activada o ha sido eliminada.");
         }
 
-        return "TOKEN_JWT";
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+
+        if( !passwordEncoder.matches(iniciarSesionDTO.contrasenia(), usuario.getContrasenia()) ) {
+            throw new Exception("La contraseña es incorrecta");
+        }
+
+        Map<String, Object> map = construirClaims(usuario);
+
+        return new TokenDTO( jwtUtils.generarToken(usuario.getEmail(), map) );
     }
 
     @Override
@@ -208,5 +222,19 @@ public class UsuarioServiceImple implements UsuarioService {
 
         return codigo.toString();
     }
+
+    private String encriptarPassword(String password){
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        return passwordEncoder.encode( password );
+    }
+
+    private Map<String, Object> construirClaims(Usuario cuenta) {
+        return Map.of(
+                "rol", cuenta.getRol(),
+                "nombre", cuenta.getNombreCompleto(),
+                "id", cuenta.getId()
+        );
+    }
+
 
 }
