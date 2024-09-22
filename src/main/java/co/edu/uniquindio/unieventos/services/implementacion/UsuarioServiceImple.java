@@ -62,7 +62,6 @@ public class UsuarioServiceImple implements UsuarioService {
 
         usuarioRepo.save(nuevoUsuario);
 
-
     }
 
     @Override

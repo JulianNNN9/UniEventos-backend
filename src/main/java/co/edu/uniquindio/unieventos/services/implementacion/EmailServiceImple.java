@@ -19,7 +19,7 @@ public class EmailServiceImple implements EmailService {
 
 
         Email email = EmailBuilder.startingBlank()
-                .from("SMTP_USERNAME")
+                .from("notificacionesunieventos@gmail.com")
                 .to(emailDTO.destinatario())
                 .withSubject(emailDTO.asunto())
                 .withPlainText(emailDTO.cuerpo())
@@ -27,7 +27,7 @@ public class EmailServiceImple implements EmailService {
 
 
         try (Mailer mailer = MailerBuilder
-                .withSMTPServer("smtp.gmail.com", 587, "notificacionesunieventos@gmail.com", "Seguir pasos de la guía")
+                .withSMTPServer("smtp.gmail.com", 587, "notificacionesunieventos@gmail.com", "miym hsqo pwqi jzzx")
                 .withTransportStrategy(TransportStrategy.SMTP_TLS)
                 .withDebugLogging(true)
                 .buildMailer()) {
