@@ -21,7 +21,7 @@ public class CuponControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, cuponService.crearCupon(crearEditarCuponDTO)));
     }
 
-    @PostMapping ("/editar-cupon")
+    @PutMapping ("/editar-cupon")
     public ResponseEntity<MensajeDTO<String>> editarCupon(@Valid @RequestBody CrearEditarCuponDTO crearEditarCuponDTO) throws Exception {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, cuponService.editarCupon(crearEditarCuponDTO)));
     }
