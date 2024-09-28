@@ -1,7 +1,6 @@
-package co.edu.uniquindio.unieventos.controladores;
+package co.edu.uniquindio.unieventos.controllers;
 
 import co.edu.uniquindio.unieventos.dto.MensajeDTO;
-import co.edu.uniquindio.unieventos.dto.cuenta.CrearUsuarioDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.EditarUsuarioDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.InformacionUsuarioDTO;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
@@ -18,8 +17,7 @@ public class UsuarioControlador {
     private final UsuarioService usuarioService;
 
     @PutMapping("/editar-perfil")
-    public ResponseEntity<MensajeDTO<String>> editarUsuario(@Valid @RequestBody
-                                                                EditarUsuarioDTO editarUsuarioDTO)throws Exception{
+    public ResponseEntity<MensajeDTO<String>> editarUsuario(@Valid @RequestBody EditarUsuarioDTO editarUsuarioDTO)throws Exception{
         usuarioService.editarUsuario(editarUsuarioDTO);
         return ResponseEntity.ok().body( new MensajeDTO<>(false, "Cliente actualizado correctamente") );
     }
@@ -33,8 +31,7 @@ public class UsuarioControlador {
     }
 
     @GetMapping("/obtener/{codigo}")
-    public ResponseEntity<MensajeDTO<InformacionUsuarioDTO>> obtenerInformacionUsuario(@PathVariable String
-                                                                                codigo) throws Exception{
+    public ResponseEntity<MensajeDTO<InformacionUsuarioDTO>> obtenerInformacionUsuario(@PathVariable String codigo) throws Exception{
         return ResponseEntity.ok().body( new MensajeDTO<>(false,
                 usuarioService.obtenerInformacionUsuario(codigo) ) );
     }
