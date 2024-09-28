@@ -26,7 +26,7 @@ public class EventoControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.crearEvento(crearEventoDTO)));
     }
 
-    @PostMapping ("/editar-evento")
+    @PutMapping ("/editar-evento")
     public ResponseEntity<MensajeDTO<String>> editarEvento(@Valid @RequestBody EditarEventoDTO editarEventoDTO) throws Exception {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.editarEvento(editarEventoDTO)));
     }

@@ -28,7 +28,7 @@ public class CarritoControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.eliminarDelCarrito(eliminarDelCarritoDTO)));
     }
 
-    @PostMapping("/editar-carrito")
+    @PutMapping("/editar-carrito")
     public ResponseEntity<MensajeDTO<String>> editarCarrito(@Valid @RequestBody EditarCarritoDTO editarCarritoDTO) throws Exception {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.editarCarrito(editarCarritoDTO)));
     }
