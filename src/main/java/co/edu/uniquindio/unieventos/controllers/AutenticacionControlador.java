@@ -1,4 +1,4 @@
-package co.edu.uniquindio.unieventos.controladores;
+package co.edu.uniquindio.unieventos.controllers;
 
 import co.edu.uniquindio.unieventos.dto.MensajeDTO;
 import co.edu.uniquindio.unieventos.dto.TokenDTO;
@@ -21,14 +21,12 @@ public class AutenticacionControlador {
     private final UsuarioService usuarioService;
     private final AutenticacionService autenticacionService;
     @PostMapping("/login-cliente")
-    public ResponseEntity<MensajeDTO<TokenDTO>> iniciarSesionCliente(@Valid @RequestBody
-                                                                     IniciarSesionDTO iniciarSesionDTO) throws Exception {
+    public ResponseEntity<MensajeDTO<TokenDTO>> iniciarSesionCliente(@Valid @RequestBody IniciarSesionDTO iniciarSesionDTO) throws Exception {
         TokenDTO tokenDTO = autenticacionService.iniciarSesionUsuario(iniciarSesionDTO);
         return ResponseEntity.ok().body(new MensajeDTO<>(false, tokenDTO));
     }
     @PostMapping("/registrar-usuarios")
-    public ResponseEntity<MensajeDTO<String>> crearUsuario(@Valid @RequestBody
-                                                           CrearUsuarioDTO crearUsuarioDTO)throws Exception{
+    public ResponseEntity<MensajeDTO<String>> crearUsuario(@Valid @RequestBody CrearUsuarioDTO crearUsuarioDTO)throws Exception{
         usuarioService.crearUsuario(crearUsuarioDTO);
         return ResponseEntity.ok().body( new MensajeDTO<>(false, "Usuario registrado correctamente")
         );

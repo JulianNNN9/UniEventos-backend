@@ -1,4 +1,4 @@
-package co.edu.uniquindio.unieventos.controladores;
+package co.edu.uniquindio.unieventos.controllers;
 
 import co.edu.uniquindio.unieventos.dto.MensajeDTO;
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/compras")
@@ -32,7 +33,6 @@ public class CompraControlador {
     //Ver si este metodo retorna la lista
     @GetMapping("/obtener-compras-usuario/{idUsuario}")
     public ResponseEntity<MensajeDTO<List<Compra>>> obtenerComprasUsuario(@PathVariable String idUsuario) throws Exception {
-
         return ResponseEntity.ok().body(new MensajeDTO<>(false, compraService.obtenerComprasUsuario(idUsuario)));
     }
 
@@ -46,5 +46,9 @@ public class CompraControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, compraService.realizarPago(idOrden)));
     }
 
-    // todo implementar lo de recibir notificacion de mercado pago
+    @PostMapping("/notificacion-pago")
+    public void recibirNotificacionMercadoPago(@RequestBody Map<String, Object> requestBody) {
+        compraService.recibirNotificacionMercadoPago(requestBody);
+    }
+
 }
