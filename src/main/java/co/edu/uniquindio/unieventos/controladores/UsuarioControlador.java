@@ -1,12 +1,12 @@
 package co.edu.uniquindio.unieventos.controladores;
 
 import co.edu.uniquindio.unieventos.dto.MensajeDTO;
-import co.edu.uniquindio.unieventos.dto.cuenta.CrearUsuarioDTO;
-import co.edu.uniquindio.unieventos.dto.cuenta.EditarUsuarioDTO;
-import co.edu.uniquindio.unieventos.dto.cuenta.InformacionUsuarioDTO;
+import co.edu.uniquindio.unieventos.dto.TokenDTO;
+import co.edu.uniquindio.unieventos.dto.cuenta.*;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.el.parser.Token;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,5 +39,27 @@ public class UsuarioControlador {
                 usuarioService.obtenerInformacionUsuario(codigo) ) );
     }
 
+    @PostMapping("/enviar-codigo-recuperacion")
+    public ResponseEntity<MensajeDTO<String>> enviarCodigoRecuperacionCuenta(@RequestBody EnviarCodigoAlCorreoDTO enviarCodigoAlCorreoDTO) throws Exception{
+        usuarioService.enviarCodigoRecuperacionCuenta(enviarCodigoAlCorreoDTO);
+        return ResponseEntity.ok().body( new MensajeDTO<>(false, "Código de recuperación enviado correctamente") );
+    }
+
+    @PostMapping("/recuperar-contrasenia")
+    public ResponseEntity<MensajeDTO<String>> recuperarContrasenia(@RequestBody RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception{
+        usuarioService.recuperarContrasenia(recuperarContraseniaDTO);
+        return ResponseEntity.ok().body( new MensajeDTO<>(false, "Contraseña recuperada correctamente") );
+    }
+
+    @PutMapping("/cambiar-contrasenia")
+    public ResponseEntity<MensajeDTO<String>> cambiarContrasenia(@RequestBody CambiarContraseniaDTO cambiarContraseniaDTO) throws Exception{
+        usuarioService.cambiarContrasenia(cambiarContraseniaDTO);
+        return ResponseEntity.ok().body( new MensajeDTO<>(false, "Contraseña cambiada correctamente") );
+    }
+
+    @PostMapping("/iniciar-sesion")
+    public ResponseEntity<MensajeDTO<TokenDTO>> iniciarSesion(@RequestBody IniciarSesionDTO iniciarSesionDTO) throws Exception{
+        return ResponseEntity.ok().body( new MensajeDTO<>(false, usuarioService.iniciarSesion(iniciarSesionDTO)) );
+    }
 
 }
