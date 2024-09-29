@@ -1,10 +1,7 @@
 package co.edu.uniquindio.unieventos.controllers;
 
 import co.edu.uniquindio.unieventos.dto.MensajeDTO;
-import co.edu.uniquindio.unieventos.dto.evento.CrearEventoDTO;
-import co.edu.uniquindio.unieventos.dto.evento.EditarEventoDTO;
-import co.edu.uniquindio.unieventos.dto.evento.InformacionEventoDTO;
-import co.edu.uniquindio.unieventos.dto.evento.ItemEventoDTO;
+import co.edu.uniquindio.unieventos.dto.evento.*;
 import co.edu.uniquindio.unieventos.model.Evento;
 import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
 import jakarta.validation.Valid;
@@ -62,5 +59,11 @@ public class EventoControlador {
     public ResponseEntity<MensajeDTO<String>> saveEvento(@Valid @RequestBody Evento evento) throws Exception {
         eventoService.saveEvento(evento);
         return ResponseEntity.ok().body(new MensajeDTO<>(false, "Evento guardado correctamente"));
+    }
+
+    // Cada que se ingrese a la página principal se cargará la notificación de los eventos nuevos
+    @GetMapping ("/notificar-nuevo-evento")
+    public ResponseEntity<MensajeDTO<List<NotificacionEventoDTO>>> notificarNuevoEvento() throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.notificarNuevoEvento()));
     }
 }
