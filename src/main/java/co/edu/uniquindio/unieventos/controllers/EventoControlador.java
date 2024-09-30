@@ -1,5 +1,6 @@
 package co.edu.uniquindio.unieventos.controllers;
 
+import co.edu.uniquindio.unieventos.dto.FiltrosEventosDTO;
 import co.edu.uniquindio.unieventos.dto.MensajeDTO;
 import co.edu.uniquindio.unieventos.dto.evento.*;
 import co.edu.uniquindio.unieventos.model.Evento;
@@ -38,7 +39,10 @@ public class EventoControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.obtenerInformacionEvento(idEvento)));
     }
 
-    // todo implementar lo de filtrar eventos
+    @PostMapping ("/filtrar-evento")
+    public ResponseEntity<MensajeDTO<List<ItemEventoDTO>>> filtrarEvento(@Valid @RequestBody FiltrosEventosDTO filtrosEventos) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.filtrarEvento(filtrosEventos)));
+    }
 
     @GetMapping ("/buscar-evento/{valorCampoDeBusqueda}")
     public ResponseEntity<MensajeDTO<List<ItemEventoDTO>>> buscarEvento(@PathVariable String valorCampoDeBusqueda) throws Exception {
