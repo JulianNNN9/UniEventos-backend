@@ -6,6 +6,7 @@ import co.edu.uniquindio.unieventos.dto.cuenta.CrearUsuarioDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.IniciarSesionDTO;
 import co.edu.uniquindio.unieventos.services.interfaces.AutenticacionService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class AutenticacionControlador {
 

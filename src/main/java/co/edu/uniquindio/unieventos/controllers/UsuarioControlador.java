@@ -1,9 +1,10 @@
-package co.edu.uniquindio.unieventos.controladores;
+package co.edu.uniquindio.unieventos.controllers;
 
 import co.edu.uniquindio.unieventos.dto.MensajeDTO;
 import co.edu.uniquindio.unieventos.dto.TokenDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.el.parser.Token;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/usuarios")
+@SecurityRequirement(name = "bearerAuth")
+
 @RequiredArgsConstructor
 public class UsuarioControlador {
 
