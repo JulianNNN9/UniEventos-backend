@@ -4,6 +4,7 @@ import co.edu.uniquindio.unieventos.dto.MensajeDTO;
 import co.edu.uniquindio.unieventos.dto.cupon.CrearEditarCuponDTO;
 import co.edu.uniquindio.unieventos.model.Cupon;
 import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/cupones")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class CuponControlador {
 
