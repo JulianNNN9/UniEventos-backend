@@ -1,10 +1,7 @@
 package co.edu.uniquindio.unieventos.services.implementacion;
 
 
-import co.edu.uniquindio.unieventos.dto.evento.CrearEventoDTO;
-import co.edu.uniquindio.unieventos.dto.evento.EditarEventoDTO;
-import co.edu.uniquindio.unieventos.dto.evento.InformacionEventoDTO;
-import co.edu.uniquindio.unieventos.dto.evento.ItemEventoDTO;
+import co.edu.uniquindio.unieventos.dto.evento.*;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.EstadoEvento;
 import co.edu.uniquindio.unieventos.model.Evento;
@@ -14,6 +11,8 @@ import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -38,6 +37,7 @@ public class EventoServiceImple implements EventoService {
                 .descripcionEvento(crearEventoDTO.descripcionEvento())
                 .tipoEvento(crearEventoDTO.tipoEvento())
                 .fechaEvento(LocalDateTime.of(crearEventoDTO.fechaEvento(), LocalTime.MIDNIGHT))
+                .fechaCreacion(LocalDate.now())
                 .localidades(crearEventoDTO.localidades())
                 .imagenPortada(crearEventoDTO.imagenPortada())
                 .imagenLocalidades(crearEventoDTO.imagenLocalidades())
@@ -45,7 +45,6 @@ public class EventoServiceImple implements EventoService {
                 .build();
 
         eventoRepo.save(evento);
-
         return "Evento creado exitosamente.";
     }
 
@@ -59,6 +58,7 @@ public class EventoServiceImple implements EventoService {
         evento.setCiudadEvento(editarEventoDTO.ciudadEvento());
         evento.setDescripcionEvento(editarEventoDTO.descripcionEvento());
         evento.setFechaEvento(editarEventoDTO.fechaEvento());
+        evento.setFechaCreacion(LocalDate.now());
         evento.setLocalidades(editarEventoDTO.localidades());
         evento.setImagenPortada(editarEventoDTO.imagenPortada());
         evento.setImagenLocalidades(editarEventoDTO.imagenLocalidades());
@@ -127,6 +127,17 @@ public class EventoServiceImple implements EventoService {
     @Override
     public void saveEvento(Evento evento) {
         eventoRepo.save(evento);
+    }
+
+    /* Se usaría cada vez que se cree un nuevo evento
+    * idealmente, en los eventos que se creen, se notificará a los usuarios
+    *
+    */
+    @Override
+    public List<NotificacionEventoDTO> notificarNuevoEvento() throws Exception {
+        List<NotificacionEventoDTO> eventosNuevos =
+                eventoRepo.findNuevosEventosAyerHoy(LocalDate.now().minusDays(1), LocalDate.now());
+        return eventosNuevos;
     }
 
     /**
