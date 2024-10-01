@@ -4,7 +4,6 @@ import co.edu.uniquindio.unieventos.dto.MensajeDTO;
 import co.edu.uniquindio.unieventos.dto.TokenDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.CrearUsuarioDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.IniciarSesionDTO;
-import co.edu.uniquindio.unieventos.services.interfaces.AutenticacionService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class AutenticacionControlador {
 
     private final UsuarioService usuarioService;
-    private final AutenticacionService autenticacionService;
 
     @PostMapping("/login")
     public ResponseEntity<MensajeDTO<TokenDTO>> iniciarSesion(@Valid @RequestBody IniciarSesionDTO iniciarSesionDTO) throws Exception {
-        TokenDTO tokenDTO = autenticacionService.iniciarSesion(iniciarSesionDTO);
+        TokenDTO tokenDTO = usuarioService.iniciarSesion(iniciarSesionDTO);
         return ResponseEntity.ok().body(new MensajeDTO<>(false, tokenDTO));
     }
 
