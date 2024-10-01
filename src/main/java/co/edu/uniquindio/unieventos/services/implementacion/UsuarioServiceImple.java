@@ -170,10 +170,10 @@ public class UsuarioServiceImple implements UsuarioService {
     @Override
     public TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception {
 
-        Optional<Usuario> optionalUsuario = usuarioRepo.findByEmailAndContrasenia(iniciarSesionDTO.email(), iniciarSesionDTO.contrasenia());
+        Optional<Usuario> optionalUsuario = usuarioRepo.findByEmail(iniciarSesionDTO.email());
 
         if (optionalUsuario.isEmpty()){
-            throw new RecursoNoEncontradoException("Las credenciales no coinciden en el sistema");
+            throw new RecursoNoEncontradoException("Usuario no Encontrado");
         }
 
         Usuario usuario = optionalUsuario.get();

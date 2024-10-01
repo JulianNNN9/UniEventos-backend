@@ -8,11 +8,13 @@ import co.edu.uniquindio.unieventos.model.Carrito;
 import co.edu.uniquindio.unieventos.services.interfaces.CarritoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/carritos")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class CarritoControlador {
 
@@ -28,7 +30,7 @@ public class CarritoControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.eliminarDelCarrito(eliminarDelCarritoDTO)));
     }
 
-    @PostMapping("/editar-carrito")
+    @PutMapping("/editar-carrito")
     public ResponseEntity<MensajeDTO<String>> editarCarrito(@Valid @RequestBody EditarCarritoDTO editarCarritoDTO) throws Exception {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.editarCarrito(editarCarritoDTO)));
     }

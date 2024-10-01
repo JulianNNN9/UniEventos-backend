@@ -1,12 +1,11 @@
 package co.edu.uniquindio.unieventos.controllers;
 
+import co.edu.uniquindio.unieventos.dto.FiltrosEventosDTO;
 import co.edu.uniquindio.unieventos.dto.MensajeDTO;
-import co.edu.uniquindio.unieventos.dto.evento.CrearEventoDTO;
-import co.edu.uniquindio.unieventos.dto.evento.EditarEventoDTO;
-import co.edu.uniquindio.unieventos.dto.evento.InformacionEventoDTO;
-import co.edu.uniquindio.unieventos.dto.evento.ItemEventoDTO;
+import co.edu.uniquindio.unieventos.dto.evento.*;
 import co.edu.uniquindio.unieventos.model.Evento;
 import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/eventos")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class EventoControlador {
 
@@ -26,7 +26,7 @@ public class EventoControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.crearEvento(crearEventoDTO)));
     }
 
-    @PostMapping ("/editar-evento")
+    @PutMapping ("/editar-evento")
     public ResponseEntity<MensajeDTO<String>> editarEvento(@Valid @RequestBody EditarEventoDTO editarEventoDTO) throws Exception {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.editarEvento(editarEventoDTO)));
     }
@@ -41,7 +41,10 @@ public class EventoControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.obtenerInformacionEvento(idEvento)));
     }
 
-    // todo implementar lo de filtrar eventos
+    @PostMapping ("/filtrar-evento")
+    public ResponseEntity<MensajeDTO<List<ItemEventoDTO>>> filtrarEvento(@Valid @RequestBody FiltrosEventosDTO filtrosEventos) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.filtrarEvento(filtrosEventos)));
+    }
 
     @GetMapping ("/buscar-evento/{valorCampoDeBusqueda}")
     public ResponseEntity<MensajeDTO<List<ItemEventoDTO>>> buscarEvento(@PathVariable String valorCampoDeBusqueda) throws Exception {
@@ -62,5 +65,11 @@ public class EventoControlador {
     public ResponseEntity<MensajeDTO<String>> saveEvento(@Valid @RequestBody Evento evento) throws Exception {
         eventoService.saveEvento(evento);
         return ResponseEntity.ok().body(new MensajeDTO<>(false, "Evento guardado correctamente"));
+    }
+
+    // Cada que se ingrese a la página principal se cargará la notificación de los eventos nuevos
+    @GetMapping ("/notificar-nuevo-evento")
+    public ResponseEntity<MensajeDTO<List<NotificacionEventoDTO>>> notificarNuevoEvento() throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.notificarNuevoEvento()));
     }
 }

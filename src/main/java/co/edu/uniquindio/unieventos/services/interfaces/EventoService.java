@@ -1,11 +1,8 @@
 package co.edu.uniquindio.unieventos.services.interfaces;
 
-import co.edu.uniquindio.unieventos.dto.evento.CrearEventoDTO;
-import co.edu.uniquindio.unieventos.dto.evento.EditarEventoDTO;
-import co.edu.uniquindio.unieventos.dto.evento.InformacionEventoDTO;
-import co.edu.uniquindio.unieventos.dto.evento.ItemEventoDTO;
+import co.edu.uniquindio.unieventos.dto.evento.*;
 import co.edu.uniquindio.unieventos.model.Evento;
-import co.edu.uniquindio.unieventos.model.FiltrosEventos;
+import co.edu.uniquindio.unieventos.dto.FiltrosEventosDTO;
 
 import java.util.List;
 
@@ -19,7 +16,12 @@ public interface EventoService {
 
     InformacionEventoDTO obtenerInformacionEvento(String idEvento) throws Exception;
 
-    List<ItemEventoDTO> filtrarEvento(List<FiltrosEventos> tipoFiltrosSeleccionados, List<Enum<?>> valoresFiltrosSeleccionados);
+    /* Se usaría cada vez que se cree un nuevo evento
+    * idealmente, en los eventos que se creen, se notificará a los usuarios
+    */
+    List<NotificacionEventoDTO> notificarNuevoEvento() throws Exception;
+
+    List<ItemEventoDTO> filtrarEvento(FiltrosEventosDTO filtrosEventos);
 
     List<ItemEventoDTO> buscarEvento(String valorCampoDeBusqueda);
 
@@ -28,5 +30,7 @@ public interface EventoService {
     Evento obtenerEvento(String idEvento) throws Exception;
 
     void saveEvento(Evento evento) throws Exception;
+
+
 
 }

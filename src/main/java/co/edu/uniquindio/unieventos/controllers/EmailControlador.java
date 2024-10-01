@@ -3,6 +3,7 @@ package co.edu.uniquindio.unieventos.controllers;
 import co.edu.uniquindio.unieventos.dto.EmailDTO;
 import co.edu.uniquindio.unieventos.dto.MensajeDTO;
 import co.edu.uniquindio.unieventos.services.interfaces.EmailService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/email")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class EmailControlador {
 

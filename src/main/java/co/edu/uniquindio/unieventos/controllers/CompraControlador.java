@@ -5,6 +5,7 @@ import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
 import co.edu.uniquindio.unieventos.model.Compra;
 import co.edu.uniquindio.unieventos.services.interfaces.CompraService;
 import com.mercadopago.resources.preference.Preference;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/compras")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class CompraControlador {
 
