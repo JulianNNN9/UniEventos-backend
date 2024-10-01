@@ -20,7 +20,9 @@ public interface UsuarioService {
 
     void cambiarContrasenia(CambiarContraseniaDTO cambiarContraseniaDTO) throws Exception;
 
-    TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception;
-
     Usuario obtenerUsuario(String id) throws Exception;
+
+    void incrementarIntentosFallidos(String correo) throws Exception;
+
+    TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception;
 }
