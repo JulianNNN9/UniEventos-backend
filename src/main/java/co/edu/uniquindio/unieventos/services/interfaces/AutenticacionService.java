@@ -6,8 +6,6 @@ import co.edu.uniquindio.unieventos.dto.cuenta.IniciarSesionDTO;
 
 public interface AutenticacionService {
 
-    TokenDTO iniciarSesionUsuario(IniciarSesionDTO iniciarSesionDTO) throws Exception;
-
-    TokenDTO iniciarSesionAdmin(IniciarSesionDTO iniciarSesionDTO) throws Exception;
+    TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception;
 
 }

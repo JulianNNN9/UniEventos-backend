@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
@@ -24,6 +26,9 @@ import java.util.Random;
 @Transactional
 @RequiredArgsConstructor
 public class UsuarioServiceImple implements UsuarioService {
+
+    private static final int MAX_FAILED_ATTEMPTS = 5;
+    private static final Duration LOCK_DURATION = Duration.ofMinutes(5);
 
     private final UsuarioRepo usuarioRepo;
     private final JWTUtils jwtUtils;
@@ -177,12 +182,24 @@ public class UsuarioServiceImple implements UsuarioService {
             throw new CuentaInactivaEliminadaException("Esta cuenta aún no ha sido activada o ha sido eliminada.");
         }
 
+        //Manejo del bloqueo de cuenta
+        if (estaBloqueada(usuario.getEmail())){
+            throw new CuentaBloqueadaException("La cuenta se encuentra bloqueada por demasiados intentos, espere 5 minutos.");
+        }
+
+        if (usuario.getTiempoBloqueo() != null && LocalDateTime.now().isAfter(usuario.getTiempoBloqueo())){
+            desbloquearUsuario(usuario.getEmail());
+        }
+
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 
         if( !passwordEncoder.matches(iniciarSesionDTO.contrasenia(), usuario.getContrasenia()) ) {
+            incrementarIntentosFallidos(usuario.getEmail());
             throw new Exception("La contraseña es incorrecta");
         }
+
+        desbloquearUsuario(usuario.getEmail());
 
         Map<String, Object> map = construirClaims(usuario);
 
@@ -196,6 +213,40 @@ public class UsuarioServiceImple implements UsuarioService {
 
         if(optionalUsuario.isEmpty()){
             throw new RecursoNoEncontradoException("Usuario no encontrado.");
+        }
+
+        return optionalUsuario.get();
+    }
+
+    @Override
+    public void incrementarIntentosFallidos(String correo) throws RecursoEncontradoException {
+        Usuario usuario = obtenerUsuarioPorEmail(correo);
+        usuario.setFallosInicioSesion(usuario.getFallosInicioSesion() + 1);
+
+        if (usuario.getFallosInicioSesion() >= MAX_FAILED_ATTEMPTS) {
+            usuario.setTiempoBloqueo(LocalDateTime.now().plus(LOCK_DURATION));
+        }
+
+        usuarioRepo.save(usuario);
+    }
+
+    public boolean estaBloqueada(String correo) throws RecursoEncontradoException {
+        Usuario usuario = obtenerUsuarioPorEmail(correo);
+        return usuario.getTiempoBloqueo() != null && LocalDateTime.now().isBefore(usuario.getTiempoBloqueo());
+    }
+
+    public void desbloquearUsuario(String username) throws RecursoEncontradoException {
+        Usuario usuario = obtenerUsuarioPorEmail(username);
+        usuario.setFallosInicioSesion(0);
+        usuario.setTiempoBloqueo(null);
+        usuarioRepo.save(usuario);
+    }
+
+    private Usuario obtenerUsuarioPorEmail(String correo) throws RecursoEncontradoException {
+        Optional<Usuario> optionalUsuario = usuarioRepo.findByEmail(correo);
+
+        if (optionalUsuario.isEmpty()){
+            throw new RecursoEncontradoException("Usuario no encontrado.");
         }
 
         return optionalUsuario.get();

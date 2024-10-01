@@ -20,11 +20,13 @@ public class AutenticacionControlador {
 
     private final UsuarioService usuarioService;
     private final AutenticacionService autenticacionService;
-    @PostMapping("/login-cliente")
-    public ResponseEntity<MensajeDTO<TokenDTO>> iniciarSesionCliente(@Valid @RequestBody IniciarSesionDTO iniciarSesionDTO) throws Exception {
-        TokenDTO tokenDTO = autenticacionService.iniciarSesionUsuario(iniciarSesionDTO);
+
+    @PostMapping("/login")
+    public ResponseEntity<MensajeDTO<TokenDTO>> iniciarSesion(@Valid @RequestBody IniciarSesionDTO iniciarSesionDTO) throws Exception {
+        TokenDTO tokenDTO = autenticacionService.iniciarSesion(iniciarSesionDTO);
         return ResponseEntity.ok().body(new MensajeDTO<>(false, tokenDTO));
     }
+
     @PostMapping("/registrar-usuarios")
     public ResponseEntity<MensajeDTO<String>> crearUsuario(@Valid @RequestBody CrearUsuarioDTO crearUsuarioDTO)throws Exception{
         usuarioService.crearUsuario(crearUsuarioDTO);

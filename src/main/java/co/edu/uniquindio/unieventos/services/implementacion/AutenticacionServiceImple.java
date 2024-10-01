@@ -32,7 +32,7 @@ public class AutenticacionServiceImple implements AutenticacionService {
     private final JWTUtils jwtUtils;
 
     @Override
-    public TokenDTO iniciarSesionUsuario(IniciarSesionDTO iniciarSesionDTO) throws Exception {
+    public TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception {
 
         Optional<Usuario> optionalUsuario = usuarioRepo.findByEmail(iniciarSesionDTO.email());
 
@@ -56,11 +56,6 @@ public class AutenticacionServiceImple implements AutenticacionService {
         Map<String, Object> map = construirClaims(usuario);
 
         return new TokenDTO( jwtUtils.generarToken(usuario.getEmail(), map) );
-    }
-
-    @Override
-    public TokenDTO iniciarSesionAdmin(IniciarSesionDTO iniciarSesionDTO) throws Exception {
-        return null;
     }
 
     private Map<String, Object> construirClaims(Usuario cuenta) {

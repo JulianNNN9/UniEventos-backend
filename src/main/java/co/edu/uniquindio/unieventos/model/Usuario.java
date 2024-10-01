@@ -5,7 +5,6 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Document("usuarios")
@@ -30,6 +29,7 @@ public class Usuario {
     private LocalDateTime fechaRegistro;
     private CodigoValidacion codigoRegistro;
     private CodigoValidacion codigoRecuperacionContrasenia;
-
+    private int fallosInicioSesion;
+    private LocalDateTime tiempoBloqueo;
 }
 
