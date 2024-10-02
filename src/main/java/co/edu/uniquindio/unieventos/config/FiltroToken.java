@@ -12,20 +12,24 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+
 @Component
 @RequiredArgsConstructor
 public class FiltroToken extends OncePerRequestFilter {
+
     private final JWTUtils jwtUtils;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    @NotNull FilterChain filterChain) throws ServletException, IOException {
         // Configuración de cabeceras para CORS
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         response.addHeader("Access-Control-Allow-Headers", "Origin, Accept, Content-Type, Authorization");
+
         if (request.getMethod().equals("OPTIONS")) {
             response.setStatus(HttpServletResponse.SC_OK);
         }else {
@@ -37,10 +41,25 @@ public class FiltroToken extends OncePerRequestFilter {
             try {
                 //Si la petición es para la ruta /api/clientes se verifica que el token sea
                 //correcto y que el rol sea CLIENTE
-                if (requestURI.startsWith("/api/usuarios")) {
+                if (requestURI.startsWith("/api/usuarios") || requestURI.startsWith("/api/carrito") || requestURI.startsWith("/api/compras")) {
                     if (token != null) {
                         Jws<Claims> jws = jwtUtils.parseJwt(token);
                         if (!jws.getPayload().get("rol").equals("CLIENTE")) {
+                            crearRespuestaError("No tiene permisos para acceder a este recurso",
+                                    HttpServletResponse.SC_FORBIDDEN, response);
+                        } else {
+                            error = false;
+                        }
+                    } else {
+                        crearRespuestaError("No tiene permisos para acceder a este recurso",
+                                HttpServletResponse.SC_FORBIDDEN, response);
+                    }
+                }
+
+                if (requestURI.startsWith("/api/cupones") || requestURI.startsWith("/api/eventos") || requestURI.startsWith("/api/imagenes")) {
+                    if (token != null) {
+                        Jws<Claims> jws = jwtUtils.parseJwt(token);
+                        if (!jws.getPayload().get("rol").equals("ADMINISTRADOR")) {
                             crearRespuestaError("No tiene permisos para acceder a este recurso",
                                     HttpServletResponse.SC_FORBIDDEN, response);
                         } else {

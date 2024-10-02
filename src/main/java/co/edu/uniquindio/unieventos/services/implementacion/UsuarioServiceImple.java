@@ -57,7 +57,6 @@ public class UsuarioServiceImple implements UsuarioService {
                 .estadoUsuario(EstadoUsuario.INACTIVA)
                 .fechaRegistro(LocalDateTime.now())
                 .codigoRegistro(
-
                         CodigoValidacion.builder()
                             .codigo(codigoActivacionCuenta)
                             .fechaCreacion(LocalDateTime.now())
