@@ -26,7 +26,7 @@ public class AutenticacionControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, tokenDTO));
     }
 
-    @PostMapping("/registrar-usuarios")
+    @PostMapping("/crear-usuario")
     public ResponseEntity<MensajeDTO<String>> crearUsuario(@Valid @RequestBody CrearUsuarioDTO crearUsuarioDTO)throws Exception{
         usuarioService.crearUsuario(crearUsuarioDTO);
         return ResponseEntity.ok().body( new MensajeDTO<>(false, "Usuario registrado correctamente")
