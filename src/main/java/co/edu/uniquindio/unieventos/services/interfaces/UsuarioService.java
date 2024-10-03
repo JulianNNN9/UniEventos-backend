@@ -9,7 +9,7 @@ public interface UsuarioService {
 
     String crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws Exception;
 
-    void editarUsuario(EditarUsuarioDTO editarCuentaDTO) throws RecursoNoEncontradoException;
+    void editarUsuario(EditarUsuarioDTO editarCuentaDTO) throws Exception;
 
     void eliminarUsuario(String id) throws RecursoNoEncontradoException;
 
@@ -19,11 +19,13 @@ public interface UsuarioService {
 
     void enviarCodigoActivacionCuenta(EnviarCodigoActivacionAlCorreoDTO enviarCodigoActivacionAlCorreoDTO) throws Exception;
 
-    void recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws RecursoNoEncontradoException, ContraseniaNoCoincidenException, CodigoExpiradoException, CodigoInvalidoException;
+    void recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception;
 
-    void cambiarContrasenia(CambiarContraseniaDTO cambiarContraseniaDTO) throws RecursoNoEncontradoException, ContraseniaNoCoincidenException, ContraseniaIncorrectaException;
+    void cambiarContrasenia(CambiarContraseniaDTO cambiarContraseniaDTO) throws Exception;
+
+    Usuario obtenerUsuario(String id) throws Exception;
+
+    void incrementarIntentosFallidos(String correo) throws Exception;
 
     TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception;
-
-    Usuario obtenerUsuario(String id) throws RecursoNoEncontradoException;
 }
