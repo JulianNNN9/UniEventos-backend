@@ -1,19 +1,17 @@
 package co.edu.uniquindio.unieventos.model;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Document("compras")
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
-@SuperBuilder
+@Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Compra {
 

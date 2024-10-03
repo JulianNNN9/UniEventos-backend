@@ -11,8 +11,9 @@ import java.util.List;
 
 @Document("eventos")
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
-@SuperBuilder
+@Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Evento {
 
