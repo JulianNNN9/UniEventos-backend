@@ -20,10 +20,9 @@ public class AutenticacionControlador {
 
     private final UsuarioService usuarioService;
 
-    @PostMapping("/login")
-    public ResponseEntity<MensajeDTO<TokenDTO>> iniciarSesion(@Valid @RequestBody IniciarSesionDTO iniciarSesionDTO) throws Exception {
-        TokenDTO tokenDTO = usuarioService.iniciarSesion(iniciarSesionDTO);
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, tokenDTO));
+    @PostMapping("/iniciar-sesion")
+    public ResponseEntity<MensajeDTO<TokenDTO>> iniciarSesion(@RequestBody IniciarSesionDTO iniciarSesionDTO) throws Exception{
+        return ResponseEntity.ok().body( new MensajeDTO<>(false, usuarioService.iniciarSesion(iniciarSesionDTO)) );
     }
 
     @PostMapping("/crear-usuario")
@@ -32,4 +31,6 @@ public class AutenticacionControlador {
         return ResponseEntity.ok().body( new MensajeDTO<>(false, "Usuario registrado correctamente")
         );
     }
+
+
 }

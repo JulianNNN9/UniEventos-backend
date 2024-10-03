@@ -57,9 +57,6 @@ public class UsuarioControlador {
         return ResponseEntity.ok().body( new MensajeDTO<>(false, "Contraseña cambiada correctamente") );
     }
 
-    @PostMapping("/iniciar-sesion")
-    public ResponseEntity<MensajeDTO<TokenDTO>> iniciarSesion(@RequestBody IniciarSesionDTO iniciarSesionDTO) throws Exception{
-        return ResponseEntity.ok().body( new MensajeDTO<>(false, usuarioService.iniciarSesion(iniciarSesionDTO)) );
-    }
+
 
 }
