@@ -10,8 +10,9 @@ import java.time.LocalDateTime;
 
 @Document("usuarios")
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
-@SuperBuilder
+@Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Usuario {
 

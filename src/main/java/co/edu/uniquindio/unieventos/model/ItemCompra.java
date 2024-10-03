@@ -1,11 +1,14 @@
 package co.edu.uniquindio.unieventos.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 import org.bson.types.ObjectId;
 
+@AllArgsConstructor
 @Data
-@SuperBuilder
+@Builder
 public class ItemCompra {
 
     private String idEvento;

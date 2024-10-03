@@ -43,9 +43,14 @@ public class UsuarioControlador {
     }
 
     @PostMapping("/enviar-codigo-recuperacion")
-    public ResponseEntity<MensajeDTO<String>> enviarCodigoRecuperacionCuenta(@RequestBody EnviarCodigoAlCorreoDTO enviarCodigoAlCorreoDTO) throws Exception{
-        usuarioService.enviarCodigoRecuperacionCuenta(enviarCodigoAlCorreoDTO);
+    public ResponseEntity<MensajeDTO<String>> enviarCodigoRecuperacionCuenta(@RequestBody EnviarCodigoRecuperacionAlCorreoDTO enviarCodigoRecuperacionAlCorreoDTO) throws Exception{
+        usuarioService.enviarCodigoRecuperacionCuenta(enviarCodigoRecuperacionAlCorreoDTO);
         return ResponseEntity.ok().body( new MensajeDTO<>(false, "Código de recuperación enviado correctamente") );
+    }
+    @PostMapping("/enviar-codigo-activacion")
+    public ResponseEntity<MensajeDTO<String>> enviarCodigoRecuperacionCuenta(@RequestBody EnviarCodigoActivacionAlCorreoDTO enviarCodigoActivacionAlCorreoDTO) throws Exception{
+        usuarioService.enviarCodigoActivacionCuenta(enviarCodigoActivacionAlCorreoDTO);
+        return ResponseEntity.ok().body( new MensajeDTO<>(false, "Código de activacion enviado correctamente") );
     }
 
     @PostMapping("/recuperar-contrasenia")
