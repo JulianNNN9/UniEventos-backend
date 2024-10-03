@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/usuarios")
+@RequestMapping("/api/usuario")
 @SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class UsuarioControlador {
