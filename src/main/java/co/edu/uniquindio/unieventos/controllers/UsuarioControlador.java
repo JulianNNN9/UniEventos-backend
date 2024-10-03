@@ -52,12 +52,6 @@ public class UsuarioControlador {
                 usuarioService.obtenerInformacionUsuario(codigo) ) );
     }
 
-    @PostMapping("/recuperar-contrasenia")
-    public ResponseEntity<MensajeDTO<String>> recuperarContrasenia(@RequestBody RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception{
-        usuarioService.recuperarContrasenia(recuperarContraseniaDTO);
-        return ResponseEntity.ok().body( new MensajeDTO<>(false, "Contraseña recuperada correctamente") );
-    }
-
     @PutMapping("/cambiar-contrasenia")
     public ResponseEntity<MensajeDTO<String>> cambiarContrasenia(@RequestBody CambiarContraseniaDTO cambiarContraseniaDTO) throws Exception{
         usuarioService.cambiarContrasenia(cambiarContraseniaDTO);

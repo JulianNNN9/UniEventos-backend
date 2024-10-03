@@ -3,10 +3,7 @@ package co.edu.uniquindio.unieventos.controllers;
 import co.edu.uniquindio.unieventos.dto.FiltrosEventosDTO;
 import co.edu.uniquindio.unieventos.dto.MensajeDTO;
 import co.edu.uniquindio.unieventos.dto.TokenDTO;
-import co.edu.uniquindio.unieventos.dto.cuenta.CrearUsuarioDTO;
-import co.edu.uniquindio.unieventos.dto.cuenta.EnviarCodigoActivacionAlCorreoDTO;
-import co.edu.uniquindio.unieventos.dto.cuenta.EnviarCodigoRecuperacionAlCorreoDTO;
-import co.edu.uniquindio.unieventos.dto.cuenta.IniciarSesionDTO;
+import co.edu.uniquindio.unieventos.dto.cuenta.*;
 import co.edu.uniquindio.unieventos.dto.evento.InformacionEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.ItemEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.NotificacionEventoDTO;
@@ -79,5 +76,11 @@ public class PublicoControlador {
     public ResponseEntity<MensajeDTO<String>> activarCuenta(@PathVariable String codigoActivacion) throws Exception{
         usuarioService.activarCuenta(codigoActivacion);
         return ResponseEntity.ok().body( new MensajeDTO<>(false, "Cuenta activada correctamente") );
+    }
+
+    @PostMapping("/recuperar-contrasenia")
+    public ResponseEntity<MensajeDTO<String>> recuperarContrasenia(@RequestBody RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception{
+        usuarioService.recuperarContrasenia(recuperarContraseniaDTO);
+        return ResponseEntity.ok().body( new MensajeDTO<>(false, "Contraseña recuperada correctamente") );
     }
 }
