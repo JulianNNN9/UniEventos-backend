@@ -74,4 +74,10 @@ public class PublicoControlador {
         usuarioService.enviarCodigoActivacionCuenta(enviarCodigoActivacionAlCorreoDTO);
         return ResponseEntity.ok().body( new MensajeDTO<>(false, "Código de activacion enviado correctamente") );
     }
+
+    @GetMapping("/activar-cuenta/{codigoActivacion}")
+    public ResponseEntity<MensajeDTO<String>> activarCuenta(@PathVariable String codigoActivacion) throws Exception{
+        usuarioService.activarCuenta(codigoActivacion);
+        return ResponseEntity.ok().body( new MensajeDTO<>(false, "Cuenta activada correctamente") );
+    }
 }
