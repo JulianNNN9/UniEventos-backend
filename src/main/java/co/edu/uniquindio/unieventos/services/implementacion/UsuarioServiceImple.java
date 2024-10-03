@@ -166,9 +166,9 @@ public class UsuarioServiceImple implements UsuarioService {
     }
 
     @Override
-    public void recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws RecursoNoEncontradoException, ContraseniaNoCoincidenException, CodigoExpiradoException, CodigoInvalidoException {
+    public void recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws RecursoNoEncontradoException, ContraseniaNoCoincidenException, CodigoExpiradoException, CodigoInvalidoException, RecursoEncontradoException {
 
-        Usuario usuario = obtenerUsuario(recuperarContraseniaDTO.idUsuario());
+        Usuario usuario = obtenerUsuarioPorEmail(recuperarContraseniaDTO.correoUsuario());
         if (!Objects.equals(recuperarContraseniaDTO.contraseniaNueva(), recuperarContraseniaDTO.confirmarContraseniaNueva())){
             throw new ContraseniaNoCoincidenException("Las contraseñas no coindicen");
         }
@@ -181,7 +181,7 @@ public class UsuarioServiceImple implements UsuarioService {
             throw new CodigoInvalidoException("El código es incorrecto");
         }
 
-        usuario.setContrasenia(recuperarContraseniaDTO.contraseniaNueva());
+        usuario.setContrasenia(encriptarPassword(recuperarContraseniaDTO.contraseniaNueva()));
 
         usuarioRepo.save(usuario);
     }
@@ -259,6 +259,18 @@ public class UsuarioServiceImple implements UsuarioService {
     public Usuario obtenerUsuario(String id) throws RecursoNoEncontradoException {
 
         Optional<Usuario> optionalUsuario = usuarioRepo.findById(id);
+
+        if(optionalUsuario.isEmpty()){
+            throw new RecursoNoEncontradoException("Usuario no encontrado");
+        }
+
+        return optionalUsuario.get();
+    }
+
+    @Override
+    public Usuario obtenerUsuarioCorreo(String correo) throws RecursoNoEncontradoException {
+
+        Optional<Usuario> optionalUsuario = usuarioRepo.findByEmail(correo);
 
         if(optionalUsuario.isEmpty()){
             throw new RecursoNoEncontradoException("Usuario no encontrado");

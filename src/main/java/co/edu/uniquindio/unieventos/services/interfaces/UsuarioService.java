@@ -25,6 +25,8 @@ public interface UsuarioService {
 
     Usuario obtenerUsuario(String id) throws Exception;
 
+    Usuario obtenerUsuarioCorreo(String correo) throws RecursoNoEncontradoException;
+
     void incrementarIntentosFallidos(String correo) throws Exception;
 
     TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception;
