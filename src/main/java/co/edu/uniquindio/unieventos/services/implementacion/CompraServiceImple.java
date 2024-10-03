@@ -39,6 +39,8 @@ public class CompraServiceImple implements CompraService {
     private final CuponService cuponService;
     private final UsuarioService usuarioService;
     private final EventoService eventoService;
+    // Cambiar cada que se vaya a probar la pasarela de pagos
+    private final String urlNgrok = "https://01f8-181-53-99-0.ngrok-free.app/";
 
     @Override
     public String crearCompra(CrearCompraDTO crearCompraDTO) throws Exception {
@@ -217,9 +219,9 @@ public class CompraServiceImple implements CompraService {
 
         // Configurar las urls de retorno de la pasarela (Frontend)
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                .success("URL PAGO EXITOSO")
-                .failure("URL PAGO FALLIDO")
-                .pending("URL PAGO PENDIENTE")
+                .success(urlNgrok + "compra/success")
+                .failure(urlNgrok + "compra/failure")
+                .pending(urlNgrok + "compra/pending")
                 .build();
 
 
@@ -228,7 +230,7 @@ public class CompraServiceImple implements CompraService {
                 .backUrls(backUrls)
                 .items(itemsPasarela)
                 .metadata(Map.of("id_orden", compraGuardada.getId()))
-                .notificationUrl("URL NOTIFICACION")
+                .notificationUrl(urlNgrok)
                 .build();
 
 
