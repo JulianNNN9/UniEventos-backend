@@ -1,7 +1,6 @@
 package co.edu.uniquindio.unieventos.model;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -28,8 +27,8 @@ public class Usuario {
     private Rol rol;
     private EstadoUsuario estadoUsuario;
     private LocalDateTime fechaRegistro;
-    private CodigoValidacion codigoRegistro;
-    private CodigoValidacion codigoRecuperacionContrasenia;
+    private CodigoActivacion codigoRegistro;
+    private CodigoActivacion codigoRecuperacionContrasenia;
     private int fallosInicioSesion;
     private LocalDateTime tiempoBloqueo;
 }

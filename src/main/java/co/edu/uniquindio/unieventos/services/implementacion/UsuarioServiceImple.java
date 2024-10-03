@@ -5,7 +5,7 @@ import co.edu.uniquindio.unieventos.dto.EmailDTO;
 import co.edu.uniquindio.unieventos.dto.TokenDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
 import co.edu.uniquindio.unieventos.exceptions.*;
-import co.edu.uniquindio.unieventos.model.CodigoValidacion;
+import co.edu.uniquindio.unieventos.model.CodigoActivacion;
 import co.edu.uniquindio.unieventos.model.EstadoUsuario;
 import co.edu.uniquindio.unieventos.model.Rol;
 import co.edu.uniquindio.unieventos.model.Usuario;
@@ -57,8 +57,8 @@ public class UsuarioServiceImple implements UsuarioService {
                 .estadoUsuario(EstadoUsuario.INACTIVA)
                 .fechaRegistro(LocalDateTime.now())
                 .codigoRegistro(
-                        CodigoValidacion.builder()
-                            .codigo(codigoActivacionCuenta)
+                        CodigoActivacion.builder()
+                            .codigo("")
                             .fechaCreacion(LocalDateTime.now())
                         .build()
                 )
@@ -122,43 +122,42 @@ public class UsuarioServiceImple implements UsuarioService {
 
         Usuario usuario = optionalUsuario.get();
 
-
-        //TODO enviar codigo el usuario por correo
-        CodigoValidacion codigoValidacion = CodigoValidacion.builder()
-                .codigo(generarCodigoValidacion())
+        CodigoActivacion codigoActivacion = CodigoActivacion.builder()
+                .codigo(generarCodigoActivacion())
                 .fechaCreacion(LocalDateTime.now())
                 .build();
 
-        usuario.setCodigoRecuperacionContrasenia(codigoValidacion);
-
+        usuario.setCodigoRecuperacionContrasenia(codigoActivacion);
         usuarioRepo.save(usuario);
 
         EmailDTO emailDTO = new EmailDTO(
                 "Recuperacion de Cuenta",
-                "Su Codigo de Recuperacion es: " + codigoValidacion.getCodigo(),
+                "Su Codigo de Recuperacion es: " + codigoActivacion.getCodigo(),
                 enviarCodigoRecuperacionAlCorreoDTO.correo());
 
         emailService.enviarCorreo(emailDTO);
     }
     @Override
     public void enviarCodigoActivacionCuenta(EnviarCodigoActivacionAlCorreoDTO enviarCodigoActivacionAlCorreoDTO) throws Exception {
+
         Optional<Usuario> usuario = usuarioRepo.findByEmail(enviarCodigoActivacionAlCorreoDTO.correo());
         if(usuario.isEmpty()){
             throw new RecursoNoEncontradoException("Correo no encontrado");
         }
         Usuario usuarioActivacion = usuario.get();
-        CodigoValidacion codigoValidacion= CodigoValidacion
+
+        CodigoActivacion codigoActivacion= CodigoActivacion
                 .builder()
-                .codigo(generarCodigoValidacion())
+                .codigo(generarCodigoActivacion())
                 .fechaCreacion(LocalDateTime.now())
                 .build();
 
-        usuarioActivacion.setCodigoRegistro(codigoValidacion);
+        usuarioActivacion.setCodigoRegistro(codigoActivacion);
         usuarioRepo.save(usuarioActivacion);
 
         EmailDTO emailDTO = new EmailDTO(
                 "Activacion de Cuenta",
-                "Su Codigo de Activacion es: " + codigoValidacion.getCodigo(),
+                "Su Codigo de Activacion es: " + codigoActivacion.getCodigo(),
                 enviarCodigoActivacionAlCorreoDTO.correo());
 
         emailService.enviarCorreo(emailDTO);
@@ -297,7 +296,7 @@ public class UsuarioServiceImple implements UsuarioService {
 
     private boolean existeCedula(String cedula) { return usuarioRepo.findByCedula(cedula).isPresent(); }
 
-    private String generarCodigoValidacion(){
+    private String generarCodigoActivacion(){
 
         String cadena = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 

@@ -2,7 +2,7 @@ package co.edu.uniquindio.unieventos;
 
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
 import co.edu.uniquindio.unieventos.exceptions.*;
-import co.edu.uniquindio.unieventos.model.CodigoValidacion;
+import co.edu.uniquindio.unieventos.model.CodigoActivacion;
 import co.edu.uniquindio.unieventos.model.EstadoUsuario;
 import co.edu.uniquindio.unieventos.model.Usuario;
 import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
@@ -196,11 +196,11 @@ public class UsuarioServicioTest {
 
         //Simular que el Usuario ya le dio a RecuperarContraseña (enviarCodigoRecuperacionCuenta)
         // por ende se asgino un nuevo codigo de recuperacion al usuario
-        CodigoValidacion codigoValidacion = CodigoValidacion.builder()
+        CodigoActivacion codigoActivacion = CodigoActivacion.builder()
                 .codigo("123456")
                 .fechaCreacion(LocalDateTime.now())
                 .build();
-        usuario.setCodigoRecuperacionContrasenia(codigoValidacion);
+        usuario.setCodigoRecuperacionContrasenia(codigoActivacion);
 
         //Guardamos el usuario con el nuevo codigo de recuperacion
         usuarioRepo.save(usuario);
@@ -224,11 +224,11 @@ public class UsuarioServicioTest {
 
         //Simular que el Usuario ya le dio a RecuperarContraseña (enviarCodigoRecuperacionCuenta)
         // por ende se asgino un nuevo codigo de recuperacion al usuario
-        CodigoValidacion codigoValidacion = CodigoValidacion.builder()
+        CodigoActivacion codigoActivacion = CodigoActivacion.builder()
                 .codigo("123456")
                 .fechaCreacion(LocalDateTime.now())
                 .build();
-        usuario.setCodigoRecuperacionContrasenia(codigoValidacion);
+        usuario.setCodigoRecuperacionContrasenia(codigoActivacion);
 
         //Guardamos el usuario con el nuevo codigo de recuperacion
         usuarioRepo.save(usuario);
@@ -259,11 +259,11 @@ public class UsuarioServicioTest {
 
         //Simular que el Usuario ya le dio a RecuperarContraseña (enviarCodigoRecuperacionCuenta)
         // por ende se asgino un nuevo codigo de recuperacion al usuario
-        CodigoValidacion codigoValidacion = CodigoValidacion.builder()
+        CodigoActivacion codigoActivacion = CodigoActivacion.builder()
                 .codigo("123456")
                 .fechaCreacion(LocalDateTime.now().minusMinutes(15)) //Restar 15 Minutos para expirar el codigo
                 .build();
-        usuario.setCodigoRecuperacionContrasenia(codigoValidacion);
+        usuario.setCodigoRecuperacionContrasenia(codigoActivacion);
 
         //Guardamos el usuario con el nuevo codigo de recuperacion
         usuarioRepo.save(usuario);
@@ -294,11 +294,11 @@ public class UsuarioServicioTest {
 
         //Simular que el Usuario ya le dio a RecuperarContraseña (enviarCodigoRecuperacionCuenta)
         // por ende se asgino un nuevo codigo de recuperacion al usuario
-        CodigoValidacion codigoValidacion = CodigoValidacion.builder()
+        CodigoActivacion codigoActivacion = CodigoActivacion.builder()
                 .codigo("123456")
                 .fechaCreacion(LocalDateTime.now())
                 .build();
-        usuario.setCodigoRecuperacionContrasenia(codigoValidacion);
+        usuario.setCodigoRecuperacionContrasenia(codigoActivacion);
 
         //Guardamos el usuario con el nuevo codigo de recuperacion
         usuarioRepo.save(usuario);
