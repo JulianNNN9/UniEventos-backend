@@ -112,7 +112,7 @@ public class EventoServiceImple implements EventoService {
                 .collect(Collectors.toList());
     }
 
-    @Override
+
     public Evento obtenerEvento(String idEvento) throws Exception {
 
         Optional<Evento> eventoExistente = eventoRepo.findById(idEvento);

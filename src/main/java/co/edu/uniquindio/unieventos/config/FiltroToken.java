@@ -41,7 +41,7 @@ public class FiltroToken extends OncePerRequestFilter {
             try {
                 //Si la petición es para la ruta /api/clientes se verifica que el token sea
                 //correcto y que el rol sea CLIENTE
-                if (requestURI.startsWith("/api/usuarios") || requestURI.startsWith("/api/carrito") || requestURI.startsWith("/api/compras")) {
+                if (requestURI.startsWith("/api/usuario")) {
                     if (token != null) {
                         Jws<Claims> jws = jwtUtils.parseJwt(token);
                         if (!jws.getPayload().get("rol").equals("CLIENTE")) {
@@ -56,7 +56,7 @@ public class FiltroToken extends OncePerRequestFilter {
                     }
                 }
 
-                if (requestURI.startsWith("/api/cupones") || requestURI.startsWith("/api/eventos") || requestURI.startsWith("/api/imagenes")) {
+                if (requestURI.startsWith("/api/admin")) {
                     if (token != null) {
                         Jws<Claims> jws = jwtUtils.parseJwt(token);
                         if (!jws.getPayload().get("rol").equals("ADMINISTRADOR")) {

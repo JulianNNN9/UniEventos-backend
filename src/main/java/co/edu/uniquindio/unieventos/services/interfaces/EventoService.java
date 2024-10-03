@@ -31,6 +31,4 @@ public interface EventoService {
 
     void saveEvento(Evento evento) throws Exception;
 
-
-
 }
