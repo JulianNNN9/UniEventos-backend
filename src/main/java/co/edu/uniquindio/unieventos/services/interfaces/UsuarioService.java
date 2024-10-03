@@ -28,4 +28,7 @@ public interface UsuarioService {
     void incrementarIntentosFallidos(String correo) throws Exception;
 
     TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception;
+
+    void activarCuenta(String codigoActivacion) throws Exception;
 }
+

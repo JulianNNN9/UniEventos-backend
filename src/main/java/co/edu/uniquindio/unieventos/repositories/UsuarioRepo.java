@@ -15,4 +15,5 @@ public interface UsuarioRepo extends MongoRepository<Usuario, String> {
 
     Optional<Usuario> findByEmailAndContrasenia(String email, String contrasenia);
 
+    Optional<Usuario> findByCodigoRegistroCodigo(String codigoActivacion);
 }

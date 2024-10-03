@@ -245,6 +245,17 @@ public class UsuarioServiceImple implements UsuarioService {
     }
 
     @Override
+    public void activarCuenta(String codigoActivacion) throws Exception {
+        Optional<Usuario> usuario = usuarioRepo.findByCodigoRegistroCodigo(codigoActivacion);
+        if(usuario.isEmpty()){
+            throw new RecursoNoEncontradoException("Codigo de activacion invalido");
+        }
+        Usuario usuarioActivacion = usuario.get();
+        usuarioActivacion.setEstadoUsuario(EstadoUsuario.ACTIVA);
+        usuarioRepo.save(usuarioActivacion);
+    }
+
+    @Override
     public Usuario obtenerUsuario(String id) throws RecursoNoEncontradoException {
 
         Optional<Usuario> optionalUsuario = usuarioRepo.findById(id);
@@ -323,6 +334,7 @@ public class UsuarioServiceImple implements UsuarioService {
                 "id", cuenta.getId()
         );
     }
+
 
 
 }
