@@ -20,6 +20,7 @@ import com.mercadopago.client.preference.PreferenceRequest;
 import com.mercadopago.resources.payment.Payment;
 import com.mercadopago.resources.preference.Preference;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -136,7 +137,7 @@ public class CompraServiceImple implements CompraService {
 
     @Override
     public List<Compra> obtenerComprasUsuario(String idUsuario){
-        return compraRepo.findAllByIdUsuario(idUsuario);
+        return compraRepo.findAllByIdUsuario(new ObjectId(idUsuario));
     }
 
     @Override
