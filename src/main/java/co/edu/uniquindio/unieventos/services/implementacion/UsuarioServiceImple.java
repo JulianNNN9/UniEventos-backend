@@ -58,7 +58,7 @@ public class UsuarioServiceImple implements UsuarioService {
                 .fechaRegistro(LocalDateTime.now())
                 .codigoRegistro(
                         CodigoActivacion.builder()
-                            .codigo("")
+                            .codigo(null)
                             .fechaCreacion(LocalDateTime.now())
                         .build()
                 )
@@ -211,7 +211,7 @@ public class UsuarioServiceImple implements UsuarioService {
         Optional<Usuario> optionalUsuario = usuarioRepo.findByEmail(iniciarSesionDTO.email());
 
         if (optionalUsuario.isEmpty()){
-            throw new RecursoNoEncontradoException("Usuario no Encontrado");
+            throw new RecursoNoEncontradoException("Este email no está registrado.");
         }
 
         Usuario usuario = optionalUsuario.get();

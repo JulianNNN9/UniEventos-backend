@@ -48,12 +48,12 @@ public class UsuarioServicioTest {
         //SE TIENE que colocar un correo valido porque al crearse el usuario
         //se envia el codigo de activacion de la cuenta
         CrearUsuarioDTO registroClienteDTO = new CrearUsuarioDTO(
-                "123456789",
-                "Johan Noe Londoño Salazar",
+                "1",
+                "Julian Admin",
                 "Calle 10 # 10-10",
-                "3127761299",
-                "ljohannoe@gmail.com",
-                "mipassword"
+                "1",
+                "JA@gmail.com",
+                "0000"
         );
         //Si el usuario se guardó en la base de datos, se le asignó un codigo en MongoDB
         try{
