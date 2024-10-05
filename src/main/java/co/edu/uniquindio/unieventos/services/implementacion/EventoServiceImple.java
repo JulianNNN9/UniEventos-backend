@@ -137,7 +137,7 @@ public class EventoServiceImple implements EventoService {
 
     @Override
     public List<ItemEventoDTO> filtrarEvento(FiltrosEventosDTO filtrosEventos) {
-        return eventoRepo.findByNombreTipoCiudad(filtrosEventos.nombreEvento(), filtrosEventos.tipoEvento(), filtrosEventos.ciudad());
+        return eventoRepo.findByNombreTipoCiudad(filtrosEventos.nombreEvento(), filtrosEventos.tipoEvento(), filtrosEventos.ciudadEvento());
     }
 
     public List<ItemEventoDTO> buscarEvento(String valorCampoDeBusqueda) {
