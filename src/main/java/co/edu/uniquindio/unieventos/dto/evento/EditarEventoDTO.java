@@ -26,7 +26,7 @@ public record EditarEventoDTO(
         @Size(max = 500, message = "La descripción del evento no puede tener más de 500 caracteres")
         String descripcionEvento,
 
-        @PastOrPresent(message = "La fecha del evento debe ser hoy o en el pasado")
+        @FutureOrPresent(message = "La fecha del evento debe ser hoy o en el futuro")
         LocalDateTime fechaEvento,
 
         @NotEmpty(message = "Debe haber al menos una localidad")
