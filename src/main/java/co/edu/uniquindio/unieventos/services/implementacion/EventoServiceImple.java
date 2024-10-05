@@ -73,11 +73,8 @@ public class EventoServiceImple implements EventoService {
     public String eliminarEvento(String idEvento) throws Exception {
 
         Evento evento = obtenerEvento(idEvento);
-
         evento.setEstadoEvento(EstadoEvento.ELIMINADO);
-
         eventoRepo.save(evento);
-
         return "Evento eliminado exitosamente.";
     }
 
@@ -135,16 +132,12 @@ public class EventoServiceImple implements EventoService {
     */
     @Override
     public List<NotificacionEventoDTO> notificarNuevoEvento() throws Exception {
-        List<NotificacionEventoDTO> eventosNuevos =
-                eventoRepo.findNuevosEventosAyerHoy(LocalDate.now().minusDays(1), LocalDate.now());
-        return eventosNuevos;
+        return eventoRepo.findNuevosEventosAyerHoy(LocalDate.now().minusDays(1), LocalDate.now());
     }
 
     @Override
     public List<ItemEventoDTO> filtrarEvento(FiltrosEventosDTO filtrosEventos) {
-        List<ItemEventoDTO> eventosEncontrados = new ArrayList<>();
-        eventosEncontrados = eventoRepo.findByNombreTipoCiudad(filtrosEventos.nombreEvento(), filtrosEventos.tipoEvento(), filtrosEventos.ciudad());
-        return List.of();
+        return eventoRepo.findByNombreTipoCiudad(filtrosEventos.nombreEvento(), filtrosEventos.tipoEvento(), filtrosEventos.ciudad());
     }
 
     public List<ItemEventoDTO> buscarEvento(String valorCampoDeBusqueda) {
