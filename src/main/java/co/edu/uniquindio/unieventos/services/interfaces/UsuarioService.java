@@ -29,7 +29,8 @@ public interface UsuarioService {
 
     void incrementarIntentosFallidos(String correo) throws RecursoNoEncontradoException;
 
-    TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception;
+    TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws RecursoNoEncontradoException,
+            CuentaInactivaEliminadaException, CuentaBloqueadaException, ContraseniaIncorrectaException;
 
     void activarCuenta(String codigoActivacion) throws Exception;
 }

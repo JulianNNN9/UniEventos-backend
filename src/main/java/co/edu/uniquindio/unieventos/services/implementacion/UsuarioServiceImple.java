@@ -188,17 +188,18 @@ public class UsuarioServiceImple implements UsuarioService {
     }
 
     @Override
-    public TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception {
+    public TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws RecursoNoEncontradoException,
+            CuentaInactivaEliminadaException, CuentaBloqueadaException, ContraseniaIncorrectaException {
 
         Usuario usuario = obtenerUsuarioPorEmail(iniciarSesionDTO.email());
 
-        if (usuario.getEstadoUsuario() == EstadoUsuario.INACTIVA || usuario.getEstadoUsuario() == EstadoUsuario.ELIMINADA){
-            throw new CuentaInactivaEliminadaException("Esta cuenta aún no ha sido activada o ha sido eliminada.");
+        if (usuario.getEstadoUsuario() == EstadoUsuario.INACTIVA){
+            throw new CuentaInactivaEliminadaException("Esta cuenta aún no ha sido activada");
         }
 
         //Manejo del bloqueo de cuenta
         if (estaBloqueada(usuario.getEmail())){
-            throw new CuentaBloqueadaException("La cuenta se encuentra bloqueada por demasiados intentos, espere 5 minutos.");
+            throw new CuentaBloqueadaException("La cuenta se encuentra bloqueada por demasiados intentos, espere 5 minutos");
         }
 
         if (usuario.getTiempoBloqueo() != null && LocalDateTime.now().isAfter(usuario.getTiempoBloqueo())){
@@ -210,7 +211,7 @@ public class UsuarioServiceImple implements UsuarioService {
 
         if( !passwordEncoder.matches(iniciarSesionDTO.contrasenia(), usuario.getContrasenia()) ) {
             incrementarIntentosFallidos(usuario.getEmail());
-            throw new Exception("La contraseña es incorrecta");
+            throw new ContraseniaIncorrectaException("La contraseña es incorrecta");
         }
 
         desbloquearUsuario(usuario.getEmail());

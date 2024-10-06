@@ -134,11 +134,11 @@ public class UsuarioServicioTest {
         String idUsuario = "1";
         try{
             InformacionUsuarioDTO informacionUsuarioDTO = usuarioServicio.obtenerInformacionUsuario(idUsuario);
-            Assertions.fail("Validacion de obtenerInformacionUsuarioErrorTest Falló");
+            Assertions.fail("Validacion de obtenerInformacionUsuarioErrorTest Falló ");
         } catch (RecursoNoEncontradoException e){
             assertEquals("Usuario no encontrado", e.getMessage());
         } catch (Exception e){
-            Assertions.fail("Validacion de obtenerInformacionUsuarioErrorTest Falló" + e.getMessage());
+            Assertions.fail("Validacion de obtenerInformacionUsuarioErrorTest Falló " + e.getMessage());
         }
 
     }
@@ -161,9 +161,9 @@ public class UsuarioServicioTest {
             //Comparamos si la edición de la dirección se realizo correctamente
             assertEquals("Nueva dirección #0 Casa 0", informacionUsuarioDTO.direccion());
         } catch (RecursoNoEncontradoException e){
-            Assertions.fail("Validacion de editarUsuarioCorrectoTest Falló" + e.getMessage());
+            Assertions.fail("Validacion de editarUsuarioCorrectoTest Falló " + e.getMessage());
         } catch (Exception e){
-            Assertions.fail("Validacion de editarUsuarioCorrectoTest Falló" + e.getMessage());
+            Assertions.fail("Validacion de editarUsuarioCorrectoTest Falló " + e.getMessage());
         }
     }
     @Test
@@ -230,10 +230,10 @@ public class UsuarioServicioTest {
         try{
             usuarioServicio.recuperarContrasenia(recuperarContraseniaDTO);
             Assertions.fail("Validacion de recuperarContraseniaEmailNoExisteErrorTest Falló");
-        }catch (ContraseniaNoCoincidenException e){
+        }catch (RecursoNoEncontradoException e){
             assertEquals("Email no encontrado", e.getMessage());
         }catch (Exception e){
-            Assertions.fail("Validacion de recuperarContraseniaEmailNoExisteErrorTest Falló" + e.getMessage());
+            Assertions.fail("Validacion de recuperarContraseniaEmailNoExisteErrorTest Falló " + e.getMessage());
         }
     }
     @Test
@@ -252,7 +252,7 @@ public class UsuarioServicioTest {
         }catch (ContraseniaNoCoincidenException e){
             assertEquals("Las contraseñas no coindicen", e.getMessage());
         }catch (Exception e){
-            Assertions.fail("Validacion de recuperarContraseniaNoCoincidenErrorTest Falló" + e.getMessage());
+            Assertions.fail("Validacion de recuperarContraseniaNoCoincidenErrorTest Falló " + e.getMessage());
         }
     }
     @Test
@@ -287,7 +287,7 @@ public class UsuarioServicioTest {
         }catch (CodigoExpiradoException e){
             assertEquals("El código expiró", e.getMessage());
         }catch (Exception e){
-            Assertions.fail("Validacion de recuperarContraseniaCodigoExpiradoErrorTest Falló" + e.getMessage());
+            Assertions.fail("Validacion de recuperarContraseniaCodigoExpiradoErrorTest Falló " + e.getMessage());
         }
     }
     @Test
@@ -310,7 +310,7 @@ public class UsuarioServicioTest {
         Thread.sleep(1000);
 
         RecuperarContraseniaDTO recuperarContraseniaDTO = new RecuperarContraseniaDTO(
-                idUsuario, // ID del Usuario 4
+                usuario.getEmail(), // ID del Usuario 4
                 "111111", // Código de verificación Incorrecto
                 "nuevaPassword", // Nueva contraseña
                 "nuevaPassword" // Confirmación de nueva contraseña
@@ -322,7 +322,7 @@ public class UsuarioServicioTest {
         }catch (CodigoInvalidoException e){
             assertEquals("El código es incorrecto", e.getMessage());
         }catch (Exception e){
-            Assertions.fail("Validacion de recuperarContraseniaCodigoIncorrectoErrorTest Falló" + e.getMessage());
+            Assertions.fail("Validacion de recuperarContraseniaCodigoIncorrectoErrorTest Falló " + e.getMessage());
         }
     }
     @Test
@@ -369,7 +369,7 @@ public class UsuarioServicioTest {
         }catch (ContraseniaNoCoincidenException e){
             assertEquals("Las contraseñas no coindicen", e.getMessage());
         }catch (Exception e){
-            Assertions.fail("Validacion de cambiarContraseniaNoCoincidenTest Falló" + e.getMessage());
+            Assertions.fail("Validacion de cambiarContraseniaNoCoincidenTest Falló " + e.getMessage());
         }
     }
     @Test
@@ -400,10 +400,9 @@ public class UsuarioServicioTest {
         }catch (ContraseniaIncorrectaException e){
             assertEquals("La contraseña es incorrecta", e.getMessage());
         }catch (Exception e){
-            Assertions.fail("Validacion de cambiarContraseniaIncorrectaTest Falló" + e.getMessage());
+            Assertions.fail("Validacion de cambiarContraseniaIncorrectaTest Falló " + e.getMessage());
         }
     }
-    // Nuevo test: Iniciar sesión
     @Test
     public void iniciarSesionTest() throws Exception {
         //Crear Usuario para encriptar la contraseña:
@@ -429,5 +428,96 @@ public class UsuarioServicioTest {
         assertDoesNotThrow(() -> usuarioServicio.iniciarSesion(iniciarSesionDTO));
         // Comprobamos que el usuario pueda iniciar sesión correctamente.
     }
+    @Test
+    public void iniciarSesionCuentaInactivaErrorTest() throws Exception {
+        //ID USUARIO 1 del DATASET
+        String id = "66b2a9aaa8620e3c1c5437be";
+        //USUARIO con estado INACTIVA
+        Usuario usuario = usuarioServicio.obtenerUsuario(id);
 
+        IniciarSesionDTO iniciarSesionDTO = new IniciarSesionDTO(
+                usuario.getEmail(), // Email
+                usuario.getContrasenia() // Contraseña
+        );
+        try{
+            usuarioServicio.iniciarSesion(iniciarSesionDTO);
+            Assertions.fail("Validacion de iniciarSesionCuentaInactivaErrorTest Falló");
+        }catch (CuentaInactivaEliminadaException e){
+            assertEquals("Esta cuenta aún no ha sido activada", e.getMessage());
+        }catch (Exception e){
+            Assertions.fail("Validacion de iniciarSesionCuentaInactivaErrorTest Falló " + e.getMessage());
+        }
+    }
+    @Test
+    public void iniciarSesionContraseniaIncorrectaErrorTest() throws Exception {
+        //Crear Usuario para encriptar la contraseña:
+        String email = "nicolasemail@email.com";
+        String contrasenia = "mipassword";
+
+        CrearUsuarioDTO registroClienteDTO = new CrearUsuarioDTO(
+                "3434343434",
+                "Nicolas Jurado",
+                "Calle 25 # 5-6",
+                "32783111",
+                email,
+                contrasenia
+        );
+        String id = usuarioServicio.crearUsuario(registroClienteDTO);        //USUARIO con estado INACTIVA
+        //Obtenemos el usuario para cambiarle el estadoa  ACTIVA para que
+        //no entre a la excepcion de que no esta activada
+        Usuario usuario = usuarioServicio.obtenerUsuario(id);
+        usuario.setEstadoUsuario(EstadoUsuario.ACTIVA);
+        usuarioRepo.save(usuario);
+
+        IniciarSesionDTO iniciarSesionDTO = new IniciarSesionDTO(
+                email, // Email
+                "ContraseñaIncorrecta"// ContraseñaIncorrecta
+        );
+        try{
+            usuarioServicio.iniciarSesion(iniciarSesionDTO);
+            Assertions.fail("Validacion de iniciarSesionContraseniaIncorrectaErrorTest Falló");
+        }catch (ContraseniaIncorrectaException e){
+            assertEquals("La contraseña es incorrecta", e.getMessage());
+        }catch (Exception e){
+            Assertions.fail("Validacion de iniciarSesionContraseniaIncorrectaErrorTest Falló " + e.getMessage());
+        }
+    }
+    @Test
+    public void iniciarSesionCuentaBloqueadaErrorTest() throws Exception {
+        //Crear Usuario para encriptar la contraseña:
+        String email = "pepitoemail@email.com";
+        String contrasenia = "mipassword";
+
+        CrearUsuarioDTO registroClienteDTO = new CrearUsuarioDTO(
+                "1234121212",
+                "Pepito Dias",
+                "Calle 78 # 4-1",
+                "324998822",
+                email,
+                contrasenia
+        );
+        String id = usuarioServicio.crearUsuario(registroClienteDTO);        //USUARIO con estado INACTIVA
+        //Obtenemos el usuario para cambiarle el estadoa  ACTIVA para que
+        //no entre a la excepcion de que no esta activada, ademas setiamos el # de fallos al maximo (5)
+        //y agregamos el tiempo de bloqueo
+        Usuario usuario = usuarioServicio.obtenerUsuario(id);
+        usuario.setEstadoUsuario(EstadoUsuario.ACTIVA);
+        usuario.setFallosInicioSesion(5);
+        usuario.setTiempoBloqueo(LocalDateTime.now().plusMinutes(5));
+
+        usuarioRepo.save(usuario);
+
+        IniciarSesionDTO iniciarSesionDTO = new IniciarSesionDTO(
+                email,
+                contrasenia
+        );
+        try{
+            usuarioServicio.iniciarSesion(iniciarSesionDTO);
+            Assertions.fail("Validacion de iniciarSesionCuentaBloqueadaErrorTest Falló");
+        }catch (CuentaBloqueadaException e){
+            assertEquals("La cuenta se encuentra bloqueada por demasiados intentos, espere 5 minutos", e.getMessage());
+        }catch (Exception e){
+            Assertions.fail("Validacion de iniciarSesionCuentaBloqueadaErrorTest Falló " + e.getMessage());
+        }
+    }
 }
