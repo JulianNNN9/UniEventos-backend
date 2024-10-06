@@ -39,7 +39,5 @@ public class ImagenesServiceImple implements ImagenesService {
             throw new Exception("No se pudo eliminar la imagen: " + nombreImagen);
         }
     }
-
-
 }
 

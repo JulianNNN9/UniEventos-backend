@@ -6,12 +6,13 @@ import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.EstadoEvento;
 import co.edu.uniquindio.unieventos.model.Evento;
 import co.edu.uniquindio.unieventos.dto.FiltrosEventosDTO;
+import co.edu.uniquindio.unieventos.model.TipoEvento;
 import co.edu.uniquindio.unieventos.repositories.EventoRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -19,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 @Service
 @Transactional
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 public class EventoServiceImple implements EventoService {
 
     private final EventoRepo eventoRepo;
+    private final MongoTemplate mongoTemplate;
 
     @Override
     public String crearEvento(CrearEventoDTO crearEventoDTO) {

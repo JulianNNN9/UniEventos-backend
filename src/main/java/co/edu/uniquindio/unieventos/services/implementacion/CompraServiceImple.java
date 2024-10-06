@@ -194,8 +194,10 @@ public class CompraServiceImple implements CompraService {
 
             // Obtener el evento y la localidad del ítem
             Evento evento = eventoService.obtenerEvento(item.getIdEvento());
-            Localidad localidad = evento.obtenerLocalidad(item.getNombreLocalidad());
-
+            Localidad localidad = evento.getLocalidades().stream()
+                    .filter(localidad1 -> localidad1.getNombreLocalidad().equals(item.getNombreLocalidad()))
+                    .findFirst()
+                    .orElse(null);
 
             // Crear el item de la pasarela
             PreferenceItemRequest itemRequest =
