@@ -13,7 +13,7 @@ db.usuarios.insertMany([
         estadoUsuario: 'INACTIVA',
         email: 'carlosperez@email.com',
         contrasenia: 'hashed_password_1',
-        codigoRegistro: {
+        codigoActivacion: {
             codigo: 'ABC123',
             fechaCreacion: ISODate('2024-08-01T10:00:00.000Z')
         },
@@ -30,7 +30,7 @@ db.usuarios.insertMany([
         estadoUsuario: 'INACTIVA',
         email: 'lauragomez@email.com',
         contrasenia: 'hashed_password_2',
-        codigoRegistro: {
+        codigoActivacion: {
             codigo: 'DEF456',
             fechaCreacion: ISODate('2024-08-01T11:00:00.000Z')
         },
@@ -47,7 +47,7 @@ db.usuarios.insertMany([
         estadoUsuario: 'INACTIVA',
         email: 'josemartinez@email.com',
         contrasenia: 'hashed_password_3',
-        codigoRegistro: {
+        codigoActivacion: {
             codigo: 'GHI789',
             fechaCreacion: ISODate('2024-08-01T12:00:00.000Z')
         },
@@ -64,7 +64,7 @@ db.usuarios.insertMany([
         estadoUsuario: 'INACTIVA',
         email: 'anaruiz@email.com',
         contrasenia: 'hashed_password_4',
-        codigoRegistro: {
+        codigoActivacion: {
             codigo: 'JKL012',
             fechaCreacion: ISODate('2024-08-01T13:00:00.000Z')
         },
@@ -81,7 +81,7 @@ db.usuarios.insertMany([
         estadoUsuario: 'ACTIVA',
         email: 'davidtorres@email.com',
         contrasenia: 'hashed_password_5',
-        codigoRegistro: {
+        codigoActivacion: {
             codigo: 'MNO345',
             fechaCreacion: ISODate('2024-08-01T14:00:00.000Z')
         },

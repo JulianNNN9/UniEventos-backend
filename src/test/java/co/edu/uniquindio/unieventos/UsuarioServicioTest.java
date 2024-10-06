@@ -2,7 +2,7 @@ package co.edu.uniquindio.unieventos;
 
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
 import co.edu.uniquindio.unieventos.exceptions.*;
-import co.edu.uniquindio.unieventos.model.CodigoActivacion;
+import co.edu.uniquindio.unieventos.model.CodigoRecuperacion;
 import co.edu.uniquindio.unieventos.model.EstadoUsuario;
 import co.edu.uniquindio.unieventos.model.Usuario;
 import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
@@ -196,11 +196,11 @@ public class UsuarioServicioTest {
 
         //Simular que el Usuario ya le dio a RecuperarContraseña (enviarCodigoRecuperacionCuenta)
         // por ende se asgino un nuevo codigo de recuperacion al usuario
-        CodigoActivacion codigoActivacion = CodigoActivacion.builder()
+        CodigoRecuperacion codigoRecuperacion = CodigoRecuperacion.builder()
                 .codigo("123456")
                 .fechaCreacion(LocalDateTime.now())
                 .build();
-        usuario.setCodigoRecuperacionContrasenia(codigoActivacion);
+        usuario.setCodigoRecuperacion(codigoRecuperacion);
 
         //Guardamos el usuario con el nuevo codigo de recuperacion
         usuarioRepo.save(usuario);
@@ -208,7 +208,7 @@ public class UsuarioServicioTest {
         Thread.sleep(1000);
 
         RecuperarContraseniaDTO recuperarContraseniaDTO = new RecuperarContraseniaDTO(
-                idUsuario, // ID del Usuario 4
+                usuario.getEmail(), // Correo del Usuario 4
                 "123456", // Código de verificación
                 "nuevaPassword", // Nueva contraseña
                 "nuevaPassword" // Confirmación de nueva contraseña
@@ -217,26 +217,30 @@ public class UsuarioServicioTest {
         assertDoesNotThrow(() -> usuarioServicio.recuperarContrasenia(recuperarContraseniaDTO));
     }
     @Test
+    public void recuperarContraseniaEmailNoExisteErrorTest() throws Exception {
+
+        String correoNoExiste = "correonoexiste@gmail.com";
+        RecuperarContraseniaDTO recuperarContraseniaDTO = new RecuperarContraseniaDTO(
+                correoNoExiste, // ID del Usuario 4
+                "123456", // Código de verificación
+                "nuevaPassword", // Nueva contraseña
+                "nuevaPassword2" // Confirmación de nueva contraseña DIFERENTE
+        );
+
+        try{
+            usuarioServicio.recuperarContrasenia(recuperarContraseniaDTO);
+            Assertions.fail("Validacion de recuperarContraseniaEmailNoExisteErrorTest Falló");
+        }catch (ContraseniaNoCoincidenException e){
+            assertEquals("Email no encontrado", e.getMessage());
+        }catch (Exception e){
+            Assertions.fail("Validacion de recuperarContraseniaEmailNoExisteErrorTest Falló" + e.getMessage());
+        }
+    }
+    @Test
     public void recuperarContraseniaNoCoincidenErrorTest() throws Exception {
-        // ID del USUARIO 4 del DataSet
-        String idUsuario = "66b2c1517f3b340441ffdeb2";
-        Usuario usuario = usuarioServicio.obtenerUsuario(idUsuario);
-
-        //Simular que el Usuario ya le dio a RecuperarContraseña (enviarCodigoRecuperacionCuenta)
-        // por ende se asgino un nuevo codigo de recuperacion al usuario
-        CodigoActivacion codigoActivacion = CodigoActivacion.builder()
-                .codigo("123456")
-                .fechaCreacion(LocalDateTime.now())
-                .build();
-        usuario.setCodigoRecuperacionContrasenia(codigoActivacion);
-
-        //Guardamos el usuario con el nuevo codigo de recuperacion
-        usuarioRepo.save(usuario);
-
-        Thread.sleep(1000);
 
         RecuperarContraseniaDTO recuperarContraseniaDTO = new RecuperarContraseniaDTO(
-                idUsuario, // ID del Usuario 4
+                "anaruiz@email.com", // ID del Usuario 4
                 "123456", // Código de verificación
                 "nuevaPassword", // Nueva contraseña
                 "nuevaPassword2" // Confirmación de nueva contraseña DIFERENTE
@@ -259,11 +263,11 @@ public class UsuarioServicioTest {
 
         //Simular que el Usuario ya le dio a RecuperarContraseña (enviarCodigoRecuperacionCuenta)
         // por ende se asgino un nuevo codigo de recuperacion al usuario
-        CodigoActivacion codigoActivacion = CodigoActivacion.builder()
+        CodigoRecuperacion codigoRecuperacion = CodigoRecuperacion.builder()
                 .codigo("123456")
                 .fechaCreacion(LocalDateTime.now().minusMinutes(15)) //Restar 15 Minutos para expirar el codigo
                 .build();
-        usuario.setCodigoRecuperacionContrasenia(codigoActivacion);
+        usuario.setCodigoRecuperacion(codigoRecuperacion);
 
         //Guardamos el usuario con el nuevo codigo de recuperacion
         usuarioRepo.save(usuario);
@@ -271,7 +275,7 @@ public class UsuarioServicioTest {
         Thread.sleep(1000);
 
         RecuperarContraseniaDTO recuperarContraseniaDTO = new RecuperarContraseniaDTO(
-                idUsuario, // ID del Usuario 4
+                usuario.getEmail(), // ID del Usuario 4
                 "123456", // Código de verificación
                 "nuevaPassword", // Nueva contraseña
                 "nuevaPassword" // Confirmación de nueva contraseña
@@ -294,11 +298,11 @@ public class UsuarioServicioTest {
 
         //Simular que el Usuario ya le dio a RecuperarContraseña (enviarCodigoRecuperacionCuenta)
         // por ende se asgino un nuevo codigo de recuperacion al usuario
-        CodigoActivacion codigoActivacion = CodigoActivacion.builder()
+        CodigoRecuperacion codigoRecuperacion = CodigoRecuperacion.builder()
                 .codigo("123456")
                 .fechaCreacion(LocalDateTime.now())
                 .build();
-        usuario.setCodigoRecuperacionContrasenia(codigoActivacion);
+        usuario.setCodigoRecuperacion(codigoRecuperacion);
 
         //Guardamos el usuario con el nuevo codigo de recuperacion
         usuarioRepo.save(usuario);
@@ -378,7 +382,7 @@ public class UsuarioServicioTest {
                 "Juan Sebastian Orozco",
                 "Calle 20 # 100-200",
                 "3123333333",
-                "juliana.hoyosg@uqvirtual.edu.co",
+                "juliana.hoyosg@email.com",
                 contrasenia
         );
         String id = usuarioServicio.crearUsuario(registroClienteDTO);

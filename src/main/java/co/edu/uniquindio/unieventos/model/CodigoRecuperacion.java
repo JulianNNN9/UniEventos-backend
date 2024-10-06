@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Data
 @Builder
-public class CodigoActivacion {
+public class CodigoRecuperacion {
 
     private String codigo;
     private LocalDateTime fechaCreacion;
