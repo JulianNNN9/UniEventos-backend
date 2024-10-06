@@ -16,7 +16,7 @@ public class FirebaseConfig {
     @Bean
     public FirebaseApp intializeFirebase() throws IOException {
         FileInputStream serviceAccount = new FileInputStream(
-                "src/main/resources/firebase.json"
+                "src/main/resources/firebase_key.json"
         );
 
 
