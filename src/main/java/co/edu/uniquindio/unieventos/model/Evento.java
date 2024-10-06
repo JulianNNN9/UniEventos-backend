@@ -32,12 +32,5 @@ public class Evento {
     private String imagenPortada;
     private String imagenLocalidades;
     private EstadoEvento estadoEvento;
-
-    public Localidad obtenerLocalidad(String nombreLocalidad) {
-        return localidades.stream()
-                .filter(localidad -> localidad.getNombreLocalidad().equals(nombreLocalidad))
-                .findFirst()
-                .orElse(null);
-    }
 }
 

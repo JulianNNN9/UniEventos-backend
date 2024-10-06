@@ -1,7 +1,8 @@
 package co.edu.uniquindio.unieventos.controllers;
 
 import co.edu.uniquindio.unieventos.dto.MensajeDTO;
-import co.edu.uniquindio.unieventos.dto.cupon.CrearEditarCuponDTO;
+import co.edu.uniquindio.unieventos.dto.cupon.CrearCuponDTO;
+import co.edu.uniquindio.unieventos.dto.cupon.EditarCuponDTO;
 import co.edu.uniquindio.unieventos.dto.evento.CrearEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.EditarEventoDTO;
 import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
@@ -46,13 +47,13 @@ public class AdminControlador {
     }
 
     @PostMapping ("/cupon/crear-cupon")
-    public ResponseEntity<MensajeDTO<String>> crearCupon(@Valid @RequestBody CrearEditarCuponDTO crearEditarCuponDTO) throws Exception {
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, cuponService.crearCupon(crearEditarCuponDTO)));
+    public ResponseEntity<MensajeDTO<String>> crearCupon(@Valid @RequestBody CrearCuponDTO crearCuponDTO) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, cuponService.crearCupon(crearCuponDTO)));
     }
 
     @PutMapping ("/cupon/editar-cupon")
-    public ResponseEntity<MensajeDTO<String>> editarCupon(@Valid @RequestBody CrearEditarCuponDTO crearEditarCuponDTO) throws Exception {
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, cuponService.editarCupon(crearEditarCuponDTO)));
+    public ResponseEntity<MensajeDTO<String>> editarCupon(@Valid @RequestBody EditarCuponDTO editarCuponDTO) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, cuponService.editarCupon(editarCuponDTO)));
     }
 
     @GetMapping ("/cupon/eliminar-cupon/{idCupon}")

@@ -3,7 +3,6 @@ package co.edu.uniquindio.unieventos.services.interfaces;
 import co.edu.uniquindio.unieventos.dto.evento.*;
 import co.edu.uniquindio.unieventos.model.Evento;
 import co.edu.uniquindio.unieventos.dto.FiltrosEventosDTO;
-
 import java.util.List;
 
 public interface EventoService {

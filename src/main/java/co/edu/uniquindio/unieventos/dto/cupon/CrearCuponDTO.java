@@ -6,10 +6,7 @@ import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
-public record CrearEditarCuponDTO(
-
-        @NotBlank(message = "El id no puede estar vacío")
-        String id,
+public record CrearCuponDTO (
 
         @NotBlank(message = "El código no puede estar vacío")
         @Size(max = 20, message = "El código no puede exceder los 20 caracteres")
@@ -33,5 +30,5 @@ public record CrearEditarCuponDTO(
         @NotNull(message = "La fecha de vencimiento es obligatoria")
         @Future(message = "La fecha de vencimiento debe estar en el futuro")
         LocalDate fechaVencimiento
-) {
+){
 }

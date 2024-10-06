@@ -30,7 +30,5 @@ public class ImagenesServiceImple implements ImagenesService {
         Blob blob = bucket.get(nombreImagen);
         blob.delete();
     }
-
-
 }
 

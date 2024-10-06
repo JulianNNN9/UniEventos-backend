@@ -29,7 +29,6 @@ import java.util.Map;
 public class UsuarioControlador {
 
     private final UsuarioService usuarioService;
-    private final CuponService cuponService;
     private final CompraService compraService;
     private final CarritoService carritoService;
 
@@ -62,11 +61,6 @@ public class UsuarioControlador {
     public ResponseEntity<MensajeDTO<String>> cambiarContrasenia(@RequestBody CambiarContraseniaDTO cambiarContraseniaDTO) throws Exception{
         usuarioService.cambiarContrasenia(cambiarContraseniaDTO);
         return ResponseEntity.ok().body( new MensajeDTO<>(false, "Contraseña cambiada correctamente") );
-    }
-
-    @GetMapping ("/cupon/obtener-cupon/{idCupon}")
-    public ResponseEntity<MensajeDTO<Cupon>> obtenerCupon(@PathVariable String idCupon) throws Exception {
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, cuponService.obtenerCupon(idCupon)));
     }
 
     @PostMapping("/compra/crear-compra")
