@@ -25,10 +25,19 @@ public class ImagenesServiceImple implements ImagenesService {
     }
 
     @Override
-    public void eliminarImagen(String nombreImagen) throws Exception{
+    public void eliminarImagen(String nombreImagen) throws Exception {
         Bucket bucket = StorageClient.getInstance().bucket();
         Blob blob = bucket.get(nombreImagen);
-        blob.delete();
+
+        if (blob == null) {
+            throw new Exception("No se encontró la imagen con el nombre: " + nombreImagen);
+        }
+
+        // Intentar eliminar el archivo
+        boolean deleted = blob.delete();
+        if (!deleted) {
+            throw new Exception("No se pudo eliminar la imagen: " + nombreImagen);
+        }
     }
 }
 

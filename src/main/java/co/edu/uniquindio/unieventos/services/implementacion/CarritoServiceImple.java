@@ -6,11 +6,14 @@ import co.edu.uniquindio.unieventos.dto.carrito.EliminarDelCarritoDTO;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.Carrito;
 import co.edu.uniquindio.unieventos.model.DetalleCarrito;
+import co.edu.uniquindio.unieventos.model.Evento;
 import co.edu.uniquindio.unieventos.model.Usuario;
 import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CarritoService;
+import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -26,6 +29,7 @@ public class CarritoServiceImple implements CarritoService {
 
     private final CarritoRepo carritoRepo;
     private final UsuarioService usuarioService;
+    private final EventoService eventoService;
 
     @Override
     public String agregarAlCarrito(AgregarItemDTO agregarItemDTO) throws Exception {
@@ -35,6 +39,21 @@ public class CarritoServiceImple implements CarritoService {
         carrito.getItemsCarrito().add(agregarItemDTO.detalleCarrito());
 
         carritoRepo.save(carrito);
+
+        Evento evento = eventoService.obtenerEvento(agregarItemDTO.detalleCarrito().getIdEvento());
+
+        evento.getLocalidades().stream()
+                .filter(localidad -> localidad.getNombreLocalidad().equals(agregarItemDTO.detalleCarrito().getNombreLocalidad()))
+                .findFirst()
+                .ifPresent(localidad -> {
+                    localidad.setEntradasRestantes(localidad.getEntradasRestantes() - agregarItemDTO.detalleCarrito().getCantidad());
+                    try {
+                        eventoService.saveEvento(evento);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+
 
         return "Item agregado al carrito con éxito.";
     }
@@ -63,6 +82,8 @@ public class CarritoServiceImple implements CarritoService {
 
         carrito.setItemsCarrito(itemsFiltrados);
 
+        // Dónde vuelve a aumentar la cantidad de entradas disponibles?
+
         carritoRepo.save(carrito);
 
         return "Item eliminado del carrito con éxito.";
@@ -84,6 +105,8 @@ public class CarritoServiceImple implements CarritoService {
             detalleCarrito.setCantidad(editarCarritoDTO.cantidadActulizada());
         }
 
+        // Dónde vuelve a aumentar la cantidad de entradas disponibles?
+
         carritoRepo.save(carrito);
 
         return "Carrito editado exitosamente.";
@@ -97,7 +120,7 @@ public class CarritoServiceImple implements CarritoService {
         Carrito carrito = Carrito.builder()
                 .fecha(LocalDateTime.now())
                 .itemsCarrito(new ArrayList<>())
-                .idUsuario(usuario.getId())
+                .idUsuario(new ObjectId(usuario.getId()))
                 .build();
 
         carritoRepo.save(carrito);

@@ -11,7 +11,7 @@ public record CrearUsuarioDTO(
     @NotBlank @Length(max = 30) String nombreCompleto,
     @Length(max = 50) String direccion,
     @Length(max = 10) String telefono,
-    @NotBlank @Length(max = 30) @Email String email,
+    @NotBlank @Length(max = 100) @Email String email,
     @Pattern(regexp = "^[A-Z](.*[!@#$%^&*])$", message = "La contraseña debe comenzar con una letra mayúscula y terminar con un carácter especial.") @NotBlank @Length(min = 8 ) @Length(max = 24) String contrasenia
 
 ){

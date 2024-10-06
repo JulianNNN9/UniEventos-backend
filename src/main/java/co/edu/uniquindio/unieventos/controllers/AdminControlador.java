@@ -9,6 +9,7 @@ import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
 import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
 import co.edu.uniquindio.unieventos.services.interfaces.ImagenesService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

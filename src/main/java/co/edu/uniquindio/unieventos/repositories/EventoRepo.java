@@ -16,13 +16,12 @@ public interface EventoRepo extends MongoRepository<Evento, String> {
 
     // Metodos de filtrado, puede recibir nulos
     @Query(value = "{ $and: [ " +
-            "  { $or: [ { 'nombreEvento': { $regex: ?0, $options: 'i' } }, { ?0: '' } ] }, " +
+            "  { $or: [ { 'nombreEvento': { $regex: ?0, $options: 'i' } }, { ?0: null }, { ?0: '' } ] }, " +
             "  { $or: [ { 'tipoEvento': ?1 }, { ?1: null }, { ?1: '' } ] }, " +
-            "  { $or: [ { 'ciudad': ?2 }, { ?2: '' } ] } " +
+            "  { $or: [ { 'ciudadEvento': ?2 }, { ?2: null }, { ?2: '' } ] } " +
             "] }",
             fields = "{ 'nombreEvento': 1, 'direccionEvento': 1, 'ciudadEvento': 1, 'fechaEvento': 1 }")
-    List<ItemEventoDTO> findByNombreTipoCiudad(String nombreEvento, TipoEvento tipoEvento, String ciudad);
-
+    List<ItemEventoDTO> findByNombreTipoCiudad(String nombreEvento, String tipoEvento, String ciudadEvento);
     // Fin metodos de filtrado
 
     // Metodo para encontrar los nuevos eventos que se crearon ayer y hoy
