@@ -30,6 +30,8 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+/src/test/resources/firebase_key.json
+/src/main/resources/firebase_key.json
 
 ### NetBeans ###
 /nbproject/private/

@@ -25,11 +25,12 @@ public interface UsuarioService {
 
     Usuario obtenerUsuario(String id) throws Exception;
 
-    Usuario obtenerUsuarioCorreo(String correo) throws RecursoNoEncontradoException;
+    Usuario obtenerUsuarioPorEmail(String correo) throws RecursoNoEncontradoException;
 
-    void incrementarIntentosFallidos(String correo) throws Exception;
+    void incrementarIntentosFallidos(String correo) throws RecursoNoEncontradoException;
 
-    TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception;
+    TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws RecursoNoEncontradoException,
+            CuentaInactivaEliminadaException, CuentaBloqueadaException, ContraseniaIncorrectaException;
 
     void activarCuenta(String codigoActivacion) throws Exception;
 }

@@ -6,6 +6,7 @@ import co.edu.uniquindio.unieventos.dto.TokenDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
 import co.edu.uniquindio.unieventos.exceptions.*;
 import co.edu.uniquindio.unieventos.model.CodigoActivacion;
+import co.edu.uniquindio.unieventos.model.CodigoRecuperacion;
 import co.edu.uniquindio.unieventos.model.EstadoUsuario;
 import co.edu.uniquindio.unieventos.model.Rol;
 import co.edu.uniquindio.unieventos.model.Usuario;
@@ -56,12 +57,6 @@ public class UsuarioServiceImple implements UsuarioService {
                 .rol(Rol.CLIENTE)
                 .estadoUsuario(EstadoUsuario.INACTIVA)
                 .fechaRegistro(LocalDateTime.now())
-                .codigoRegistro(
-                        CodigoActivacion.builder()
-                            .codigo(null)
-                            .fechaCreacion(LocalDateTime.now())
-                        .build()
-                )
         .build();
 
         Usuario usuarioGuardado = usuarioRepo.save(nuevoUsuario);
@@ -99,9 +94,6 @@ public class UsuarioServiceImple implements UsuarioService {
 
         Usuario usuario = obtenerUsuario(id);
 
-        if(usuario.getEstadoUsuario() == EstadoUsuario.ELIMINADA){
-            throw new RecursoNoEncontradoException("Usuario no encontrado");
-        }
         return new InformacionUsuarioDTO(
                 usuario.getCedula(),
                 usuario.getNombreCompleto(),
@@ -114,25 +106,19 @@ public class UsuarioServiceImple implements UsuarioService {
     @Override
     public void enviarCodigoRecuperacionCuenta(EnviarCodigoRecuperacionAlCorreoDTO enviarCodigoRecuperacionAlCorreoDTO) throws Exception {
 
-        Optional<Usuario> optionalUsuario = usuarioRepo.findByEmail(enviarCodigoRecuperacionAlCorreoDTO.correo());
+        Usuario usuario= obtenerUsuarioPorEmail(enviarCodigoRecuperacionAlCorreoDTO.correo());
 
-        if (optionalUsuario.isEmpty()) {
-            throw new RecursoNoEncontradoException("Email no encontrado");
-        }
-
-        Usuario usuario = optionalUsuario.get();
-
-        CodigoActivacion codigoActivacion = CodigoActivacion.builder()
+        CodigoRecuperacion codigoRecuperacion = CodigoRecuperacion.builder()
                 .codigo(generarCodigoActivacion())
                 .fechaCreacion(LocalDateTime.now())
                 .build();
 
-        usuario.setCodigoRecuperacionContrasenia(codigoActivacion);
+        usuario.setCodigoRecuperacion(codigoRecuperacion);
         usuarioRepo.save(usuario);
 
         EmailDTO emailDTO = new EmailDTO(
                 "Recuperacion de Cuenta",
-                "Su Codigo de Recuperacion es: " + codigoActivacion.getCodigo(),
+                "Su Codigo de Recuperacion es: " + codigoRecuperacion.getCodigo(),
                 enviarCodigoRecuperacionAlCorreoDTO.correo());
 
         emailService.enviarCorreo(emailDTO);
@@ -140,11 +126,7 @@ public class UsuarioServiceImple implements UsuarioService {
     @Override
     public void enviarCodigoActivacionCuenta(EnviarCodigoActivacionAlCorreoDTO enviarCodigoActivacionAlCorreoDTO) throws Exception {
 
-        Optional<Usuario> usuario = usuarioRepo.findByEmail(enviarCodigoActivacionAlCorreoDTO.correo());
-        if(usuario.isEmpty()){
-            throw new RecursoNoEncontradoException("Correo no encontrado");
-        }
-        Usuario usuarioActivacion = usuario.get();
+        Usuario usuarioActivacion = obtenerUsuarioPorEmail(enviarCodigoActivacionAlCorreoDTO.correo());
 
         CodigoActivacion codigoActivacion= CodigoActivacion
                 .builder()
@@ -152,7 +134,7 @@ public class UsuarioServiceImple implements UsuarioService {
                 .fechaCreacion(LocalDateTime.now())
                 .build();
 
-        usuarioActivacion.setCodigoRegistro(codigoActivacion);
+        usuarioActivacion.setCodigoActivacion(codigoActivacion);
         usuarioRepo.save(usuarioActivacion);
 
         EmailDTO emailDTO = new EmailDTO(
@@ -173,11 +155,11 @@ public class UsuarioServiceImple implements UsuarioService {
             throw new ContraseniaNoCoincidenException("Las contraseñas no coindicen");
         }
 
-        if (usuario.getCodigoRecuperacionContrasenia().getFechaCreacion().plusMinutes(15).isBefore(LocalDateTime.now())){
+        if (usuario.getCodigoRecuperacion().getFechaCreacion().plusMinutes(15).isBefore(LocalDateTime.now())){
             throw new CodigoExpiradoException("El código expiró");
         }
 
-        if (!usuario.getCodigoRecuperacionContrasenia().getCodigo().equals(recuperarContraseniaDTO.codigoVerificacion())){
+        if (!usuario.getCodigoRecuperacion().getCodigo().equals(recuperarContraseniaDTO.codigoVerificacion())){
             throw new CodigoInvalidoException("El código es incorrecto");
         }
 
@@ -206,23 +188,18 @@ public class UsuarioServiceImple implements UsuarioService {
     }
 
     @Override
-    public TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws Exception {
+    public TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws RecursoNoEncontradoException,
+            CuentaInactivaEliminadaException, CuentaBloqueadaException, ContraseniaIncorrectaException {
 
-        Optional<Usuario> optionalUsuario = usuarioRepo.findByEmail(iniciarSesionDTO.email());
+        Usuario usuario = obtenerUsuarioPorEmail(iniciarSesionDTO.email());
 
-        if (optionalUsuario.isEmpty()){
-            throw new RecursoNoEncontradoException("Este email no está registrado.");
-        }
-
-        Usuario usuario = optionalUsuario.get();
-
-        if (usuario.getEstadoUsuario() == EstadoUsuario.INACTIVA || usuario.getEstadoUsuario() == EstadoUsuario.ELIMINADA){
-            throw new CuentaInactivaEliminadaException("Esta cuenta aún no ha sido activada o ha sido eliminada.");
+        if (usuario.getEstadoUsuario() == EstadoUsuario.INACTIVA){
+            throw new CuentaInactivaEliminadaException("Esta cuenta aún no ha sido activada");
         }
 
         //Manejo del bloqueo de cuenta
         if (estaBloqueada(usuario.getEmail())){
-            throw new CuentaBloqueadaException("La cuenta se encuentra bloqueada por demasiados intentos, espere 5 minutos.");
+            throw new CuentaBloqueadaException("La cuenta se encuentra bloqueada por demasiados intentos, espere 5 minutos");
         }
 
         if (usuario.getTiempoBloqueo() != null && LocalDateTime.now().isAfter(usuario.getTiempoBloqueo())){
@@ -234,7 +211,7 @@ public class UsuarioServiceImple implements UsuarioService {
 
         if( !passwordEncoder.matches(iniciarSesionDTO.contrasenia(), usuario.getContrasenia()) ) {
             incrementarIntentosFallidos(usuario.getEmail());
-            throw new Exception("La contraseña es incorrecta");
+            throw new ContraseniaIncorrectaException("La contraseña es incorrecta");
         }
 
         desbloquearUsuario(usuario.getEmail());
@@ -246,7 +223,7 @@ public class UsuarioServiceImple implements UsuarioService {
 
     @Override
     public void activarCuenta(String codigoActivacion) throws Exception {
-        Optional<Usuario> usuario = usuarioRepo.findByCodigoRegistroCodigo(codigoActivacion);
+        Optional<Usuario> usuario = usuarioRepo.findByCodigoRegistroCodigoAndEstadoUsuarioNot(codigoActivacion, EstadoUsuario.ELIMINADA);
         if(usuario.isEmpty()){
             throw new RecursoNoEncontradoException("Codigo de activacion invalido");
         }
@@ -258,29 +235,27 @@ public class UsuarioServiceImple implements UsuarioService {
     @Override
     public Usuario obtenerUsuario(String id) throws RecursoNoEncontradoException {
 
-        Optional<Usuario> optionalUsuario = usuarioRepo.findById(id);
+        Optional<Usuario> optionalUsuario = usuarioRepo.findByIdAndEstadoUsuarioNot(id, EstadoUsuario.ELIMINADA);
 
         if(optionalUsuario.isEmpty()){
             throw new RecursoNoEncontradoException("Usuario no encontrado");
         }
-
         return optionalUsuario.get();
     }
 
     @Override
-    public Usuario obtenerUsuarioCorreo(String correo) throws RecursoNoEncontradoException {
+    public Usuario obtenerUsuarioPorEmail(String correo) throws RecursoNoEncontradoException {
 
-        Optional<Usuario> optionalUsuario = usuarioRepo.findByEmail(correo);
+        Optional<Usuario> optionalUsuario = usuarioRepo.findByEmailAndEstadoUsuarioNot(correo, EstadoUsuario.ELIMINADA);
 
         if(optionalUsuario.isEmpty()){
-            throw new RecursoNoEncontradoException("Usuario no encontrado");
+            throw new RecursoNoEncontradoException("Email no encontrado");
         }
-
         return optionalUsuario.get();
     }
 
     @Override
-    public void incrementarIntentosFallidos(String correo) throws RecursoEncontradoException {
+    public void incrementarIntentosFallidos(String correo) throws RecursoNoEncontradoException {
         Usuario usuario = obtenerUsuarioPorEmail(correo);
         usuario.setFallosInicioSesion(usuario.getFallosInicioSesion() + 1);
 
@@ -291,33 +266,24 @@ public class UsuarioServiceImple implements UsuarioService {
         usuarioRepo.save(usuario);
     }
 
-    public boolean estaBloqueada(String correo) throws RecursoEncontradoException {
+    private boolean estaBloqueada(String correo) throws RecursoNoEncontradoException {
         Usuario usuario = obtenerUsuarioPorEmail(correo);
         return usuario.getTiempoBloqueo() != null && LocalDateTime.now().isBefore(usuario.getTiempoBloqueo());
     }
 
-    public void desbloquearUsuario(String username) throws RecursoEncontradoException {
+    private void desbloquearUsuario(String username) throws RecursoNoEncontradoException {
         Usuario usuario = obtenerUsuarioPorEmail(username);
         usuario.setFallosInicioSesion(0);
         usuario.setTiempoBloqueo(null);
         usuarioRepo.save(usuario);
     }
 
-    private Usuario obtenerUsuarioPorEmail(String correo) throws RecursoEncontradoException {
-        Optional<Usuario> optionalUsuario = usuarioRepo.findByEmail(correo);
-
-        if (optionalUsuario.isEmpty()){
-            throw new RecursoEncontradoException("Usuario no encontrado.");
-        }
-
-        return optionalUsuario.get();
-    }
-
     private boolean existeEmail(String email) {
-        return usuarioRepo.findByEmail(email).isPresent();
+
+        return usuarioRepo.findByEmailAndEstadoUsuarioNot(email, EstadoUsuario.ELIMINADA).isPresent();
     }
 
-    private boolean existeCedula(String cedula) { return usuarioRepo.findByCedula(cedula).isPresent(); }
+    private boolean existeCedula(String cedula) { return usuarioRepo.findByCedulaAndEstadoUsuarioNot(cedula, EstadoUsuario.ELIMINADA).isPresent(); }
 
     private String generarCodigoActivacion(){
 

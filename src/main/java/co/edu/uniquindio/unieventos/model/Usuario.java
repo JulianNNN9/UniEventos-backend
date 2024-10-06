@@ -27,8 +27,8 @@ public class Usuario {
     private Rol rol;
     private EstadoUsuario estadoUsuario;
     private LocalDateTime fechaRegistro;
-    private CodigoActivacion codigoRegistro;
-    private CodigoActivacion codigoRecuperacionContrasenia;
+    private CodigoActivacion codigoActivacion;
+    private CodigoRecuperacion codigoRecuperacion;
     private int fallosInicioSesion;
     private LocalDateTime tiempoBloqueo;
 }

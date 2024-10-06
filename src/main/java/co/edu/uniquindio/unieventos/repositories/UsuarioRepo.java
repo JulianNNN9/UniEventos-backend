@@ -1,5 +1,6 @@
 package co.edu.uniquindio.unieventos.repositories;
 
+import co.edu.uniquindio.unieventos.model.EstadoUsuario;
 import co.edu.uniquindio.unieventos.model.Usuario;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -9,11 +10,18 @@ import java.util.Optional;
 @Repository
 public interface UsuarioRepo extends MongoRepository<Usuario, String> {
 
-    Optional<Usuario> findByCedula(String cedula);
+    @Query("{ '_id': ?0, 'estadoUsuario': { $ne: ?1 } }")
+    Optional<Usuario> findByIdAndEstadoUsuarioNot(String id, EstadoUsuario estadoUsuario);
 
-    Optional<Usuario> findByEmail(String email);
+    @Query("{ 'cedula': ?0, 'estadoUsuario': { $ne: ?1 } }")
+    Optional<Usuario> findByCedulaAndEstadoUsuarioNot(String cedula, EstadoUsuario estadoUsuario);
 
-    Optional<Usuario> findByEmailAndContrasenia(String email, String contrasenia);
+    @Query("{ 'email': ?0, 'estadoUsuario': { $ne: ?1 } }")
+    Optional<Usuario> findByEmailAndEstadoUsuarioNot(String email, EstadoUsuario estadoUsuario);
 
-    Optional<Usuario> findByCodigoRegistroCodigo(String codigoActivacion);
+    @Query("{ 'email': ?0, 'contrasenia': ?1, 'estadoUsuario': { $ne: ?2 } }")
+    Optional<Usuario> findByEmailAndContraseniaAndEstadoUsuarioNot(String email, String contrasenia, EstadoUsuario estadoUsuario);
+
+    @Query("{ 'codigoRegistro.codigo': ?0, 'estadoUsuario': { $ne: ?1 } }")
+    Optional<Usuario> findByCodigoRegistroCodigoAndEstadoUsuarioNot(String codigoActivacion, EstadoUsuario estadoUsuario);
 }
