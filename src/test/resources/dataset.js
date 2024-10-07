@@ -153,7 +153,7 @@ db.eventos.insertMany([
         fechaEvento: ISODate('2025-07-20T00:00:00.000Z'),
         tipoEvento: 'FESTIVAL',
         direccionEvento: 'Parque Central',
-        ciudadEvento: 'Medellín',
+        ciudadEvento: 'Medellin',
         localidades: [
             { nombreLocalidad: 'VIP', precioLocalidad: 120000, capacidadMaxima: 100, entradasRestantes: 98 },
             { nombreLocalidad: 'GENERAL', precioLocalidad: 60000, capacidadMaxima: 500, entradasRestantes: 498 }
@@ -170,7 +170,7 @@ db.eventos.insertMany([
         fechaEvento: ISODate('2025-09-15T00:00:00.000Z'),
         tipoEvento: 'CONCIERTO',
         direccionEvento: 'Estadio Municipal',
-        ciudadEvento: 'Bogotá',
+        ciudadEvento: 'Bogota',
         localidades: [
             { nombreLocalidad: 'PLATEA', precioLocalidad: 80000, capacidadMaxima: 200, entradasRestantes: 200 },
             { nombreLocalidad: 'GENERAL', precioLocalidad: 50000, capacidadMaxima: 1000, entradasRestantes: 999 }

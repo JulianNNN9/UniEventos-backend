@@ -46,9 +46,9 @@ public class PublicoControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.filtrarEvento(filtrosEventos)));
     }
 
-    @GetMapping ("/eventos/buscar-evento/{valorCampoDeBusqueda}")
-    public ResponseEntity<MensajeDTO<List<ItemEventoDTO>>> buscarEvento(@PathVariable String valorCampoDeBusqueda) throws Exception {
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.buscarEvento(valorCampoDeBusqueda)));
+    @GetMapping ("/eventos/buscar-evento/{nombreEvento}")
+    public ResponseEntity<MensajeDTO<List<ItemEventoDTO>>> buscarEvento(@PathVariable String nombreEvento) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.buscarEventoPorNombre(nombreEvento)));
     }
 
     @GetMapping ("/eventos/listar-eventos")

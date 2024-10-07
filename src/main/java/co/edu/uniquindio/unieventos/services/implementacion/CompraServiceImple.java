@@ -50,7 +50,7 @@ public class CompraServiceImple implements CompraService {
             VALIDACIÓN DEL CUPON
          */
 
-        Cupon cupon = cuponService.obtenerCupon(crearCompraDTO.codigoCupon());
+        Cupon cupon = cuponService.obtenerCuponPorCodigo(crearCompraDTO.codigoCupon());
 
         if(cupon.getTipoCupon() == TipoCupon.UNICO){
 

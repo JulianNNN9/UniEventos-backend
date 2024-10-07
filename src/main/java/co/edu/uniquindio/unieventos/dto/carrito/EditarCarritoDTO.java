@@ -9,6 +9,6 @@ public record EditarCarritoDTO(
         String nombreLocalidad,
         String idEvento,
 
-        Integer cantidadActulizada
+        Integer cantidadActualizada
 ) {
 }

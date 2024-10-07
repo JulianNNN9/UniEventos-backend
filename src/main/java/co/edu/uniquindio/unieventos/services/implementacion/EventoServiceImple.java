@@ -8,6 +8,7 @@ import co.edu.uniquindio.unieventos.model.Evento;
 import co.edu.uniquindio.unieventos.dto.FiltrosEventosDTO;
 import co.edu.uniquindio.unieventos.repositories.EventoRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
+import co.edu.uniquindio.unieventos.utils.TextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,9 +33,9 @@ public class EventoServiceImple implements EventoService {
     public String crearEvento(CrearEventoDTO crearEventoDTO) {
 
         Evento evento = Evento.builder()
-                .nombreEvento(crearEventoDTO.nombreEvento())
-                .direccionEvento(crearEventoDTO.direccionEvento())
-                .ciudadEvento(crearEventoDTO.ciudadEvento())
+                .nombreEvento(TextUtils.normalizarTexto(crearEventoDTO.nombreEvento()))
+                .direccionEvento(TextUtils.normalizarTexto(crearEventoDTO.direccionEvento()))
+                .ciudadEvento(TextUtils.normalizarTexto(crearEventoDTO.ciudadEvento()))
                 .descripcionEvento(crearEventoDTO.descripcionEvento())
                 .tipoEvento(crearEventoDTO.tipoEvento())
                 .fechaEvento(LocalDateTime.of(crearEventoDTO.fechaEvento(), LocalTime.MIDNIGHT))
@@ -45,7 +47,7 @@ public class EventoServiceImple implements EventoService {
                 .build();
 
         eventoRepo.save(evento);
-        return "Evento creado exitosamente.";
+        return "Evento creado exitosamente";
     }
 
     @Override
@@ -53,9 +55,9 @@ public class EventoServiceImple implements EventoService {
 
         Evento evento = obtenerEvento(editarEventoDTO.idEvento());
 
-        evento.setNombreEvento(editarEventoDTO.nombreEvento());
-        evento.setDireccionEvento(editarEventoDTO.direccionEvento());
-        evento.setCiudadEvento(editarEventoDTO.ciudadEvento());
+        evento.setNombreEvento(TextUtils.normalizarTexto(editarEventoDTO.nombreEvento()));
+        evento.setDireccionEvento(TextUtils.normalizarTexto(editarEventoDTO.direccionEvento()));
+        evento.setCiudadEvento(TextUtils.normalizarTexto(editarEventoDTO.ciudadEvento()));
         evento.setDescripcionEvento(editarEventoDTO.descripcionEvento());
         evento.setFechaEvento(editarEventoDTO.fechaEvento());
         evento.setFechaCreacion(LocalDate.now());
@@ -75,7 +77,7 @@ public class EventoServiceImple implements EventoService {
         Evento evento = obtenerEvento(idEvento);
         evento.setEstadoEvento(EstadoEvento.ELIMINADO);
         eventoRepo.save(evento);
-        return "Evento eliminado exitosamente.";
+        return "Evento eliminado exitosamente";
     }
 
     @Override
@@ -110,12 +112,12 @@ public class EventoServiceImple implements EventoService {
     }
 
 
-    public Evento obtenerEvento(String idEvento) throws Exception {
+    public Evento obtenerEvento(String idEvento) throws RecursoNoEncontradoException {
 
-        Optional<Evento> eventoExistente = eventoRepo.findById(idEvento);
+        Optional<Evento> eventoExistente = eventoRepo.findByIdAndEstadoNot(idEvento, EstadoEvento.ELIMINADO);
 
         if (eventoExistente.isEmpty()) {
-            throw new RecursoNoEncontradoException("No encontrado con el ID: " + idEvento);
+            throw new RecursoNoEncontradoException("Evento no encontrado");
         }
 
         return eventoExistente.get();
@@ -132,18 +134,74 @@ public class EventoServiceImple implements EventoService {
     */
     @Override
     public List<NotificacionEventoDTO> notificarNuevoEvento() throws Exception {
-        return eventoRepo.findNuevosEventosAyerHoy(LocalDate.now().minusDays(1), LocalDate.now());
+        return eventoRepo.findNuevosEventosAyerHoyAndEstadoNot(LocalDate.now().minusDays(1), LocalDate.now(), EstadoEvento.ELIMINADO);
     }
 
     @Override
     public List<ItemEventoDTO> filtrarEvento(FiltrosEventosDTO filtrosEventos) {
-        return eventoRepo.findByNombreTipoCiudad(filtrosEventos.nombreEvento(), filtrosEventos.tipoEvento(), filtrosEventos.ciudadEvento());
+        String nombreEvento = filtrosEventos.nombreEvento();
+        String tipoEvento = filtrosEventos.tipoEvento();
+        String ciudadEvento = filtrosEventos.ciudadEvento();
+
+        // Si todos los filtros son nulos o vacíos, devuelve todos los eventos (excepto los eliminados)
+        if ((nombreEvento == null || nombreEvento.isEmpty()) &&
+                (tipoEvento == null || tipoEvento.isEmpty()) &&
+                (ciudadEvento == null || ciudadEvento.isEmpty())) {
+
+            // Retorna todos los eventos que no están eliminados
+            return eventoRepo.findByEstadoNot(EstadoEvento.ELIMINADO);
+        }
+        // Si todos los filtros son CORRECTOS
+        if ((nombreEvento != null && !nombreEvento.isEmpty()) &&
+                (tipoEvento != null && !tipoEvento.isEmpty()) &&
+                (ciudadEvento != null && !ciudadEvento.isEmpty())) {
+
+            // Retorna todos los eventos que no están eliminados
+            return eventoRepo.findByNombreTipoCiudadAndEstadoNot(nombreEvento, tipoEvento, ciudadEvento, EstadoEvento.ELIMINADO);
+        }
+
+
+        // Filtrar combinaciones de dos parámetros
+        if (nombreEvento != null && !nombreEvento.isEmpty() &&
+                tipoEvento != null && !tipoEvento.isEmpty()) {
+            // Combinación de nombre y tipo
+            return eventoRepo.findByNombreTipoEventoAndEstadoNot(nombreEvento, tipoEvento, EstadoEvento.ELIMINADO);
+        }
+
+        if (nombreEvento != null && !nombreEvento.isEmpty() &&
+                ciudadEvento != null && !ciudadEvento.isEmpty()) {
+            // Combinación de nombre y ciudad
+            return eventoRepo.findByNombreCiudadEventoAndEstadoNot(nombreEvento, ciudadEvento, EstadoEvento.ELIMINADO);
+        }
+
+        if (tipoEvento != null && !tipoEvento.isEmpty() &&
+                ciudadEvento != null && !ciudadEvento.isEmpty()) {
+            // Combinación de tipo y ciudad
+            return eventoRepo.findByTipoCiudadEventoAndEstadoNot(tipoEvento, ciudadEvento, EstadoEvento.ELIMINADO);
+        }
+
+        // Filtrar individualmente si no hay combinaciones que aporten resultados
+        if (nombreEvento != null && !nombreEvento.isEmpty()) {
+            return eventoRepo.findByNombreEventoAndEstadoNot(nombreEvento, EstadoEvento.ELIMINADO);
+        }
+
+        if (tipoEvento != null && !tipoEvento.isEmpty()) {
+            return eventoRepo.findByTipoEventoAndEstadoNot(tipoEvento, EstadoEvento.ELIMINADO);
+        }
+
+        if (ciudadEvento != null && !ciudadEvento.isEmpty()) {
+            return eventoRepo.findByCiudadEventoAndEstadoNot(ciudadEvento, EstadoEvento.ELIMINADO);
+        }
+
+        // Si no se encontraron resultados, retorna una lista vacía o un valor por defecto
+        return Collections.emptyList();
     }
 
-    public List<ItemEventoDTO> buscarEvento(String valorCampoDeBusqueda) {
+    @Override
+    public List<ItemEventoDTO> buscarEventoPorNombre(String nombreEvento) {
         List<ItemEventoDTO> eventosEncontrados = new ArrayList<>();
-        if (!valorCampoDeBusqueda.isEmpty()) {
-            eventosEncontrados = eventoRepo.findByNombreEvento(valorCampoDeBusqueda);
+        if (!nombreEvento.isEmpty()) {
+            eventosEncontrados = eventoRepo.findByNombreEventoAndEstadoNot(nombreEvento, EstadoEvento.ELIMINADO);
         }
         return eventosEncontrados;
     }

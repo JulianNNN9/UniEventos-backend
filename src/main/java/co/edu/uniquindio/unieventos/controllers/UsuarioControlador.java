@@ -1,7 +1,6 @@
 package co.edu.uniquindio.unieventos.controllers;
 
 import co.edu.uniquindio.unieventos.dto.MensajeDTO;
-import co.edu.uniquindio.unieventos.dto.TokenDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.AgregarItemDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.EditarCarritoDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.EliminarDelCarritoDTO;
@@ -15,7 +14,6 @@ import com.mercadopago.resources.preference.Preference;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.el.parser.Token;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,7 +58,7 @@ public class UsuarioControlador {
 
     @GetMapping ("/cupon/obtener-cupon/{idCupon}")
     public ResponseEntity<MensajeDTO<Cupon>> obtenerCupon(@PathVariable String idCupon) throws Exception {
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, cuponService.obtenerCupon(idCupon)));
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, cuponService.obtenerCuponPorId(idCupon)));
     }
 
     @PostMapping("/compra/crear-compra")
@@ -114,9 +112,9 @@ public class UsuarioControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.crearCarrito(idUsuario)));
     }
 
-    @GetMapping("/carrito/obtener-carrito/{idCarrito}")
-    public ResponseEntity<MensajeDTO<Carrito>> obtenerCarrito(@PathVariable String idCarrito) throws Exception {
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.obtenerCarrito(idCarrito)));
+    @GetMapping("/carrito/obtener-carrito/{idUsuario}")
+    public ResponseEntity<MensajeDTO<Carrito>> obtenerCarrito(@PathVariable String idUsuario) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.obtenerCarritoPorIdUsuario(idUsuario)));
     }
 
 }
