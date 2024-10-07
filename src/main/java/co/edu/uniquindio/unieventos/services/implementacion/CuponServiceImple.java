@@ -23,7 +23,7 @@ public class CuponServiceImple implements CuponService {
     private final CuponRepo cuponRepo;
 
     @Override
-    public String crearCupon(CrearEditarCuponDTO crearCuponDTO) throws RecursoEncontradoException {
+    public String crearCupon(CrearCuponDTO crearCuponDTO) throws Exception {
 
         Optional<Cupon> cuponExistente = cuponRepo.findByCodigoAndEstadoNot(crearCuponDTO.codigo(), EstadoCupon.ELIMINADO);
 
@@ -46,7 +46,7 @@ public class CuponServiceImple implements CuponService {
     }
 
     @Override
-    public String editarCupon(CrearEditarCuponDTO crearCuponDTO) throws RecursoNoEncontradoException {
+    public String editarCupon(EditarCuponDTO crearCuponDTO) throws RecursoNoEncontradoException {
 
         Cupon cupon = obtenerCuponPorId(crearCuponDTO.id());
 

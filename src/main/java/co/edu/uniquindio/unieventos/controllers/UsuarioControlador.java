@@ -1,6 +1,7 @@
 package co.edu.uniquindio.unieventos.controllers;
 
 import co.edu.uniquindio.unieventos.dto.MensajeDTO;
+import co.edu.uniquindio.unieventos.dto.TokenDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.AgregarItemDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.EditarCarritoDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.EliminarDelCarritoDTO;
@@ -14,6 +15,7 @@ import com.mercadopago.resources.preference.Preference;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.el.parser.Token;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +29,6 @@ import java.util.Map;
 public class UsuarioControlador {
 
     private final UsuarioService usuarioService;
-    private final CuponService cuponService;
     private final CompraService compraService;
     private final CarritoService carritoService;
 
@@ -54,11 +55,6 @@ public class UsuarioControlador {
     public ResponseEntity<MensajeDTO<String>> cambiarContrasenia(@RequestBody CambiarContraseniaDTO cambiarContraseniaDTO) throws Exception{
         usuarioService.cambiarContrasenia(cambiarContraseniaDTO);
         return ResponseEntity.ok().body( new MensajeDTO<>(false, "Contraseña cambiada correctamente") );
-    }
-
-    @GetMapping ("/cupon/obtener-cupon/{idCupon}")
-    public ResponseEntity<MensajeDTO<Cupon>> obtenerCupon(@PathVariable String idCupon) throws Exception {
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, cuponService.obtenerCuponPorId(idCupon)));
     }
 
     @PostMapping("/compra/crear-compra")
