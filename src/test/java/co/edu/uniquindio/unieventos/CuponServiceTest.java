@@ -1,6 +1,7 @@
 package co.edu.uniquindio.unieventos;
 
-import co.edu.uniquindio.unieventos.dto.cupon.CrearEditarCuponDTO;
+import co.edu.uniquindio.unieventos.dto.cupon.CrearCuponDTO;
+import co.edu.uniquindio.unieventos.dto.cupon.EditarCuponDTO;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.Cupon;
@@ -90,8 +91,7 @@ public class CuponServiceTest {
 
     @Test
     public void crearCuponTest() {
-        CrearEditarCuponDTO crearCuponDTO = new CrearEditarCuponDTO(
-                "",
+        CrearCuponDTO crearCuponDTO = new CrearCuponDTO(
                 "AMORYAMISTAD",
                 "Descuento del 15.5% por el dia del amor y amistad",
                 15.5,
@@ -109,8 +109,7 @@ public class CuponServiceTest {
     public void crearCuponYaExistenteErrorTest() {
         //CUPON 2 DEL DATASET
         String nombreCuponExiste = "PRIMERACOMPRA";
-        CrearEditarCuponDTO crearCuponDTO = new CrearEditarCuponDTO(
-                "",
+        CrearCuponDTO crearCuponDTO = new CrearCuponDTO(
                 nombreCuponExiste,
                 "Descuento del 10% para la primera compra",
                 10.0,
@@ -135,7 +134,7 @@ public class CuponServiceTest {
         String idCupon = "66b2c1517f3b340441ffdeb4";
 
         //Creamos el DTO para editar el cupon
-        CrearEditarCuponDTO crearEditarCuponDTO = new CrearEditarCuponDTO(
+        EditarCuponDTO editarCuponDTO = new EditarCuponDTO(
                 idCupon,
                 "CUPON55",
                 "CUPON MODIFICADO",
@@ -145,7 +144,7 @@ public class CuponServiceTest {
                 LocalDate.now().plusDays(30)
         );
         try{
-            cuponServiceImple.editarCupon(crearEditarCuponDTO);
+            cuponServiceImple.editarCupon(editarCuponDTO);
             Optional<Cupon> cuponEncontrado = cuponRepo.findByIdAndEstadoNot(idCupon, EstadoCupon.ELIMINADO);
             Cupon cupon = null;
             if(cuponEncontrado.isPresent()){
@@ -162,7 +161,7 @@ public class CuponServiceTest {
     public void editarCuponNoExistenteErrorTest() {
         String idCupon = "1234"; //ID Erroneo que no existe en la base de datos
 
-        CrearEditarCuponDTO crearEditarCuponDTO = new CrearEditarCuponDTO(
+        EditarCuponDTO editarCuponDTO = new EditarCuponDTO(
                 idCupon, //ID ERRONEO
                 "CUPON55",
                 "CUPON MODIFICADO",
@@ -172,7 +171,7 @@ public class CuponServiceTest {
                 LocalDate.now().plusDays(30)
         );
         try{
-            cuponServiceImple.editarCupon(crearEditarCuponDTO);
+            cuponServiceImple.editarCupon(editarCuponDTO);
             fail("Validacion de editarCuponNoExistenteErrorTest Falló ");
         } catch (RecursoNoEncontradoException e){
             assertEquals("Cupón no encontrado", e.getMessage());
@@ -193,7 +192,7 @@ public class CuponServiceTest {
     }
 
     @Test
-    public void eliminarCuponNoExistenteTest()throws RecursoNoEncontradoException {
+    public void eliminarCuponNoExistenteTest(){
         String idCupon = "1234"; //ID ERRONEO DEL CUPON
         //Se intenta eliminar el cupon
         try{

@@ -12,22 +12,27 @@ import java.io.IOException;
 @Configuration
 public class FirebaseConfig {
 
+
     @Bean
     public FirebaseApp intializeFirebase() throws IOException {
-
         FileInputStream serviceAccount = new FileInputStream(
-                "G:\\IntelliJ IDEA - workspace\\UniEventos\\src\\main\\resources\\firebase_key.json"
+                "src/main/resources/firebase_key.json"
         );
+
 
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .setStorageBucket("unieventos-proyect.appspot.com")
                 .build();
 
+
         if(FirebaseApp.getApps().isEmpty()) {
             return FirebaseApp.initializeApp(options);
         }
 
+
         return null;
     }
+
+
 }

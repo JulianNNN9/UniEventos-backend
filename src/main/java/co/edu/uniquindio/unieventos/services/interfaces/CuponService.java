@@ -1,6 +1,5 @@
 package co.edu.uniquindio.unieventos.services.interfaces;
 
-import co.edu.uniquindio.unieventos.dto.cupon.CrearEditarCuponDTO;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.dto.cupon.CrearCuponDTO;
@@ -9,9 +8,9 @@ import co.edu.uniquindio.unieventos.model.Cupon;
 
 public interface CuponService {
 
-    String crearCupon(CrearCuponDto CrearCuponDTO) throws RecursoEncontradoException;
+    String crearCupon(CrearCuponDTO crearCuponDTO) throws RecursoEncontradoException;
 
-    String editarCupon(EditarCuponDTO crearCuponDTO)throws RecursoNoEncontradoException;
+    String editarCupon(EditarCuponDTO editarCuponDTO)throws RecursoNoEncontradoException;
 
     String eliminarCupon(String idCupon)throws RecursoNoEncontradoException;
 

@@ -10,7 +10,6 @@ import co.edu.uniquindio.unieventos.services.interfaces.CarritoService;
 import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -159,7 +158,7 @@ public class CarritoServiceImple implements CarritoService {
         Carrito carrito = Carrito.builder()
                 .fecha(LocalDateTime.now())
                 .itemsCarrito(new ArrayList<>())
-                .idUsuario(new ObjectId(usuario.getId()))
+                .idUsuario(usuario.getId())
                 .build();
 
         carritoRepo.save(carrito);

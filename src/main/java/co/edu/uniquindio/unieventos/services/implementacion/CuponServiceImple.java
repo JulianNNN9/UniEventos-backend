@@ -9,7 +9,6 @@ import co.edu.uniquindio.unieventos.repositories.CuponRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
 import co.edu.uniquindio.unieventos.utils.TextUtils;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +22,7 @@ public class CuponServiceImple implements CuponService {
     private final CuponRepo cuponRepo;
 
     @Override
-    public String crearCupon(CrearCuponDTO crearCuponDTO) throws Exception {
+    public String crearCupon(CrearCuponDTO crearCuponDTO) throws RecursoEncontradoException {
 
         Optional<Cupon> cuponExistente = cuponRepo.findByCodigoAndEstadoNot(crearCuponDTO.codigo(), EstadoCupon.ELIMINADO);
 
@@ -46,16 +45,16 @@ public class CuponServiceImple implements CuponService {
     }
 
     @Override
-    public String editarCupon(EditarCuponDTO crearCuponDTO) throws RecursoNoEncontradoException {
+    public String editarCupon(EditarCuponDTO editarCuponDTO) throws RecursoNoEncontradoException {
 
-        Cupon cupon = obtenerCuponPorId(crearCuponDTO.id());
+        Cupon cupon = obtenerCuponPorId(editarCuponDTO.id());
 
-        cupon.setCodigo(crearCuponDTO.codigo());
-        cupon.setNombre(crearCuponDTO.nombre());
-        cupon.setPorcentajeDescuento(crearCuponDTO.porcentajeDescuento());
-        cupon.setEstadoCupon(crearCuponDTO.estadoCupon());
-        cupon.setTipoCupon(crearCuponDTO.tipoCupon());
-        cupon.setFechaVencimiento(crearCuponDTO.fechaVencimiento());
+        cupon.setCodigo(editarCuponDTO.codigo());
+        cupon.setNombre(editarCuponDTO.nombre());
+        cupon.setPorcentajeDescuento(editarCuponDTO.porcentajeDescuento());
+        cupon.setEstadoCupon(editarCuponDTO.estadoCupon());
+        cupon.setTipoCupon(editarCuponDTO.tipoCupon());
+        cupon.setFechaVencimiento(editarCuponDTO.fechaVencimiento());
 
         cuponRepo.save(cupon);
 
