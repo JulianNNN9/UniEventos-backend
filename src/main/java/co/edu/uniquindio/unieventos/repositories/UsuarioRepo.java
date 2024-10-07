@@ -22,6 +22,6 @@ public interface UsuarioRepo extends MongoRepository<Usuario, String> {
     @Query("{ 'email': ?0, 'contrasenia': ?1, 'estadoUsuario': { $ne: ?2 } }")
     Optional<Usuario> findByEmailAndContraseniaAndEstadoUsuarioNot(String email, String contrasenia, EstadoUsuario estadoUsuario);
 
-    @Query("{ 'codigoRegistro.codigo': ?0, 'estadoUsuario': { $ne: ?1 } }")
+    @Query("{ 'codigoActivacion.codigo': ?0, 'estadoUsuario': { $ne: ?1 } }")
     Optional<Usuario> findByCodigoRegistroCodigoAndEstadoUsuarioNot(String codigoActivacion, EstadoUsuario estadoUsuario);
 }

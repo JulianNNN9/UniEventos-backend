@@ -108,9 +108,9 @@ public class UsuarioControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.crearCarrito(idUsuario)));
     }
 
-    @GetMapping("/carrito/obtener-carrito/{idCarrito}")
-    public ResponseEntity<MensajeDTO<Carrito>> obtenerCarrito(@PathVariable String idCarrito) throws Exception {
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.obtenerCarrito(idCarrito)));
+    @GetMapping("/carrito/obtener-carrito/{idUsuario}")
+    public ResponseEntity<MensajeDTO<Carrito>> obtenerCarrito(@PathVariable String idUsuario) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.obtenerCarritoPorIdUsuario(idUsuario)));
     }
 
 }

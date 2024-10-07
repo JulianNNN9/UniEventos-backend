@@ -1,6 +1,7 @@
 package co.edu.uniquindio.unieventos.services.interfaces;
 
 import co.edu.uniquindio.unieventos.dto.evento.*;
+import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.Evento;
 import co.edu.uniquindio.unieventos.dto.FiltrosEventosDTO;
 import java.util.List;
@@ -22,11 +23,11 @@ public interface EventoService {
 
     List<ItemEventoDTO> filtrarEvento(FiltrosEventosDTO filtrosEventos);
 
-    List<ItemEventoDTO> buscarEvento(String valorCampoDeBusqueda);
+    List<ItemEventoDTO> buscarEventoPorNombre(String nombreEvento);
 
     List<ItemEventoDTO> listarEventos() throws Exception;
 
-    Evento obtenerEvento(String idEvento) throws Exception;
+    Evento obtenerEvento(String idEvento) throws RecursoNoEncontradoException;
 
     void saveEvento(Evento evento) throws Exception;
 

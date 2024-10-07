@@ -7,6 +7,7 @@ import co.edu.uniquindio.unieventos.model.Cupon;
 import co.edu.uniquindio.unieventos.model.EstadoCupon;
 import co.edu.uniquindio.unieventos.repositories.CuponRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
+import co.edu.uniquindio.unieventos.utils.TextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,17 +22,17 @@ public class CuponServiceImple implements CuponService {
     private final CuponRepo cuponRepo;
 
     @Override
-    public String crearCupon(CrearCuponDTO crearCuponDTO) throws Exception {
+    public String crearCupon(CrearCuponDTO crearCuponDTO) throws RecursoEncontradoException {
 
-        Optional<Cupon> cuponExistente = cuponRepo.findByCodigo(crearCuponDTO.codigo());
+        Optional<Cupon> cuponExistente = cuponRepo.findByCodigoAndEstadoNot(crearCuponDTO.codigo(), EstadoCupon.ELIMINADO);
 
         if (cuponExistente.isPresent()) {
-            throw new RecursoEncontradoException("El codigo de cupon ya existe.");
+            throw new RecursoEncontradoException("El cupon ya existe");
         }
 
         Cupon cupon = Cupon.builder()
-                .codigo(crearCuponDTO.codigo())
-                .nombre(crearCuponDTO.nombre())
+                .codigo(TextUtils.normalizarTexto(crearCuponDTO.codigo()))
+                .nombre(TextUtils.normalizarTexto(crearCuponDTO.nombre()))
                 .porcentajeDescuento(crearCuponDTO.porcentajeDescuento())
                 .estadoCupon(crearCuponDTO.estadoCupon())
                 .tipoCupon(crearCuponDTO.tipoCupon())
@@ -40,39 +41,39 @@ public class CuponServiceImple implements CuponService {
 
         cuponRepo.save(cupon);
 
-        return "Cupon creado exitosamente.";
+        return "Cupon creado exitosamente";
     }
 
     @Override
-    public String editarCupon(EditarCuponDTO crearCuponDTO) throws Exception {
+    public String editarCupon(EditarCuponDTO editarCuponDTO) throws RecursoNoEncontradoException {
 
-        Cupon cupon = obtenerCuponPorId(crearCuponDTO.id());
+        Cupon cupon = obtenerCuponPorId(editarCuponDTO.id());
 
-        cupon.setCodigo(crearCuponDTO.codigo());
-        cupon.setNombre(crearCuponDTO.nombre());
-        cupon.setPorcentajeDescuento(crearCuponDTO.porcentajeDescuento());
-        cupon.setEstadoCupon(crearCuponDTO.estadoCupon());
-        cupon.setTipoCupon(crearCuponDTO.tipoCupon());
-        cupon.setFechaVencimiento(crearCuponDTO.fechaVencimiento());
+        cupon.setCodigo(editarCuponDTO.codigo());
+        cupon.setNombre(editarCuponDTO.nombre());
+        cupon.setPorcentajeDescuento(editarCuponDTO.porcentajeDescuento());
+        cupon.setEstadoCupon(editarCuponDTO.estadoCupon());
+        cupon.setTipoCupon(editarCuponDTO.tipoCupon());
+        cupon.setFechaVencimiento(editarCuponDTO.fechaVencimiento());
 
         cuponRepo.save(cupon);
 
         return cupon.getId();
     }
+    @Override
+    public Cupon obtenerCuponPorId(String id) throws RecursoNoEncontradoException {
 
-    private Cupon obtenerCuponPorId(String id) throws RecursoNoEncontradoException {
-
-        Optional<Cupon> cuponExistente = cuponRepo.findById(id);
+        Optional<Cupon> cuponExistente = cuponRepo.findByIdAndEstadoNot(id, EstadoCupon.ELIMINADO);
 
         if (cuponExistente.isEmpty()) {
-            throw new RecursoNoEncontradoException("Cupón no encontrado con el ID: " + id);
+            throw new RecursoNoEncontradoException("Cupón no encontrado");
         }
 
         return cuponExistente.get();
     }
 
     @Override
-    public String eliminarCupon(String idCupon) throws Exception {
+    public String eliminarCupon(String idCupon) throws RecursoNoEncontradoException {
 
         Cupon cupon = obtenerCuponPorId(idCupon);
 
@@ -84,12 +85,12 @@ public class CuponServiceImple implements CuponService {
     }
 
     @Override
-    public Cupon obtenerCupon(String codigo) throws Exception {
+    public Cupon obtenerCuponPorCodigo(String codigo) throws RecursoNoEncontradoException {
 
-        Optional<Cupon> cuponExistente = cuponRepo.findByCodigo(codigo);
+        Optional<Cupon> cuponExistente = cuponRepo.findByCodigoAndEstadoNot(codigo, EstadoCupon.ELIMINADO);
 
         if (cuponExistente.isEmpty()) {
-            throw new Exception("Cupón no encontrado con el código: " + codigo);
+            throw new RecursoNoEncontradoException("Cupón no encontrado");
         }
 
         return cuponExistente.get();
