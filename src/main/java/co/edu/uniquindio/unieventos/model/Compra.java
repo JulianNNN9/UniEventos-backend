@@ -24,7 +24,7 @@ public class Compra {
     private Double total;
     private LocalDateTime fechaCompra;
     private String codigoCupon;
-    private EstadoCompra estado;
+    private EstadoCompra estadoCompra;
     private String codigoPasarela;
     private Pago pago;
 

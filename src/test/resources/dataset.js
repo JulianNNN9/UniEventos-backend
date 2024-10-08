@@ -355,7 +355,7 @@ db.compras.insertMany([
         fechaCompra: ISODate("2024-09-29T10:15:30Z"),
         //CUPON 1
         codigoCupon: "REGISTROUNICO",
-        estado: "PENDIENTE",
+        estadoCompra: "PENDIENTE",
         _class: 'co.edu.uniquindio.unieventos.model.Compra'
     },
     {
@@ -375,7 +375,13 @@ db.compras.insertMany([
         total: 405000.0,
         fechaCompra: ISODate("2024-10-01T15:45:00Z"),
         codigoCupon: "PRIMERACOMPRA",
-        estado: "PENDIENTE",
+        estadoCompra: "COMPLETADA",
+        codigoPasarela: "PAGOVIALE131411",
+        pago: {
+            metodo: "visa",
+            estado: "APROBADO",
+            fechaPago: ISODate("2024-10-02T08:16:00Z")
+        },
         _class: 'co.edu.uniquindio.unieventos.model.Compra'
     },
     {
@@ -400,7 +406,7 @@ db.compras.insertMany([
         ],
         total: 240000.0,
         fechaCompra: ISODate("2024-10-01T09:30:00Z"),
-        estado: "PENDIENTE",
+        estadoCompra: "PENDIENTE",
         _class: 'co.edu.uniquindio.unieventos.model.Compra'
     },
     {
@@ -425,7 +431,7 @@ db.compras.insertMany([
         ],
         total: 210000.0,
         fechaCompra: ISODate("2024-09-28T12:00:00Z"),
-        estado: "COMPLETADA",
+        estadoCompra: "COMPLETADA",
         codigoPasarela: "PAGOVIALE101112",
         pago: {
             metodo: "Tarjeta de Débito",
@@ -449,7 +455,7 @@ db.compras.insertMany([
         ],
         total: 250000.0,
         fechaCompra: ISODate("2024-10-02T08:15:00Z"),
-        estado: "COMPLETADA",
+        estadoCompra: "COMPLETADA",
         codigoPasarela: "PAGOVIALE131415",
         pago: {
             metodo: "Criptomoneda",
