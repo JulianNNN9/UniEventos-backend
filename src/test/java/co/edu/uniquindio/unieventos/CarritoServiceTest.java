@@ -15,7 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+/*
+IMPORTANTE: Se necesita cargar el Script de datase.js en la base de datos para poder realizar correctamente las
+            Pruebas
+ */
 @SpringBootTest
 public class CarritoServiceTest {
 

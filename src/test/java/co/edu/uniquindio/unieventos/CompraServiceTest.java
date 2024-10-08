@@ -20,7 +20,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
+/*
+IMPORTANTE: Se necesita cargar el Script de datase.js en la base de datos para poder realizar correctamente las
+            Pruebas
+ */
 @SpringBootTest
 public class CompraServiceTest {
 
@@ -275,7 +278,6 @@ public class CompraServiceTest {
     }
     @Test
     void testCancelarCompraNoPendienteException() {
-        // ID de compra inexistente
         String idCompra = "66fc31634ed5f7a3186e0e19"; //Compra con Estado COMPLETADA
         try{
             compraServiceImple.cancelarCompra(idCompra);
