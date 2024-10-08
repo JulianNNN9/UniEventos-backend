@@ -1,6 +1,9 @@
 package co.edu.uniquindio.unieventos.services.interfaces;
 
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
+import co.edu.uniquindio.unieventos.exceptions.EntradasInsuficientesException;
+import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
+import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.Compra;
 import java.util.Map;
 import com.mercadopago.resources.preference.Preference;

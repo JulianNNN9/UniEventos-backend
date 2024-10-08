@@ -29,6 +29,6 @@ public interface EventoService {
 
     Evento obtenerEvento(String idEvento) throws RecursoNoEncontradoException;
 
-    void saveEvento(Evento evento) throws Exception;
+    void saveEvento(Evento evento);
 
 }
