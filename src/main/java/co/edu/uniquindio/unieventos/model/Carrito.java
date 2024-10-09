@@ -17,6 +17,7 @@ public class Carrito {
     @Id
     @EqualsAndHashCode.Include
     private String id;
+
     private LocalDateTime fecha;
     private List<DetalleCarrito> itemsCarrito;
     private String idUsuario;

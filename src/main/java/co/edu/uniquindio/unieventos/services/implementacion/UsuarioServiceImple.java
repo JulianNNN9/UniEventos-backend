@@ -5,11 +5,8 @@ import co.edu.uniquindio.unieventos.dto.EmailDTO;
 import co.edu.uniquindio.unieventos.dto.TokenDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
 import co.edu.uniquindio.unieventos.exceptions.*;
-import co.edu.uniquindio.unieventos.model.CodigoActivacion;
-import co.edu.uniquindio.unieventos.model.CodigoRecuperacion;
-import co.edu.uniquindio.unieventos.model.EstadoUsuario;
-import co.edu.uniquindio.unieventos.model.Rol;
-import co.edu.uniquindio.unieventos.model.Usuario;
+import co.edu.uniquindio.unieventos.model.*;
+import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
 import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.EmailService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
@@ -34,6 +31,7 @@ public class UsuarioServiceImple implements UsuarioService {
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final Duration LOCK_DURATION = Duration.ofMinutes(5);
     private final UsuarioRepo usuarioRepo;
+    private final CarritoRepo carritoRepo;
     private final JWTUtils jwtUtils;
 
     @Override
@@ -63,7 +61,15 @@ public class UsuarioServiceImple implements UsuarioService {
         EnviarCodigoActivacionAlCorreoDTO enviarCodigoActivacionAlCorreoDTO = new EnviarCodigoActivacionAlCorreoDTO(crearCuentaDTO.email());
 
         enviarCodigoActivacionCuenta(enviarCodigoActivacionAlCorreoDTO);
-        return "" + usuarioGuardado.getId();
+
+        Carrito carrito = Carrito.builder()
+                .fecha(LocalDateTime.now())
+                .idUsuario(usuarioGuardado.getId())
+                .build();
+
+        carritoRepo.save(carrito);
+
+        return usuarioGuardado.getId();
 
     }
 

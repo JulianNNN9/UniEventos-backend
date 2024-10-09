@@ -5,6 +5,7 @@ import co.edu.uniquindio.unieventos.exceptions.EntradasInsuficientesException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.*;
+import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
 import co.edu.uniquindio.unieventos.repositories.CompraRepo;
 import co.edu.uniquindio.unieventos.repositories.CuponRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CompraService;
@@ -38,6 +39,7 @@ import java.util.Optional;
 public class CompraServiceImple implements CompraService {
 
     private final CompraRepo compraRepo;
+    private final CarritoRepo carritoRepo;
     private final CuponService cuponService;
     private final UsuarioService usuarioService;
     private final EventoService eventoService;
@@ -283,6 +285,17 @@ public class CompraServiceImple implements CompraService {
         compraGuardada.setCodigoPasarela( preference.getId() );
         compraRepo.save(compraGuardada);
 
+        Optional<Carrito> carritoOptional = carritoRepo.findByIdUsuario(compraGuardada.getIdUsuario());
+
+        if (carritoOptional.isEmpty()) {
+            throw new RecursoNoEncontradoException("Carrito no encontrado con el id del usuario: " + compraGuardada.getIdUsuario());
+        }
+
+        Carrito carrito = carritoOptional.get();
+
+        List<DetalleCarrito> detalleCarritos = new ArrayList<>();
+
+        carrito.setItemsCarrito(detalleCarritos);
 
         return preference;
     }
