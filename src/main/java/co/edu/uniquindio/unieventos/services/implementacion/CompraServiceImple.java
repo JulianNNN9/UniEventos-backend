@@ -260,6 +260,8 @@ public class CompraServiceImple implements CompraService {
 
         carrito.setItemsCarrito(detalleCarritos);
 
+        carritoRepo.save(carrito);
+
         return preference;
     }
 
