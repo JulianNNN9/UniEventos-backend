@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 @Transactional
@@ -96,4 +97,19 @@ public class CuponServiceImple implements CuponService {
         return cuponExistente.get();
     }
 
+    @Override
+    public String generarCodigoCupon(){
+
+        String cadena = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        StringBuilder codigo = new StringBuilder();
+
+        Random random = new Random();
+
+        for (int i = 0; i < 6; i++) {
+            codigo.append(cadena.charAt(random.nextInt(cadena.length())));
+        }
+
+        return codigo.toString();
+    }
 }

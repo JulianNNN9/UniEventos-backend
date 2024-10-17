@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Document("usuarios")
 @NoArgsConstructor
@@ -29,6 +30,8 @@ public class Usuario {
     private LocalDateTime fechaRegistro;
     private CodigoActivacion codigoActivacion;
     private CodigoRecuperacion codigoRecuperacion;
+    private List<Cupon> cuponesUsuario;
+    private Boolean primeraCompraRealizada;
     private int fallosInicioSesion;
     private LocalDateTime tiempoBloqueo;
 }

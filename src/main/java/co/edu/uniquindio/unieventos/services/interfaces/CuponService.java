@@ -16,4 +16,6 @@ public interface CuponService {
 
     Cupon obtenerCuponPorCodigo(String id) throws RecursoNoEncontradoException;
     Cupon obtenerCuponPorId(String id) throws RecursoNoEncontradoException;
+
+    String generarCodigoCupon();
 }

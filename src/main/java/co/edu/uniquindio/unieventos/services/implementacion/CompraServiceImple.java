@@ -1,6 +1,8 @@
 package co.edu.uniquindio.unieventos.services.implementacion;
 
+import co.edu.uniquindio.unieventos.dto.EmailDTO;
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
+import co.edu.uniquindio.unieventos.dto.cupon.CrearCuponDTO;
 import co.edu.uniquindio.unieventos.exceptions.EntradasInsuficientesException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
@@ -8,10 +10,8 @@ import co.edu.uniquindio.unieventos.model.*;
 import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
 import co.edu.uniquindio.unieventos.repositories.CompraRepo;
 import co.edu.uniquindio.unieventos.repositories.CuponRepo;
-import co.edu.uniquindio.unieventos.services.interfaces.CompraService;
-import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
-import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
-import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
+import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
+import co.edu.uniquindio.unieventos.services.interfaces.*;
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
@@ -43,9 +43,11 @@ public class CompraServiceImple implements CompraService {
     private final CuponService cuponService;
     private final UsuarioService usuarioService;
     private final EventoService eventoService;
+    private final EmailService emailService;
     // Cambiar cada que se vaya a probar la pasarela de pagos
     private final String urlNgrok = "https://01f8-181-53-99-0.ngrok-free.app/";
     private final CuponRepo cuponRepo;
+    private final UsuarioRepo usuarioRepo;
 
     @Override
     public String crearCompra(CrearCompraDTO crearCompraDTO) throws Exception {
@@ -298,6 +300,32 @@ public class CompraServiceImple implements CompraService {
         carrito.setItemsCarrito(detalleCarritos);
 
         carritoRepo.save(carrito);
+
+        // Metodo que envia el correo con el cupon de nuevo usuario
+        Optional<Usuario> usuarioOptional = Optional.ofNullable(usuarioService.obtenerUsuario(compraGuardada.getIdUsuario()));
+        Usuario usuario = usuarioOptional.get();
+        if (!usuario.getPrimeraCompraRealizada()){
+            String codigoCupon = cuponService.generarCodigoCupon();
+            CrearCuponDTO cuponDTO = new CrearCuponDTO(codigoCupon, "cuponPrimeraCompra", 25.0, EstadoCupon.ACTIVO, TipoCupon.UNICO, LocalDate.now().plusDays(30));
+            cuponService.crearCupon(cuponDTO);
+            usuario.getCuponesUsuario().add(cuponService.obtenerCuponPorCodigo(cuponDTO.codigo()));
+            usuario.setPrimeraCompraRealizada(true);
+            usuarioRepo.save(usuario);
+
+            EmailDTO emailDTO = new EmailDTO(
+                    "Tu nuevo cupón",
+                    "Felicidades, hiciste tu primera compra. Tu Codigo de por tu primera compra es: " + codigoCupon, usuario.getEmail());
+            emailService.enviarCorreo(emailDTO);
+
+        }
+
+        // Metodo que envia el correo con la confirmacion de la compra
+        if (compraGuardada.getEstadoCompra() == EstadoCompra.COMPLETADA){
+            EmailDTO emailDTO = new EmailDTO(
+                    "Confirmacion de compra",
+                    "Tu compra ha sido completada con exito", usuario.getEmail());
+            emailService.enviarCorreo(emailDTO);
+        }
 
         return preference;
     }
