@@ -12,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -94,6 +96,20 @@ public class CuponServiceImple implements CuponService {
         }
 
         return cuponExistente.get();
+    }
+
+    @Override
+    public List<CuponDTO> listarCupones() {
+        return cuponRepo.findAll().stream()
+                .map(cupon -> new CuponDTO(
+                        cupon.getCodigo(),
+                        cupon.getNombre(),
+                        cupon.getPorcentajeDescuento(),
+                        cupon.getEstadoCupon(),
+                        cupon.getTipoCupon(),
+                        cupon.getFechaVencimiento()
+                ))
+                .collect(Collectors.toList());
     }
 
 }

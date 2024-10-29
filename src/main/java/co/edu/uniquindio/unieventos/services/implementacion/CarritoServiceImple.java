@@ -64,6 +64,7 @@ public class CarritoServiceImple implements CarritoService {
 
         return carritoExistente.get();
     }
+
     @Override
     public Carrito obtenerCarritoPorIdUsuario(String idUsuario) throws RecursoNoEncontradoException {
         // Validar la longitud del idUsuario para que tenga exactamente 24 caracteres
@@ -164,6 +165,16 @@ public class CarritoServiceImple implements CarritoService {
         carritoRepo.save(carrito);
 
         return "Carrito creado exitosamente";
+    }
+
+    @Override
+    public String vaciarCarrito(String idUsuario) throws Exception {
+        Carrito carrito = carritoRepo.findByIdUsuario(idUsuario)
+                .orElseThrow(() -> new IllegalArgumentException("Carrito no encontrado para el usuario: " + idUsuario));
+
+        carrito.setItemsCarrito(new ArrayList<>());
+        carritoRepo.save(carrito);
+        return "Carrito vaciado correctamente.";
     }
 
 }

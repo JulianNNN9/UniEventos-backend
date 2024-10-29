@@ -19,4 +19,6 @@ public interface CarritoService {
     Carrito obtenerCarrito(String idCarrito) throws RecursoNoEncontradoException;
 
     Carrito obtenerCarritoPorIdUsuario(String idUsuario) throws RecursoNoEncontradoException;
+
+    String vaciarCarrito(String idUsuario) throws Exception;
 }
