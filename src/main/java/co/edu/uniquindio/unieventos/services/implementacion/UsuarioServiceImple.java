@@ -240,7 +240,7 @@ public class UsuarioServiceImple implements UsuarioService {
         }
 
         //revisar que se haga dentro del tiempo estipulado
-        if (!(usuario.get().getCodigoActivacion().getFechaCreacion().plusMinutes(15).isBefore(LocalDateTime.now()))){
+        if (usuario.get().getCodigoActivacion().getFechaCreacion().plusMinutes(15).isBefore(LocalDateTime.now())){
             throw new CodigoExpiradoException("El código de activación ya expiró");
         }
 
