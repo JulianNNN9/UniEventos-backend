@@ -3,6 +3,7 @@ package co.edu.uniquindio.unieventos.services.implementacion;
 import co.edu.uniquindio.unieventos.dto.carrito.AgregarItemDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.EditarCarritoDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.EliminarDelCarritoDTO;
+import co.edu.uniquindio.unieventos.dto.carrito.InformacionCarritoDTO;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.*;
 import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
@@ -87,6 +88,11 @@ public class CarritoServiceImple implements CarritoService {
 
         // Devolver el carrito encontrado
         return carritoExistente.get();
+    }
+    @Override
+    public InformacionCarritoDTO obtenerCarritoPorIdUsuarioDTO(String idUsuario) throws RecursoNoEncontradoException {
+        Carrito carrito = obtenerCarritoPorIdUsuario(idUsuario);
+        return new InformacionCarritoDTO(carrito.getId(), carrito.getFecha(), carrito.getItemsCarrito(), carrito.getIdUsuario());
     }
 
     @Override

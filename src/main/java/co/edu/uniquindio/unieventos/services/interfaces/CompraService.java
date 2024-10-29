@@ -1,6 +1,7 @@
 package co.edu.uniquindio.unieventos.services.interfaces;
 
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
+import co.edu.uniquindio.unieventos.dto.compra.InformacionCompraDTO;
 import co.edu.uniquindio.unieventos.exceptions.EntradasInsuficientesException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
@@ -15,7 +16,11 @@ public interface CompraService {
 
     Compra obtenerCompra(String idCompra) throws Exception;
 
+    InformacionCompraDTO obtenerCompraDTO(String idCompra) throws Exception;
+
     List<Compra> obtenerComprasUsuario(String idUsuario) throws Exception;
+
+    List<InformacionCompraDTO> obtenerComprasUsuarioDTO(String idUsuario) throws Exception;
 
     String cancelarCompra(String idCompra) throws Exception;
 

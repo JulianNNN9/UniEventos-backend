@@ -2,6 +2,7 @@ package co.edu.uniquindio.unieventos.services.implementacion;
 
 import co.edu.uniquindio.unieventos.dto.EmailDTO;
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
+import co.edu.uniquindio.unieventos.dto.compra.InformacionCompraDTO;
 import co.edu.uniquindio.unieventos.dto.cupon.CrearCuponDTO;
 import co.edu.uniquindio.unieventos.exceptions.EntradasInsuficientesException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
@@ -167,7 +168,23 @@ public class CompraServiceImple implements CompraService {
 
         return compraExistente.get();
     }
+    @Override
+    public InformacionCompraDTO obtenerCompraDTO(String idCompra) throws Exception {
 
+        Compra compra = obtenerCompra(idCompra);
+
+        return new InformacionCompraDTO(
+                compra.getId(),
+                compra.getIdUsuario(),
+                compra.getItemsCompra(),
+                calcularTotal(compra.getItemsCompra()),
+                compra.getFechaCompra(),
+                compra.getCodigoCupon(),
+                compra.getEstadoCompra(),
+                compra.getCodigoPasarela(),
+                compra.getPago()
+        );
+    }
     @Override
     public List<Compra> obtenerComprasUsuario(String idUsuario){
         if (idUsuario.length() != 24) {
@@ -180,6 +197,23 @@ public class CompraServiceImple implements CompraService {
             }
         }
         return compraRepo.findAllByIdUsuario(new ObjectId(idUsuario));
+    }
+    @Override
+    public List<InformacionCompraDTO> obtenerComprasUsuarioDTO(String idUsuario){
+
+        return obtenerComprasUsuario(idUsuario).stream()
+                .map(compra -> new InformacionCompraDTO(
+                        compra.getId(),
+                        compra.getIdUsuario(),
+                        compra.getItemsCompra(),
+                        calcularTotal(compra.getItemsCompra()),
+                        compra.getFechaCompra(),
+                        compra.getCodigoCupon(),
+                        compra.getEstadoCompra(),
+                        compra.getCodigoPasarela(),
+                        compra.getPago()
+                ))
+                .toList();
     }
 
     @Override

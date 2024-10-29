@@ -5,7 +5,9 @@ import co.edu.uniquindio.unieventos.dto.TokenDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.AgregarItemDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.EditarCarritoDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.EliminarDelCarritoDTO;
+import co.edu.uniquindio.unieventos.dto.carrito.InformacionCarritoDTO;
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
+import co.edu.uniquindio.unieventos.dto.compra.InformacionCompraDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
 import co.edu.uniquindio.unieventos.model.Carrito;
 import co.edu.uniquindio.unieventos.model.Compra;
@@ -63,14 +65,14 @@ public class UsuarioControlador {
     }
 
     @GetMapping("/compra/obtener-compra/{idCompra}")
-    public ResponseEntity<MensajeDTO<Compra>> obtenerCompra(@PathVariable String idCompra) throws Exception {
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, compraService.obtenerCompra(idCompra)));
+    public ResponseEntity<MensajeDTO<InformacionCompraDTO>> obtenerCompra(@PathVariable String idCompra) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, compraService.obtenerCompraDTO(idCompra)));
     }
 
     //Ver si este metodo retorna la lista
     @GetMapping("/compra/obtener-compras-usuario/{idUsuario}")
-    public ResponseEntity<MensajeDTO<List<Compra>>> obtenerComprasUsuario(@PathVariable String idUsuario) throws Exception {
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, compraService.obtenerComprasUsuario(idUsuario)));
+    public ResponseEntity<MensajeDTO<List<InformacionCompraDTO>>> obtenerComprasUsuario(@PathVariable String idUsuario) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, compraService.obtenerComprasUsuarioDTO(idUsuario)));
     }
 
     @GetMapping("/compra/cancelar-compra/{idCompra}")
@@ -109,8 +111,8 @@ public class UsuarioControlador {
     }
 
     @GetMapping("/carrito/obtener-carrito/{idUsuario}")
-    public ResponseEntity<MensajeDTO<Carrito>> obtenerCarrito(@PathVariable String idUsuario) throws Exception {
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.obtenerCarritoPorIdUsuario(idUsuario)));
+    public ResponseEntity<MensajeDTO<InformacionCarritoDTO>> obtenerCarrito(@PathVariable String idUsuario) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.obtenerCarritoPorIdUsuarioDTO(idUsuario)));
     }
 
     @PostMapping("/carrito/vaciar-carrito/{idUsuario}")
