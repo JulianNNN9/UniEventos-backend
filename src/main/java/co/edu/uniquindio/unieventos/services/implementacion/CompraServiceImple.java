@@ -6,12 +6,18 @@ import co.edu.uniquindio.unieventos.dto.cupon.CrearCuponDTO;
 import co.edu.uniquindio.unieventos.exceptions.EntradasInsuficientesException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
+import co.edu.uniquindio.unieventos.exceptions.TiempoCompraEventoException;
 import co.edu.uniquindio.unieventos.model.*;
 import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
 import co.edu.uniquindio.unieventos.repositories.CompraRepo;
 import co.edu.uniquindio.unieventos.repositories.CuponRepo;
 import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.*;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
@@ -25,13 +31,12 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -55,6 +60,7 @@ public class CompraServiceImple implements CompraService {
         /*
             VALIDACIÓN DEL CUPON
          */
+
         // Obtener el cupón por su código
         boolean isCupon = true;
         Cupon cupon = null;
@@ -119,9 +125,6 @@ public class CompraServiceImple implements CompraService {
                 throw new EntradasInsuficientesException("No hay suficientes entradas restantes para la localidad");
             }
 
-            // Restar la cantidad de entradas
-            localidad.setEntradasRestantes(localidad.getEntradasRestantes() - cantidad);
-
             // Actualizar el evento
             eventoService.saveEvento(evento);
         }
@@ -135,7 +138,7 @@ public class CompraServiceImple implements CompraService {
         Compra compra = Compra.builder()
                 .idUsuario(usuario.getId())
                 .itemsCompra(crearCompraDTO.itemsCompra())
-                .total(total)
+                //.total(total) // calcular el total acá
                 .fechaCompra(LocalDateTime.now())
                 .codigoCupon(crearCompraDTO.codigoCupon())
                 .estadoCompra(EstadoCompra.PENDIENTE)
@@ -243,6 +246,7 @@ public class CompraServiceImple implements CompraService {
                     .findFirst()
                     .orElse(null);
 
+
             // Crear el item de la pasarela
             PreferenceItemRequest itemRequest =
                     PreferenceItemRequest.builder()
@@ -304,7 +308,7 @@ public class CompraServiceImple implements CompraService {
 
         carritoRepo.save(carrito);
 
-        // Metodo que envia el correo con el cupon de nuevo usuario
+        // Metodo que envia el correo con el cupon de primera compra
         Optional<Usuario> usuarioOptional = Optional.ofNullable(usuarioService.obtenerUsuario(compraGuardada.getIdUsuario()));
         Usuario usuario = usuarioOptional.get();
         if (!usuario.getPrimeraCompraRealizada()){
@@ -324,10 +328,58 @@ public class CompraServiceImple implements CompraService {
 
         // Metodo que envia el correo con la confirmacion de la compra
         if (compraGuardada.getEstadoCompra() == EstadoCompra.COMPLETADA){
+
+            // Se crea un codigo QR con el codigo de la compra por medio de un servicio externo
+            byte[] qrCode = generateQRCodeImage(compraGuardada.getId(), 350, 350);
+            String qrCodeBase64 = Base64.getEncoder().encodeToString(qrCode);
+
+            // Crear el contenido del correo con el código QR
+            String emailContent = "Tu compra ha sido completada con exito. Aquí está tu código QR: <img src='data:image/png;base64," + qrCodeBase64 + "' />";
+
+            // Se envia el correo
             EmailDTO emailDTO = new EmailDTO(
                     "Confirmacion de compra",
-                    "Tu compra ha sido completada con exito", usuario.getEmail());
+                    emailContent, usuario.getEmail());
             emailService.enviarCorreo(emailDTO);
+        }
+
+
+
+
+        // Obtiene las compra que realizó el usuario, recorre cada compra individual y sus
+        // localidades, verifica que se puedan restar (por si alguien más las compró antes)
+        // y resta las entradas compradas a las entradas restantes
+        if (compraGuardada.getEstadoCompra() == EstadoCompra.COMPLETADA){
+            List<ItemCompra> itemsCompra = compraGuardada.getItemsCompra();
+
+            // Iterar sobre cada item de la compra
+            for (ItemCompra item : itemsCompra) {
+
+                String idEvento = item.getIdEvento();
+                String nombreLocalidad = item.getNombreLocalidad();
+                Integer cantidad = item.getCantidad();
+
+                // Buscar el evento correspondiente
+                Evento evento = eventoService.obtenerEvento(idEvento);
+
+                // Buscar la localidad en el evento
+                Localidad localidad = evento.getLocalidades().stream()
+                        .filter(loc -> loc.getNombreLocalidad().equals(nombreLocalidad))
+                        .findFirst()
+                        .orElseThrow(() ->
+                                new RecursoNoEncontradoException("Localidad no encontrada"));
+
+                // Verificar si hay suficientes entradas restantes
+                if (localidad.getEntradasRestantes() < cantidad) {
+                    throw new EntradasInsuficientesException("No hay suficientes entradas restantes para la localidad");
+                }
+
+                // Resta las entradas compradas a las entradas restantes
+                localidad.setEntradasRestantes(localidad.getEntradasRestantes() - cantidad);
+
+                //actulizar el evento
+                eventoService.saveEvento(evento);
+            }
         }
 
         return preference;
@@ -401,6 +453,13 @@ public class CompraServiceImple implements CompraService {
         return pago;
     }
 
+    private byte[] generateQRCodeImage(String text, int width, int height) throws WriterException, IOException {
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, width, height);
 
+        ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
+        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
+        return pngOutputStream.toByteArray();
+    }
 
 }
