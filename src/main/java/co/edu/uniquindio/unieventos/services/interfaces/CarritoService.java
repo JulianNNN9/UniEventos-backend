@@ -3,6 +3,7 @@ package co.edu.uniquindio.unieventos.services.interfaces;
 import co.edu.uniquindio.unieventos.dto.carrito.AgregarItemDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.EditarCarritoDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.EliminarDelCarritoDTO;
+import co.edu.uniquindio.unieventos.dto.carrito.InformacionCarritoDTO;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.Carrito;
 
@@ -19,6 +20,8 @@ public interface CarritoService {
     Carrito obtenerCarrito(String idCarrito) throws RecursoNoEncontradoException;
 
     Carrito obtenerCarritoPorIdUsuario(String idUsuario) throws RecursoNoEncontradoException;
+
+    InformacionCarritoDTO obtenerCarritoPorIdUsuarioDTO(String idUsuario) throws RecursoNoEncontradoException;
 
     String vaciarCarrito(String idUsuario) throws Exception;
 }
