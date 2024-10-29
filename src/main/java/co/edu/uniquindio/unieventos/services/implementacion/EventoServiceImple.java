@@ -99,7 +99,7 @@ public class EventoServiceImple implements EventoService {
     @Override
     public List<ItemEventoDTO> listarEventos() {
 
-        List<Evento> eventos = eventoRepo.findAll();
+        List<Evento> eventos = eventoRepo.findByFechaEventoAfterAndEstadoEvento(LocalDateTime.now(), EstadoEvento.ACTIVO);
 
         return eventos.stream()
                 .map(evento -> new ItemEventoDTO(
@@ -112,12 +112,13 @@ public class EventoServiceImple implements EventoService {
     }
 
 
+
     public Evento obtenerEvento(String idEvento) throws RecursoNoEncontradoException {
 
         Optional<Evento> eventoExistente = eventoRepo.findByIdAndEstadoNot(idEvento, EstadoEvento.ELIMINADO);
 
         if (eventoExistente.isEmpty()) {
-            throw new RecursoNoEncontradoException("Evento no encontrado");
+            throw new RecursoNoEncontradoException("Evento no encontrado o ELIMINADO");
         }
 
         return eventoExistente.get();

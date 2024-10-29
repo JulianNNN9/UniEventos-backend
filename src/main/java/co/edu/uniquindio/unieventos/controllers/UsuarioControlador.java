@@ -113,4 +113,8 @@ public class UsuarioControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.obtenerCarritoPorIdUsuario(idUsuario)));
     }
 
+    @PostMapping("/carrito/vaciar-carrito/{idUsuario}")
+    public ResponseEntity<MensajeDTO<String>> vaciarCarrito(@PathVariable String idUsuario) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.vaciarCarrito(idUsuario)));
+    }
 }
