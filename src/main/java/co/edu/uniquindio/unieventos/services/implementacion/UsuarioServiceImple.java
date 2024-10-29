@@ -238,6 +238,12 @@ public class UsuarioServiceImple implements UsuarioService {
         if(usuario.isEmpty()){
             throw new RecursoNoEncontradoException("Codigo de activacion invalido");
         }
+
+        //revisar que se haga dentro del tiempo estipulado
+        if (usuario.get().getCodigoActivacion().getFechaCreacion().plusMinutes(15).isBefore(LocalDateTime.now())){
+            throw new CodigoExpiradoException("El código de activación ya expiró");
+        }
+
         Usuario usuarioActivacion = usuario.get();
         usuarioActivacion.setEstadoUsuario(EstadoUsuario.ACTIVA);
 
