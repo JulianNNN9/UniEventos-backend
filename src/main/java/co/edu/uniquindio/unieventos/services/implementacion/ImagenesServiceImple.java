@@ -26,6 +26,7 @@ public class ImagenesServiceImple implements ImagenesService {
 
     @Override
     public void eliminarImagen(String nombreImagen) throws Exception {
+
         Bucket bucket = StorageClient.getInstance().bucket();
         Blob blob = bucket.get(nombreImagen);
 

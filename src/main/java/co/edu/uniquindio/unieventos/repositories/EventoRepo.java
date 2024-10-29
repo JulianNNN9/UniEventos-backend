@@ -8,12 +8,15 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 
 public interface EventoRepo extends MongoRepository<Evento, String> {
+
+    List<Evento> findByFechaEventoAfterAndEstadoEvento(LocalDateTime fecha, EstadoEvento estado);
 
     // Método para encontrar un evento por su ID, excluyendo los eliminados
     @Query("{ '_id' : ?0, 'estadoEvento' : { $ne: ?1 } }")

@@ -94,21 +94,24 @@ public class CompraServiceImple implements CompraService {
             isCupon = false;
         }
 
-        /*
-            VALIDACIÓN DE ENTRADAS PARA LA LOCALIDAD
-         */
-
+    /*
+        VALIDACIÓN DE ENTRADAS Y ANTICIPACIÓN PARA LA LOCALIDAD
+     */
         List<ItemCompra> itemsCompra = crearCompraDTO.itemsCompra();
 
         // Iterar sobre cada item de la compra
         for (ItemCompra item : itemsCompra) {
-
             String idEvento = item.getIdEvento();
             String nombreLocalidad = item.getNombreLocalidad();
             Integer cantidad = item.getCantidad();
 
             // Buscar el evento correspondiente
             Evento evento = eventoService.obtenerEvento(idEvento);
+
+            // Verificar si el evento ocurre con al menos dos días de anticipación
+            if (evento.getFechaEvento().isBefore(LocalDateTime.now().plusDays(2))) {
+                throw new IllegalArgumentException("Las compras deben realizarse con al menos dos días de anticipación.");
+            }
 
             // Buscar la localidad en el evento
             Localidad localidad = evento.getLocalidades().stream()
@@ -122,7 +125,7 @@ public class CompraServiceImple implements CompraService {
                 throw new EntradasInsuficientesException("No hay suficientes entradas restantes para la localidad");
             }
 
-            //actulizar el evento
+            // Actualizar el evento
             eventoService.saveEvento(evento);
         }
 
@@ -135,7 +138,7 @@ public class CompraServiceImple implements CompraService {
         Compra compra = Compra.builder()
                 .idUsuario(usuario.getId())
                 .itemsCompra(crearCompraDTO.itemsCompra())
-                .total(total)
+                //.total(total) // calcular el total acá
                 .fechaCompra(LocalDateTime.now())
                 .codigoCupon(crearCompraDTO.codigoCupon())
                 .estadoCompra(EstadoCompra.PENDIENTE)
