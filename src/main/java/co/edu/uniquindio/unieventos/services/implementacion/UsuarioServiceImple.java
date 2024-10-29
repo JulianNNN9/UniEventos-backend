@@ -4,10 +4,12 @@ import co.edu.uniquindio.unieventos.config.JWTUtils;
 import co.edu.uniquindio.unieventos.dto.EmailDTO;
 import co.edu.uniquindio.unieventos.dto.TokenDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
+import co.edu.uniquindio.unieventos.dto.cupon.CrearCuponDTO;
 import co.edu.uniquindio.unieventos.exceptions.*;
 import co.edu.uniquindio.unieventos.model.*;
 import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
 import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
+import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
 import co.edu.uniquindio.unieventos.services.interfaces.EmailService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +31,7 @@ import java.util.Random;
 public class UsuarioServiceImple implements UsuarioService {
 
     private final EmailService emailService;
+    private final CuponService cuponService;
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final Duration LOCK_DURATION = Duration.ofMinutes(5);
     private final UsuarioRepo usuarioRepo;
@@ -55,6 +59,7 @@ public class UsuarioServiceImple implements UsuarioService {
                 .rol(Rol.CLIENTE)
                 .estadoUsuario(EstadoUsuario.INACTIVA)
                 .fechaRegistro(LocalDateTime.now())
+                .primeraCompraRealizada(false)
         .build();
 
         Usuario usuarioGuardado = usuarioRepo.save(nuevoUsuario);
@@ -235,7 +240,18 @@ public class UsuarioServiceImple implements UsuarioService {
         }
         Usuario usuarioActivacion = usuario.get();
         usuarioActivacion.setEstadoUsuario(EstadoUsuario.ACTIVA);
+
+        String codigoCupon = cuponService.generarCodigoCupon();
+        CrearCuponDTO cuponDTO = new CrearCuponDTO(codigoCupon, "cuponPrimerIngreso", 19.0, EstadoCupon.ACTIVO, TipoCupon.UNICO, LocalDate.now().plusDays(30));
+        cuponService.crearCupon(cuponDTO);
+        usuarioActivacion.getCuponesUsuario().add(cuponService.obtenerCuponPorCodigo(cuponDTO.codigo()));
         usuarioRepo.save(usuarioActivacion);
+
+        EmailDTO emailDTO = new EmailDTO(
+                "Tu nuevo cupon",
+                "Por tu primer ingreso, tienes un nuevo cupon. Tu Codigo es: " + codigoCupon, usuarioActivacion.getEmail());
+        emailService.enviarCorreo(emailDTO);
+
     }
 
     @Override

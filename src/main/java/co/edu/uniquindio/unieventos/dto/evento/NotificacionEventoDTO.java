@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public record NotificacionEventoDTO(
 
-        String idEvento,
+        String _id,
 
         String nombreEvento
 ) {

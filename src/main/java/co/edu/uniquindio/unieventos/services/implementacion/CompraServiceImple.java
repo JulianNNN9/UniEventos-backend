@@ -1,17 +1,17 @@
 package co.edu.uniquindio.unieventos.services.implementacion;
 
+import co.edu.uniquindio.unieventos.dto.EmailDTO;
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
-import co.edu.uniquindio.unieventos.exceptions.CuponUsadoException;
+import co.edu.uniquindio.unieventos.dto.cupon.CrearCuponDTO;
 import co.edu.uniquindio.unieventos.exceptions.EntradasInsuficientesException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.*;
 import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
 import co.edu.uniquindio.unieventos.repositories.CompraRepo;
-import co.edu.uniquindio.unieventos.services.interfaces.CompraService;
-import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
-import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
-import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
+import co.edu.uniquindio.unieventos.repositories.CuponRepo;
+import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
+import co.edu.uniquindio.unieventos.services.interfaces.*;
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,28 +43,49 @@ public class CompraServiceImple implements CompraService {
     private final CuponService cuponService;
     private final UsuarioService usuarioService;
     private final EventoService eventoService;
+    private final EmailService emailService;
     // Cambiar cada que se vaya a probar la pasarela de pagos
     private final String urlNgrok = "https://01f8-181-53-99-0.ngrok-free.app/";
+    private final CuponRepo cuponRepo;
+    private final UsuarioRepo usuarioRepo;
 
     @Override
     public String crearCompra(CrearCompraDTO crearCompraDTO) throws Exception {
 
-    /*
-        VALIDACIÓN DEL CUPON
-     */
-        Cupon cupon = cuponService.obtenerCuponPorCodigo(crearCompraDTO.codigoCupon());
+        /*
+            VALIDACIÓN DEL CUPON
+         */
+        // Obtener el cupón por su código
+        boolean isCupon = true;
+        Cupon cupon = null;
+        if(crearCompraDTO.codigoCupon() != null && !crearCompraDTO.codigoCupon().isEmpty()){
+            cupon = cuponService.obtenerCuponPorCodigo(crearCompraDTO.codigoCupon());
 
-        if(cupon.getTipoCupon() == TipoCupon.UNICO){
-            if(cupon.getEstadoCupon() == EstadoCupon.ACTIVO){
+            // Validar si el cupón está activo
+            if (cupon.getEstadoCupon() != EstadoCupon.ACTIVO) {
+                throw new IllegalArgumentException("El cupón no está disponible o ha expirado");
+            }
+            if(cupon.getFechaVencimiento().isBefore(LocalDate.now())){
                 cupon.setEstadoCupon(EstadoCupon.INACTIVO);
+                cuponRepo.save(cupon);
+                throw new IllegalArgumentException("El cupon ha expirado");
+            }
+
+            // Validación para cupón único
+            if (cupon.getTipoCupon() == TipoCupon.UNICO) {
+                // Cambiar el estado del cupón a inactivo una vez utilizado
+                cupon.setEstadoCupon(EstadoCupon.INACTIVO);
+
             } else {
-                throw new CuponUsadoException("Este cupón ya fue usado por otra persona");
+                // Validación para cupones generales (múltiples)
+                Optional<Compra> compraOptional = obtenerComprasPorCodigoCuponYIdUsuario(crearCompraDTO.codigoCupon(), crearCompraDTO.idUsuario());
+
+                if (compraOptional.isPresent()) {
+                    throw new RecursoEncontradoException("Este cupón ya ha sido redimido por el usuario");
+                }
             }
-        } else {
-            Optional<Compra> compraOptional = compraRepo.findByCodigoCuponAndIdUsuario(crearCompraDTO.codigoCupon(), crearCompraDTO.idUsuario());
-            if (compraOptional.isPresent()) {
-                throw new RecursoEncontradoException("Este cupon ya ha sido redimido.");
-            }
+        }else{
+            isCupon = false;
         }
 
     /*
@@ -90,11 +112,11 @@ public class CompraServiceImple implements CompraService {
                     .filter(loc -> loc.getNombreLocalidad().equals(nombreLocalidad))
                     .findFirst()
                     .orElseThrow(() ->
-                            new RecursoNoEncontradoException("Localidad no encontrada: " + nombreLocalidad + " en el evento: " + idEvento));
+                            new RecursoNoEncontradoException("Localidad no encontrada"));
 
             // Verificar si hay suficientes entradas restantes
             if (localidad.getEntradasRestantes() < cantidad) {
-                throw new EntradasInsuficientesException("No hay suficientes entradas restantes para la localidad: " + nombreLocalidad);
+                throw new EntradasInsuficientesException("No hay suficientes entradas restantes para la localidad");
             }
 
             // Restar la cantidad de entradas
@@ -106,13 +128,17 @@ public class CompraServiceImple implements CompraService {
 
         Usuario usuario = usuarioService.obtenerUsuario(crearCompraDTO.idUsuario());
 
+        double total = calcularTotal(itemsCompra);
+        if (isCupon){
+            total = calcularTotalConDescuentoCupon(cupon, total);
+        }
         Compra compra = Compra.builder()
                 .idUsuario(usuario.getId())
                 .itemsCompra(crearCompraDTO.itemsCompra())
-                //.total() // calcular el total acá
+                .total(total)
                 .fechaCompra(LocalDateTime.now())
                 .codigoCupon(crearCompraDTO.codigoCupon())
-                .estado(EstadoCompra.PENDIENTE)
+                .estadoCompra(EstadoCompra.PENDIENTE)
                 .build();
 
         compraRepo.save(compra);
@@ -120,6 +146,12 @@ public class CompraServiceImple implements CompraService {
         return compra.getId();
     }
 
+    private double calcularTotalConDescuentoCupon(Cupon cupon, double total) {
+        return total - total * (cupon.getPorcentajeDescuento() / 100);
+    }
+    private double calcularTotal(List<ItemCompra> itemsCompra) {
+        return itemsCompra.stream().mapToDouble((item) -> item.getPrecioUnitario() * item.getCantidad()).sum();
+    }
 
     @Override
     public Compra obtenerCompra(String idCompra) throws Exception {
@@ -127,7 +159,7 @@ public class CompraServiceImple implements CompraService {
         Optional<Compra> compraExistente = compraRepo.findById(idCompra);
 
         if (compraExistente.isEmpty()) {
-            throw new RecursoNoEncontradoException("Compra no encontrada con el ID: " + idCompra);
+            throw new RecursoNoEncontradoException("Compra no encontrada");
         }
 
         return compraExistente.get();
@@ -135,6 +167,15 @@ public class CompraServiceImple implements CompraService {
 
     @Override
     public List<Compra> obtenerComprasUsuario(String idUsuario){
+        if (idUsuario.length() != 24) {
+            if (idUsuario.length() < 24) {
+                // Si es más corto, completar con ceros al final
+                idUsuario = String.format("%-24s", idUsuario).replace(' ', '0');
+            } else {
+                // Si es más largo, recortar a 24 caracteres
+                idUsuario = idUsuario.substring(0, 24);
+            }
+        }
         return compraRepo.findAllByIdUsuario(new ObjectId(idUsuario));
     }
 
@@ -142,8 +183,11 @@ public class CompraServiceImple implements CompraService {
     public String cancelarCompra(String idCompra) throws Exception {
 
         Compra compra = obtenerCompra(idCompra);
+        if(compra.getEstadoCompra() != EstadoCompra.PENDIENTE){
+            throw new IllegalArgumentException("La compra debe estar PENDIENTE");
+        }
 
-        compra.setEstado(EstadoCompra.CANCELADA);
+        compra.setEstadoCompra(EstadoCompra.CANCELADA);
 
         /*
             DEVOLVER LAS ENTRADAS COMPRADAS NUEVAMENTE A LA LOCALIDAD
@@ -158,23 +202,25 @@ public class CompraServiceImple implements CompraService {
             // Buscar el evento correspondiente
             Evento evento = eventoService.obtenerEvento(item.getIdEvento());
 
-            // Buscar la localidad en el evento
-            Localidad localidad = evento.getLocalidades().stream()
-                    .filter(loc -> loc.getNombreLocalidad().equals(nombreLocalidad))
-                    .findFirst()
-                    .orElseThrow(() ->
-                            new Exception("Localidad no encontrada: " + nombreLocalidad + " en el evento: " + idEvento));
+            if(evento.getLocalidades() != null){
+                // Buscar la localidad en el evento
+                Localidad localidad = evento.getLocalidades().stream()
+                        .filter(loc -> loc.getNombreLocalidad().equals(nombreLocalidad))
+                        .findFirst()
+                        .orElseThrow(() ->
+                                new Exception("Localidad no encontrada"));
 
-            // Devolver las entradas canceladas
-            localidad.setEntradasRestantes(localidad.getEntradasRestantes() + cantidad);
+                // Devolver las entradas canceladas
+                localidad.setEntradasRestantes(localidad.getEntradasRestantes() + cantidad);
 
-            // Guardar el evento con las entradas actualizadas
-            eventoService.saveEvento(evento);
+                // Guardar el evento con las entradas actualizadas
+                eventoService.saveEvento(evento);
+            }
         }
 
         compraRepo.save(compra);
 
-        return "Compra cancelada exitosamente,";
+        return "Compra cancelada exitosamente";
     }
 
     @Override
@@ -215,7 +261,7 @@ public class CompraServiceImple implements CompraService {
 
 
         // Configurar las credenciales de MercadoPago
-        MercadoPagoConfig.setAccessToken("ACCESS_TOKEN");
+        MercadoPagoConfig.setAccessToken("APP_USR-1683778910738309-100810-244312086b9b60a77c052359c31c2376-2024325571");
 
 
         // Configurar las urls de retorno de la pasarela (Frontend)
@@ -257,6 +303,32 @@ public class CompraServiceImple implements CompraService {
         carrito.setItemsCarrito(detalleCarritos);
 
         carritoRepo.save(carrito);
+
+        // Metodo que envia el correo con el cupon de nuevo usuario
+        Optional<Usuario> usuarioOptional = Optional.ofNullable(usuarioService.obtenerUsuario(compraGuardada.getIdUsuario()));
+        Usuario usuario = usuarioOptional.get();
+        if (!usuario.getPrimeraCompraRealizada()){
+            String codigoCupon = cuponService.generarCodigoCupon();
+            CrearCuponDTO cuponDTO = new CrearCuponDTO(codigoCupon, "cuponPrimeraCompra", 25.0, EstadoCupon.ACTIVO, TipoCupon.UNICO, LocalDate.now().plusDays(30));
+            cuponService.crearCupon(cuponDTO);
+            usuario.getCuponesUsuario().add(cuponService.obtenerCuponPorCodigo(cuponDTO.codigo()));
+            usuario.setPrimeraCompraRealizada(true);
+            usuarioRepo.save(usuario);
+
+            EmailDTO emailDTO = new EmailDTO(
+                    "Tu nuevo cupón",
+                    "Felicidades, hiciste tu primera compra. Tu Codigo de por tu primera compra es: " + codigoCupon, usuario.getEmail());
+            emailService.enviarCorreo(emailDTO);
+
+        }
+
+        // Metodo que envia el correo con la confirmacion de la compra
+        if (compraGuardada.getEstadoCompra() == EstadoCompra.COMPLETADA){
+            EmailDTO emailDTO = new EmailDTO(
+                    "Confirmacion de compra",
+                    "Tu compra ha sido completada con exito", usuario.getEmail());
+            emailService.enviarCorreo(emailDTO);
+        }
 
         return preference;
     }
@@ -302,6 +374,18 @@ public class CompraServiceImple implements CompraService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    private Optional<Compra> obtenerComprasPorCodigoCuponYIdUsuario(String codigoCupon, String idUsuario) {
+        if (idUsuario.length() != 24) {
+            if (idUsuario.length() < 24) {
+                // Si es más corto, completar con ceros al final
+                idUsuario = String.format("%-24s", idUsuario).replace(' ', '0');
+            } else {
+                // Si es más largo, recortar a 24 caracteres
+                idUsuario = idUsuario.substring(0, 24);
+            }
+        }
+        return compraRepo.findByCodigoCuponAndIdUsuario(codigoCupon, idUsuario);
     }
 
     private Pago crearPago(Payment payment) {

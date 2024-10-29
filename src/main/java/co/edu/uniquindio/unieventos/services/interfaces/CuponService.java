@@ -23,4 +23,5 @@ public interface CuponService {
 
     List<CuponDTO> listarCupones();
 
+    String generarCodigoCupon();
 }

@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Random;
 
 @Service
 @Transactional
@@ -112,4 +113,19 @@ public class CuponServiceImple implements CuponService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public String generarCodigoCupon(){
+
+        String cadena = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        StringBuilder codigo = new StringBuilder();
+
+        Random random = new Random();
+
+        for (int i = 0; i < 6; i++) {
+            codigo.append(cadena.charAt(random.nextInt(cadena.length())));
+        }
+
+        return codigo.toString();
+    }
 }
