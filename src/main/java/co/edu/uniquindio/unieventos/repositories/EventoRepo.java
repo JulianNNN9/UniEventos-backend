@@ -19,7 +19,7 @@ public interface EventoRepo extends MongoRepository<Evento, String> {
     List<Evento> findByFechaEventoAfterAndEstadoEvento(LocalDateTime fecha, EstadoEvento estado);
 
     // Método para encontrar un evento por su ID, excluyendo los eliminados
-    @Query("{ '_id' : ?0, 'estadoEvento' : { $ne: ?1 } }")
+    @Query("{ '_id' : ObjectId(?0), 'estadoEvento' : { $ne: ?1 } }")
     Optional<Evento> findByIdAndEstadoNot(String id, EstadoEvento estadoEvento);
 
     // Método para encontrar eventos por nombre, tipo y ciudad, excluyendo un estado específico

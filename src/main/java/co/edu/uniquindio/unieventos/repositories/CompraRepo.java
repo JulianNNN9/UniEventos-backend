@@ -13,8 +13,9 @@ import java.util.Optional;
 @Repository
 public interface CompraRepo extends MongoRepository<Compra, String> {
 
-    List<Compra> findAllByIdUsuario(ObjectId idUsuario);
+    @Query("{ 'usuario.$id': ObjectId(?0) }")
+    List<Compra> findAllByIdUsuario(String usuarioId);
 
-    @Query("{ 'codigoCupon': ?0, 'idUsuario': ObjectId(?1) }")
+    @Query("{ 'codigoCupon': ?0, 'usuario.$id': ObjectId(?1) }")
     Optional<Compra> findByCodigoCuponAndIdUsuario(String codigoCupon, String idUsuario);
 }

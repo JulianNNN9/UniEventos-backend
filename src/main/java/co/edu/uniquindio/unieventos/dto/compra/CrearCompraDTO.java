@@ -10,7 +10,7 @@ public record CrearCompraDTO(
         String idUsuario,
 
         @NotEmpty(message = "La lista de items de compra no puede estar vacía")
-        List<@NotNull(message = "Los items de compra no pueden ser nulos") ItemCompra> itemsCompra,
+        List<@NotNull(message = "Los items de compra no pueden ser nulos") InformacionItemCompraDTO> informacionItemCompraDTOS,
 
         String codigoCupon
 ) {

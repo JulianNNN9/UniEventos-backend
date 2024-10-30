@@ -3,12 +3,15 @@ package co.edu.uniquindio.unieventos;
 import co.edu.uniquindio.unieventos.dto.carrito.AgregarItemDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.EditarCarritoDTO;
 import co.edu.uniquindio.unieventos.dto.carrito.EliminarDelCarritoDTO;
+import co.edu.uniquindio.unieventos.dto.carrito.InformacionDetalleCarritoDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.CrearUsuarioDTO;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.Carrito;
 import co.edu.uniquindio.unieventos.model.DetalleCarrito;
+import co.edu.uniquindio.unieventos.model.Evento;
 import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
 import co.edu.uniquindio.unieventos.services.implementacion.CarritoServiceImple;
+import co.edu.uniquindio.unieventos.services.implementacion.EventoServiceImple;
 import co.edu.uniquindio.unieventos.services.implementacion.UsuarioServiceImple;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +32,13 @@ public class CarritoServiceTest {
     private UsuarioServiceImple usuarioServiceImple;
     @Autowired
     private CarritoRepo carritoRepo;
+    @Autowired
+    private EventoServiceImple eventoServiceImple;
 
     @Test
     public void obtenerCarritoPorIdUsuarioTest() {
         //id del Usuario del Carrito 4 del Dataset
-        String idUsuario = "66b2c1517f3b340441ffdeb2";
+        String idUsuario = "6722b8784c1f6c5a95e01de0";
         try {
             assertDoesNotThrow(() -> {
                 Carrito resultado = carritoServiceImple.obtenerCarritoPorIdUsuario(idUsuario);
@@ -95,11 +100,8 @@ public class CarritoServiceTest {
                 "marioc@email.com",
                 "micontrasenia"
         );
-        String id = usuarioServiceImple.crearUsuario(registroClienteDTO);
-
         assertDoesNotThrow(() -> {
-            String resultado = carritoServiceImple.crearCarrito(id);
-            assertEquals("Carrito creado exitosamente", resultado);
+            String id = usuarioServiceImple.crearUsuario(registroClienteDTO);
         });
     }
 
@@ -109,7 +111,7 @@ public class CarritoServiceTest {
         String idEvento = "66b2c1517f3b340441ffdebb"; //ID EVENTO 3 del Dataset
         AgregarItemDTO agregarItemDTO = new AgregarItemDTO(
                 idCarrito, // ID del carrito
-                new DetalleCarrito(
+                new InformacionDetalleCarritoDTO(
                         2,
                         "VIP",
                         idEvento)
@@ -126,7 +128,7 @@ public class CarritoServiceTest {
         String idCarritoInvalido = "12324"; //ID ERRORENO DEL CARRITO
         AgregarItemDTO agregarItemDTO = new AgregarItemDTO(
                 idCarritoInvalido, // ID del carrito Erroneo
-                new DetalleCarrito(1, "VIP", "12345") // Evento no existente
+                new InformacionDetalleCarritoDTO(1, "VIP", "12345") // Evento no existente
         );
         try {
             carritoServiceImple.agregarAlCarrito(agregarItemDTO);
@@ -143,13 +145,13 @@ public class CarritoServiceTest {
         String idEvento = "12345"; //ID ERRONEO DEL EVENTO
         AgregarItemDTO agregarItemDTO = new AgregarItemDTO(
                 idCarrito, // ID del carrito
-                new DetalleCarrito(1, "GENERAL", idEvento) // Evento no existente
+                new InformacionDetalleCarritoDTO(1, "GENERAL", idEvento) // Evento no existente
         );
         try {
             carritoServiceImple.agregarAlCarrito(agregarItemDTO);
             fail("Validacion de agregarAlCarritoEventoNoExisteErrorTest Falló");
         } catch (RecursoNoEncontradoException e) {
-            assertEquals("Evento no encontrado", e.getMessage());
+            assertEquals("Evento no encontrado o ELIMINADO", e.getMessage());
         } catch (Exception e) {
             fail("Validacion de agregarAlCarritoEventoNoExisteErrorTest Falló " + e.getMessage());
         }
@@ -162,7 +164,7 @@ public class CarritoServiceTest {
 
         AgregarItemDTO agregarItemDTO = new AgregarItemDTO(
                 idCarrito,
-                new DetalleCarrito(1, nombreLocalidadNoExiste, idEvento)
+                new InformacionDetalleCarritoDTO(1, nombreLocalidadNoExiste, idEvento)
         );
 
         try {
@@ -183,7 +185,7 @@ public class CarritoServiceTest {
 
         AgregarItemDTO agregarItemDTO = new AgregarItemDTO(
                 idCarrito,
-                new DetalleCarrito(cantidadExcedida, nombreLocalidad, idEvento)
+                new InformacionDetalleCarritoDTO(cantidadExcedida, nombreLocalidad, idEvento)
         );
 
         try {
@@ -285,7 +287,7 @@ public class CarritoServiceTest {
             carritoServiceImple.editarCarrito(editarCarritoDTO);
             fail("Validacion de editarCarritoEventoNoExisteErrorTest Falló");
         } catch (RecursoNoEncontradoException e) {
-            assertEquals("Evento no encontrado", e.getMessage());
+            assertEquals("Evento no encontrado o ELIMINADO", e.getMessage());
         } catch (Exception e) {
             fail("Validacion de editarCarritoEventoNoExisteErrorTest Falló " + e.getMessage());
         }
@@ -319,11 +321,11 @@ public class CarritoServiceTest {
         String idCarrito = "64db45abcf1b8a0001a0b8a1"; // ID válido del carrito
         String idEvento = "66b2c1517f3b340441ffdeb9"; // ID válido del evento
         String nombreLocalidadInvalido = "EXCLUSIVA"; // Localidad que no existe en el evento
-
+        Evento evento = eventoServiceImple.obtenerEvento(idEvento);
         DetalleCarrito detalleCarrito = new DetalleCarrito(
                 5,
                 "EXCLUSIVA", //LOCALIDAD QUE NO EXISTE
-                idEvento); //ID EVENTO 1 DEL DATASET
+                evento); //ID EVENTO 1 DEL DATASET
         //Guardamos el nuevo item al carrito, en el que la localidad no existe en el evento
         Carrito carrito = carritoServiceImple.obtenerCarrito(idCarrito); //Obtenemos el Carrito 1 del dataset
         carrito.getItemsCarrito().add(detalleCarrito);

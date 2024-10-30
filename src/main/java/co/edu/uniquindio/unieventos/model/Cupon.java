@@ -3,6 +3,7 @@ package co.edu.uniquindio.unieventos.model;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDate;
 
@@ -25,5 +26,7 @@ public class Cupon {
     private EstadoCupon estadoCupon;
     private TipoCupon tipoCupon;
     private LocalDate fechaVencimiento;
+    @DBRef
+    private Usuario usuario;
 }
 

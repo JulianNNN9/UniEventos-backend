@@ -15,9 +15,9 @@ public interface UsuarioService {
 
     InformacionUsuarioDTO obtenerInformacionUsuario(String id) throws RecursoNoEncontradoException;
 
-    void enviarCodigoRecuperacionCuenta(EnviarCodigoRecuperacionAlCorreoDTO enviarCodigoRecuperacionAlCorreoDTO) throws Exception;
+    void enviarCodigoRecuperacionCuenta(String correo) throws Exception;
 
-    void enviarCodigoActivacionCuenta(EnviarCodigoActivacionAlCorreoDTO enviarCodigoActivacionAlCorreoDTO) throws Exception;
+    void enviarCodigoActivacionCuenta(String correo) throws Exception;
 
     void recuperarContrasenia(RecuperarContraseniaDTO recuperarContraseniaDTO) throws Exception;
 
@@ -32,6 +32,6 @@ public interface UsuarioService {
     TokenDTO iniciarSesion(IniciarSesionDTO iniciarSesionDTO) throws RecursoNoEncontradoException,
             CuentaInactivaEliminadaException, CuentaBloqueadaException, ContraseniaIncorrectaException;
 
-    void activarCuenta(String codigoActivacion) throws Exception;
+    void activarCuenta(ActivarCuentaDTO activarCuentaDTO) throws Exception;
 }
 

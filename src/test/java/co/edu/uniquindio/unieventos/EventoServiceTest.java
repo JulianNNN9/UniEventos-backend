@@ -48,7 +48,7 @@ public class EventoServiceTest {
             eventoServiceImple.obtenerInformacionEvento(idEvento);
             fail("Validacion de testObtenerInformacionEvento Falló ");
         } catch (RecursoNoEncontradoException e){
-            assertEquals("Evento no encontrado", e.getMessage());
+            assertEquals("Evento no encontrado o ELIMINADO", e.getMessage());
         } catch (Exception e){
             fail("Validacion de testObtenerInformacionEvento Falló " + e.getMessage());
         }

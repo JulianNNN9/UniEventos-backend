@@ -1,9 +1,6 @@
 package co.edu.uniquindio.unieventos.services.implementacion;
 
-import co.edu.uniquindio.unieventos.dto.carrito.AgregarItemDTO;
-import co.edu.uniquindio.unieventos.dto.carrito.EditarCarritoDTO;
-import co.edu.uniquindio.unieventos.dto.carrito.EliminarDelCarritoDTO;
-import co.edu.uniquindio.unieventos.dto.carrito.InformacionCarritoDTO;
+import co.edu.uniquindio.unieventos.dto.carrito.*;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.*;
 import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
@@ -32,9 +29,9 @@ public class CarritoServiceImple implements CarritoService {
     public String agregarAlCarrito(AgregarItemDTO agregarItemDTO) throws RecursoNoEncontradoException, IllegalArgumentException {
 
         Carrito carrito = obtenerCarrito(agregarItemDTO.idCarrito());
-        Evento evento = eventoService.obtenerEvento(agregarItemDTO.detalleCarrito().getIdEvento());
+        Evento evento = eventoService.obtenerEvento(agregarItemDTO.informacionDetalleCarritoDTO().idEvento());
         Optional<Localidad> localidadOptional = evento.getLocalidades().stream()
-                .filter(localidad -> localidad.getNombreLocalidad().equals(agregarItemDTO.detalleCarrito().getNombreLocalidad()))
+                .filter(localidad -> localidad.getNombreLocalidad().equals(agregarItemDTO.informacionDetalleCarritoDTO().nombreLocalidad()))
                 .findFirst();
 
         if (localidadOptional.isEmpty()) {
@@ -44,19 +41,39 @@ public class CarritoServiceImple implements CarritoService {
         Localidad localidad = localidadOptional.get();
 
         // Verificar si hay suficientes entradas restantes
-        if (localidad.getEntradasRestantes() < agregarItemDTO.detalleCarrito().getCantidad()) {
+        if (localidad.getEntradasRestantes() < agregarItemDTO.informacionDetalleCarritoDTO().cantidad()) {
             throw new IllegalArgumentException("No hay suficientes entradas disponibles en la localidad seleccionada");
         }
 
-        carrito.getItemsCarrito().add(agregarItemDTO.detalleCarrito());
+        if(carrito.getItemsCarrito() != null){
+            carrito.getItemsCarrito().add(convertirDetalleCarritoDTO(agregarItemDTO.informacionDetalleCarritoDTO()));
+        }else{
+            carrito.setItemsCarrito(List.of(convertirDetalleCarritoDTO(agregarItemDTO.informacionDetalleCarritoDTO())));
+        }
         carritoRepo.save(carrito);
 
         return "Item agregado al carrito con éxito";
     }
+    private DetalleCarrito convertirDetalleCarritoDTO(InformacionDetalleCarritoDTO informacionDetalleCarritoDTO) throws RecursoNoEncontradoException {
+        Evento evento = eventoService.obtenerEvento(informacionDetalleCarritoDTO.idEvento());
+        return DetalleCarrito.builder()
+                .cantidad(informacionDetalleCarritoDTO.cantidad())
+                .nombreLocalidad(informacionDetalleCarritoDTO.nombreLocalidad())
+                .evento(evento)
+                .build();
+    }
 
     @Override
     public Carrito obtenerCarrito(String idCarrito) throws RecursoNoEncontradoException {
-
+        if (idCarrito.length() != 24) {
+            if (idCarrito.length() < 24) {
+                // Si es más corto, completar con ceros al final
+                idCarrito = String.format("%-24s", idCarrito).replace(' ', '0');
+            } else {
+                // Si es más largo, recortar a 24 caracteres
+                idCarrito = idCarrito.substring(0, 24);
+            }
+        }
         Optional<Carrito> carritoExistente = carritoRepo.findById(idCarrito);
 
         if (carritoExistente.isEmpty()) {
@@ -92,18 +109,20 @@ public class CarritoServiceImple implements CarritoService {
     @Override
     public InformacionCarritoDTO obtenerCarritoPorIdUsuarioDTO(String idUsuario) throws RecursoNoEncontradoException {
         Carrito carrito = obtenerCarritoPorIdUsuario(idUsuario);
-        return new InformacionCarritoDTO(carrito.getId(), carrito.getFecha(), carrito.getItemsCarrito(), carrito.getIdUsuario());
+        return new InformacionCarritoDTO(carrito.getId(), carrito.getFecha(), carrito.getItemsCarrito(), carrito.getUsuario().getId());
     }
 
     @Override
     public String eliminarDelCarrito(EliminarDelCarritoDTO eliminarDelCarritoDTO) throws Exception {
 
         Carrito carrito = obtenerCarrito(eliminarDelCarritoDTO.idCarrito());
-
-        List<DetalleCarrito> itemsFiltrados = carrito.getItemsCarrito().stream()
-                .filter(item -> !(item.getNombreLocalidad().equals(eliminarDelCarritoDTO.nombreLocalidad()) &&
-                        item.getIdEvento().equals(eliminarDelCarritoDTO.idEvento())))
-                .collect(Collectors.toList());
+        List<DetalleCarrito> itemsFiltrados = null;
+        if(carrito.getItemsCarrito() != null){
+            itemsFiltrados = carrito.getItemsCarrito().stream()
+                    .filter(item -> !(item.getNombreLocalidad().equals(eliminarDelCarritoDTO.nombreLocalidad()) &&
+                            item.getEvento().getId().equals(eliminarDelCarritoDTO.idEvento())))
+                    .collect(Collectors.toList());
+        }
 
         carrito.setItemsCarrito(itemsFiltrados);
 
@@ -123,11 +142,13 @@ public class CarritoServiceImple implements CarritoService {
         Evento evento = eventoService.obtenerEvento(editarCarritoDTO.idEvento());
 
         // Buscar el item del carrito a editar
-        Optional<DetalleCarrito> itemFiltrado = carrito.getItemsCarrito().stream()
-                .filter(detalleCarrito -> (detalleCarrito.getNombreLocalidad().equals(editarCarritoDTO.nombreLocalidad()) &&
-                        detalleCarrito.getIdEvento().equals(editarCarritoDTO.idEvento())))
-                .findFirst();
-
+        Optional<DetalleCarrito> itemFiltrado = null;
+        if(carrito.getItemsCarrito() != null){
+            itemFiltrado = carrito.getItemsCarrito().stream()
+                    .filter(detalleCarrito -> (detalleCarrito.getNombreLocalidad().equals(editarCarritoDTO.nombreLocalidad()) &&
+                            detalleCarrito.getEvento().getId().equals(editarCarritoDTO.idEvento())))
+                    .findFirst();
+        }
         if (itemFiltrado.isEmpty()) {
             throw new RecursoNoEncontradoException("Item no encontrado en el carrito");
         } else {
@@ -165,7 +186,7 @@ public class CarritoServiceImple implements CarritoService {
         Carrito carrito = Carrito.builder()
                 .fecha(LocalDateTime.now())
                 .itemsCarrito(new ArrayList<>())
-                .idUsuario(usuario.getId())
+                .usuario(usuario)
                 .build();
 
         carritoRepo.save(carrito);

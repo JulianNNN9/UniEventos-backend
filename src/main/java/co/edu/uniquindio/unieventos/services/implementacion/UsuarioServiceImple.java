@@ -20,10 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @Service
 @Transactional
@@ -63,13 +60,12 @@ public class UsuarioServiceImple implements UsuarioService {
         .build();
 
         Usuario usuarioGuardado = usuarioRepo.save(nuevoUsuario);
-        EnviarCodigoActivacionAlCorreoDTO enviarCodigoActivacionAlCorreoDTO = new EnviarCodigoActivacionAlCorreoDTO(crearCuentaDTO.email());
 
-        enviarCodigoActivacionCuenta(enviarCodigoActivacionAlCorreoDTO);
+        enviarCodigoActivacionCuenta(crearCuentaDTO.email());
 
         Carrito carrito = Carrito.builder()
                 .fecha(LocalDateTime.now())
-                .idUsuario(usuarioGuardado.getId())
+                .usuario(usuarioGuardado)
                 .build();
 
         carritoRepo.save(carrito);
@@ -115,47 +111,53 @@ public class UsuarioServiceImple implements UsuarioService {
     }
 
     @Override
-    public void enviarCodigoRecuperacionCuenta(EnviarCodigoRecuperacionAlCorreoDTO enviarCodigoRecuperacionAlCorreoDTO) throws Exception {
+    public void enviarCodigoRecuperacionCuenta(String correo) throws Exception {
 
-        Usuario usuario= obtenerUsuarioPorEmail(enviarCodigoRecuperacionAlCorreoDTO.correo());
+        try{
+            Usuario usuario= obtenerUsuarioPorEmail(correo);
 
-        CodigoRecuperacion codigoRecuperacion = CodigoRecuperacion.builder()
-                .codigo(generarCodigoActivacion())
-                .fechaCreacion(LocalDateTime.now())
-                .build();
+            CodigoRecuperacion codigoRecuperacion = CodigoRecuperacion.builder()
+                    .codigo(generarCodigoActivacion())
+                    .fechaCreacion(LocalDateTime.now())
+                    .build();
 
-        usuario.setCodigoRecuperacion(codigoRecuperacion);
-        usuarioRepo.save(usuario);
+            usuario.setCodigoRecuperacion(codigoRecuperacion);
+            usuarioRepo.save(usuario);
 
-        EmailDTO emailDTO = new EmailDTO(
-                "Recuperacion de Cuenta",
-                "Su Codigo de Recuperacion es: " + codigoRecuperacion.getCodigo(),
-                enviarCodigoRecuperacionAlCorreoDTO.correo());
+            EmailDTO emailDTO = new EmailDTO(
+                    "Recuperacion de Cuenta",
+                    "Su Codigo de Recuperacion es: " + codigoRecuperacion.getCodigo(),
+                    correo);
 
-        emailService.enviarCorreo(emailDTO);
+            emailService.enviarCorreo(emailDTO);
+        }catch (Exception e){
+            return;
+        }
     }
     @Override
-    public void enviarCodigoActivacionCuenta(EnviarCodigoActivacionAlCorreoDTO enviarCodigoActivacionAlCorreoDTO) throws Exception {
+    public void enviarCodigoActivacionCuenta(String correo ) throws Exception {
 
-        Usuario usuarioActivacion = obtenerUsuarioPorEmail(enviarCodigoActivacionAlCorreoDTO.correo());
+        try{
+            Usuario usuarioActivacion = obtenerUsuarioPorEmail(correo);
 
-        CodigoActivacion codigoActivacion= CodigoActivacion
-                .builder()
-                .codigo(generarCodigoActivacion())
-                .fechaCreacion(LocalDateTime.now())
-                .build();
+            CodigoActivacion codigoActivacion= CodigoActivacion
+                    .builder()
+                    .codigo(generarCodigoActivacion())
+                    .fechaCreacion(LocalDateTime.now())
+                    .build();
 
-        usuarioActivacion.setCodigoActivacion(codigoActivacion);
-        usuarioRepo.save(usuarioActivacion);
+            usuarioActivacion.setCodigoActivacion(codigoActivacion);
+            usuarioRepo.save(usuarioActivacion);
 
-        EmailDTO emailDTO = new EmailDTO(
-                "Activacion de Cuenta",
-                "Su Codigo de Activacion es: " + codigoActivacion.getCodigo(),
-                enviarCodigoActivacionAlCorreoDTO.correo());
+            EmailDTO emailDTO = new EmailDTO(
+                    "Activacion de Cuenta",
+                    "Su Codigo de Activacion es: " + codigoActivacion.getCodigo(),
+                    correo);
 
-        emailService.enviarCorreo(emailDTO);
-
-
+            emailService.enviarCorreo(emailDTO);
+        }catch ( Exception e){
+            return;
+        }
     }
 
     @Override
@@ -233,26 +235,30 @@ public class UsuarioServiceImple implements UsuarioService {
     }
 
     @Override
-    public void activarCuenta(String codigoActivacion) throws Exception {
-        Optional<Usuario> usuario = usuarioRepo.findByCodigoRegistroCodigoAndEstadoUsuarioNot(codigoActivacion, EstadoUsuario.ELIMINADA);
+    public void activarCuenta(ActivarCuentaDTO activarCuentaDTO) throws Exception {
+        Optional<Usuario> usuario = usuarioRepo.findByEmailAndEstadoUsuarioNot(activarCuentaDTO.email(), EstadoUsuario.ELIMINADA);
         if(usuario.isEmpty()){
-            throw new RecursoNoEncontradoException("Codigo de activacion invalido");
+            throw new RecursoNoEncontradoException("Error al Activar la Cuenta");
         }
-
         //revisar que se haga dentro del tiempo estipulado
         if (usuario.get().getCodigoActivacion().getFechaCreacion().plusMinutes(15).isBefore(LocalDateTime.now())){
             throw new CodigoExpiradoException("El código de activación ya expiró");
         }
-
+        if(!usuario.get().getCodigoActivacion().getCodigo().equals(activarCuentaDTO.codigoActivacion())){
+            throw new CodigoInvalidoException("El código de activación es incorrecto: " + "Codigo Usuario: " + usuario.get().getCodigoActivacion().getCodigo() + "Codigo Enviado: " + activarCuentaDTO.codigoActivacion());
+        }
         Usuario usuarioActivacion = usuario.get();
         usuarioActivacion.setEstadoUsuario(EstadoUsuario.ACTIVA);
 
         String codigoCupon = cuponService.generarCodigoCupon();
-        CrearCuponDTO cuponDTO = new CrearCuponDTO(codigoCupon, "cuponPrimerIngreso", 19.0, EstadoCupon.ACTIVO, TipoCupon.UNICO, LocalDate.now().plusDays(30));
+        CrearCuponDTO cuponDTO = new CrearCuponDTO(codigoCupon, "CUPONPRIMERINGRESO", 19.0, EstadoCupon.ACTIVO, TipoCupon.UNICO, LocalDate.now().plusDays(30), usuarioActivacion);
         cuponService.crearCupon(cuponDTO);
-        usuarioActivacion.getCuponesUsuario().add(cuponService.obtenerCuponPorCodigo(cuponDTO.codigo()));
+        if (usuarioActivacion.getCuponesUsuario() != null){
+            usuarioActivacion.getCuponesUsuario().add(cuponService.obtenerCuponPorCodigoYIdUsuario(cuponDTO.codigo(), usuarioActivacion.getId()));
+        }else{
+            usuarioActivacion.setCuponesUsuario(List.of(cuponService.obtenerCuponPorCodigoYIdUsuario(cuponDTO.codigo(), usuarioActivacion.getId())));
+        }
         usuarioRepo.save(usuarioActivacion);
-
         EmailDTO emailDTO = new EmailDTO(
                 "Tu nuevo cupon",
                 "Por tu primer ingreso, tienes un nuevo cupon. Tu Codigo es: " + codigoCupon, usuarioActivacion.getEmail());
@@ -262,7 +268,15 @@ public class UsuarioServiceImple implements UsuarioService {
 
     @Override
     public Usuario obtenerUsuario(String id) throws RecursoNoEncontradoException {
-
+        if (id.length() != 24) {
+            if (id.length() < 24) {
+                // Si es más corto, completar con ceros al final
+                id = String.format("%-24s", id).replace(' ', '0');
+            } else {
+                // Si es más largo, recortar a 24 caracteres
+                id = id.substring(0, 24);
+            }
+        }
         Optional<Usuario> optionalUsuario = usuarioRepo.findByIdAndEstadoUsuarioNot(id, EstadoUsuario.ELIMINADA);
 
         if(optionalUsuario.isEmpty()){
