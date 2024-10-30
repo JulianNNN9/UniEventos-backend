@@ -38,8 +38,7 @@ public class UsuarioServicioTest {
         Usuario usuario = usuarioServicio.obtenerUsuario(idUsuario);
 
 
-        EnviarCodigoActivacionAlCorreoDTO enviarCodigoActivacionAlCorreoDTO = new EnviarCodigoActivacionAlCorreoDTO(usuario.getEmail());
-        assertDoesNotThrow(() -> usuarioServicio.enviarCodigoActivacionCuenta(enviarCodigoActivacionAlCorreoDTO));
+        assertDoesNotThrow(() -> usuarioServicio.enviarCodigoActivacionCuenta(usuario.getEmail()));
 
     }
 
@@ -184,8 +183,7 @@ public class UsuarioServicioTest {
         //Necesitamos el correo del usuario para poder enviar el codigo de activacion
         Usuario usuario = usuarioServicio.obtenerUsuario(idUsuario);
 
-        EnviarCodigoRecuperacionAlCorreoDTO enviarCodigoRecuperacionAlCorreoDTO = new EnviarCodigoRecuperacionAlCorreoDTO(usuario.getEmail());
-        assertDoesNotThrow(() -> usuarioServicio.enviarCodigoRecuperacionCuenta(enviarCodigoRecuperacionAlCorreoDTO));
+        assertDoesNotThrow(() -> usuarioServicio.enviarCodigoRecuperacionCuenta(usuario.getEmail()));
 
     }
     @Test

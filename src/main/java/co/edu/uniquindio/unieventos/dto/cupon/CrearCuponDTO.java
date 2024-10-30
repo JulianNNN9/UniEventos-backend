@@ -2,6 +2,7 @@ package co.edu.uniquindio.unieventos.dto.cupon;
 
 import co.edu.uniquindio.unieventos.model.EstadoCupon;
 import co.edu.uniquindio.unieventos.model.TipoCupon;
+import co.edu.uniquindio.unieventos.model.Usuario;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
@@ -29,6 +30,7 @@ public record CrearCuponDTO (
 
         @NotNull(message = "La fecha de vencimiento es obligatoria")
         @Future(message = "La fecha de vencimiento debe estar en el futuro")
-        LocalDate fechaVencimiento
+        LocalDate fechaVencimiento,
+        Usuario usuario
 ){
 }

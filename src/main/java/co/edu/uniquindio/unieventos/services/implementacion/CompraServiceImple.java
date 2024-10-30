@@ -3,11 +3,11 @@ package co.edu.uniquindio.unieventos.services.implementacion;
 import co.edu.uniquindio.unieventos.dto.EmailDTO;
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
 import co.edu.uniquindio.unieventos.dto.compra.InformacionCompraDTO;
+import co.edu.uniquindio.unieventos.dto.compra.InformacionItemCompraDTO;
 import co.edu.uniquindio.unieventos.dto.cupon.CrearCuponDTO;
 import co.edu.uniquindio.unieventos.exceptions.EntradasInsuficientesException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
-import co.edu.uniquindio.unieventos.exceptions.TiempoCompraEventoException;
 import co.edu.uniquindio.unieventos.model.*;
 import co.edu.uniquindio.unieventos.repositories.CarritoRepo;
 import co.edu.uniquindio.unieventos.repositories.CompraRepo;
@@ -98,11 +98,11 @@ public class CompraServiceImple implements CompraService {
     /*
         VALIDACIÓN DE ENTRADAS Y ANTICIPACIÓN PARA LA LOCALIDAD
      */
-        List<ItemCompra> itemsCompra = crearCompraDTO.itemsCompra();
+        List<ItemCompra> itemsCompra = convertirListaItemCompraDTO(crearCompraDTO.informacionItemCompraDTOS());
 
         // Iterar sobre cada item de la compra
         for (ItemCompra item : itemsCompra) {
-            String idEvento = item.getIdEvento();
+            String idEvento = item.getEvento().getId();
             String nombreLocalidad = item.getNombreLocalidad();
             Integer cantidad = item.getCantidad();
 
@@ -137,8 +137,8 @@ public class CompraServiceImple implements CompraService {
             total = calcularTotalConDescuentoCupon(cupon, total);
         }
         Compra compra = Compra.builder()
-                .idUsuario(usuario.getId())
-                .itemsCompra(crearCompraDTO.itemsCompra())
+                .usuario(usuario)
+                .itemsCompra(itemsCompra)
                 //.total(total) // calcular el total acá
                 .fechaCompra(LocalDateTime.now())
                 .codigoCupon(crearCompraDTO.codigoCupon())
@@ -148,6 +148,20 @@ public class CompraServiceImple implements CompraService {
         compraRepo.save(compra);
 
         return compra.getId();
+    }
+    private List<ItemCompra> convertirListaItemCompraDTO(List<InformacionItemCompraDTO> informacionItemCompraDTOList) throws RecursoNoEncontradoException {
+        List<ItemCompra> itemCompraList = new ArrayList<>();
+        for (InformacionItemCompraDTO informacionItemCompraDTO : informacionItemCompraDTOList){
+            Evento evento = eventoService.obtenerEvento(informacionItemCompraDTO.idEvento());
+            ItemCompra itemCompra = ItemCompra.builder()
+                    .evento(evento)
+                    .nombreLocalidad(informacionItemCompraDTO.nombreLocalidad())
+                    .cantidad(informacionItemCompraDTO.cantidad())
+                    .precioUnitario(informacionItemCompraDTO.precioUnitario())
+                    .build();
+            itemCompraList.add(itemCompra);
+        }
+        return itemCompraList;
     }
 
     private double calcularTotalConDescuentoCupon(Cupon cupon, double total) {
@@ -159,7 +173,15 @@ public class CompraServiceImple implements CompraService {
 
     @Override
     public Compra obtenerCompra(String idCompra) throws Exception {
-
+        if (idCompra.length() != 24) {
+            if (idCompra.length() < 24) {
+                // Si es más corto, completar con ceros al final
+                idCompra = String.format("%-24s", idCompra).replace(' ', '0');
+            } else {
+                // Si es más largo, recortar a 24 caracteres
+                idCompra = idCompra.substring(0, 24);
+            }
+        }
         Optional<Compra> compraExistente = compraRepo.findById(idCompra);
 
         if (compraExistente.isEmpty()) {
@@ -175,7 +197,7 @@ public class CompraServiceImple implements CompraService {
 
         return new InformacionCompraDTO(
                 compra.getId(),
-                compra.getIdUsuario(),
+                compra.getUsuario().getId(),
                 compra.getItemsCompra(),
                 calcularTotal(compra.getItemsCompra()),
                 compra.getFechaCompra(),
@@ -196,7 +218,7 @@ public class CompraServiceImple implements CompraService {
                 idUsuario = idUsuario.substring(0, 24);
             }
         }
-        return compraRepo.findAllByIdUsuario(new ObjectId(idUsuario));
+        return compraRepo.findAllByIdUsuario(idUsuario);
     }
     @Override
     public List<InformacionCompraDTO> obtenerComprasUsuarioDTO(String idUsuario){
@@ -204,7 +226,7 @@ public class CompraServiceImple implements CompraService {
         return obtenerComprasUsuario(idUsuario).stream()
                 .map(compra -> new InformacionCompraDTO(
                         compra.getId(),
-                        compra.getIdUsuario(),
+                        compra.getUsuario().getId(),
                         compra.getItemsCompra(),
                         calcularTotal(compra.getItemsCompra()),
                         compra.getFechaCompra(),
@@ -232,12 +254,12 @@ public class CompraServiceImple implements CompraService {
 
         for (ItemCompra item : compra.getItemsCompra()) {
 
-            String idEvento = item.getIdEvento();
+            String idEvento = item.getEvento().getId();
             String nombreLocalidad = item.getNombreLocalidad();
             Integer cantidad = item.getCantidad();
 
             // Buscar el evento correspondiente
-            Evento evento = eventoService.obtenerEvento(item.getIdEvento());
+            Evento evento = eventoService.obtenerEvento(item.getEvento().getId());
 
             if(evento.getLocalidades() != null){
                 // Buscar la localidad en el evento
@@ -274,7 +296,7 @@ public class CompraServiceImple implements CompraService {
 
 
             // Obtener el evento y la localidad del ítem
-            Evento evento = eventoService.obtenerEvento(item.getIdEvento());
+            Evento evento = eventoService.obtenerEvento(item.getEvento().getId());
             Localidad localidad = evento.getLocalidades().stream()
                     .filter(localidad1 -> localidad1.getNombreLocalidad().equals(item.getNombreLocalidad()))
                     .findFirst()
@@ -328,10 +350,10 @@ public class CompraServiceImple implements CompraService {
         compraGuardada.setCodigoPasarela( preference.getId() );
         compraRepo.save(compraGuardada);
 
-        Optional<Carrito> carritoOptional = carritoRepo.findByIdUsuario(compraGuardada.getIdUsuario());
+        Optional<Carrito> carritoOptional = carritoRepo.findByIdUsuario(compraGuardada.getUsuario().getId());
 
         if (carritoOptional.isEmpty()) {
-            throw new RecursoNoEncontradoException("Carrito no encontrado con el id del usuario: " + compraGuardada.getIdUsuario());
+            throw new RecursoNoEncontradoException("Carrito no encontrado con el id del usuario: " + compraGuardada.getUsuario().getId());
         }
 
         Carrito carrito = carritoOptional.get();
@@ -343,11 +365,11 @@ public class CompraServiceImple implements CompraService {
         carritoRepo.save(carrito);
 
         // Metodo que envia el correo con el cupon de primera compra
-        Optional<Usuario> usuarioOptional = Optional.ofNullable(usuarioService.obtenerUsuario(compraGuardada.getIdUsuario()));
+        Optional<Usuario> usuarioOptional = Optional.ofNullable(usuarioService.obtenerUsuario(compraGuardada.getUsuario().getId()));
         Usuario usuario = usuarioOptional.get();
         if (!usuario.getPrimeraCompraRealizada()){
             String codigoCupon = cuponService.generarCodigoCupon();
-            CrearCuponDTO cuponDTO = new CrearCuponDTO(codigoCupon, "cuponPrimeraCompra", 25.0, EstadoCupon.ACTIVO, TipoCupon.UNICO, LocalDate.now().plusDays(30));
+            CrearCuponDTO cuponDTO = new CrearCuponDTO(codigoCupon, "CUPONPRIMERACOMPRA", 25.0, EstadoCupon.ACTIVO, TipoCupon.UNICO, LocalDate.now().plusDays(30), usuario);
             cuponService.crearCupon(cuponDTO);
             usuario.getCuponesUsuario().add(cuponService.obtenerCuponPorCodigo(cuponDTO.codigo()));
             usuario.setPrimeraCompraRealizada(true);
@@ -389,7 +411,7 @@ public class CompraServiceImple implements CompraService {
             // Iterar sobre cada item de la compra
             for (ItemCompra item : itemsCompra) {
 
-                String idEvento = item.getIdEvento();
+                String idEvento = item.getEvento().getId();
                 String nombreLocalidad = item.getNombreLocalidad();
                 Integer cantidad = item.getCantidad();
 

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 @AllArgsConstructor
 @Data
@@ -12,5 +13,6 @@ public class DetalleCarrito {
 
     private Integer cantidad;
     private String nombreLocalidad;
-    private String idEvento;
+    @DBRef
+    private Evento evento;
 }

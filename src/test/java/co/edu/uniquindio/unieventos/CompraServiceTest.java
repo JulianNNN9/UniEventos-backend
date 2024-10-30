@@ -1,6 +1,7 @@
 package co.edu.uniquindio.unieventos;
 
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
+import co.edu.uniquindio.unieventos.dto.compra.InformacionItemCompraDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.CrearUsuarioDTO;
 import co.edu.uniquindio.unieventos.dto.cupon.CrearCuponDTO;
 import co.edu.uniquindio.unieventos.exceptions.CuponUsadoException;
@@ -24,9 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 IMPORTANTE: Se necesita cargar el Script de datase.js en la base de datos para poder realizar correctamente las
             Pruebas
  */
+
 @SpringBootTest
 public class CompraServiceTest {
-
     @Autowired
     private UsuarioServiceImple usuarioServiceImple;
     @Autowired
@@ -35,7 +36,6 @@ public class CompraServiceTest {
     private CuponServiceImple cuponServiceImple;
     @Autowired
     private EventoServiceImple eventoServiceImple;
-
     @Test
     public void testObtenerCompraPorId() {
         //ID Compra 1 DEL DATASET
@@ -106,7 +106,7 @@ public class CompraServiceTest {
 
         CrearCompraDTO crearCompraDTO = new CrearCompraDTO(
                 idUsuario,
-                List.of(new ItemCompra("66b2c1517f3b340441ffdebc", "PLATINO", 2, 180000.0)),
+                List.of(new InformacionItemCompraDTO("66b2c1517f3b340441ffdebc", "PLATINO", 2, 180000.0)),
                 codigoCupon
         );
         Assertions.assertDoesNotThrow(() -> compraServiceImple.crearCompra(crearCompraDTO));
@@ -120,7 +120,7 @@ public class CompraServiceTest {
 
         CrearCompraDTO crearCompraDTO = new CrearCompraDTO(
                 idUsuario,
-                List.of(new ItemCompra("66b2c1517f3b340441ffdebc", "PLATINO", 2, 180000.0)),
+                List.of(new InformacionItemCompraDTO("66b2c1517f3b340441ffdebc", "PLATINO", 2, 180000.0)),
                 null
         );
         Assertions.assertDoesNotThrow(() -> compraServiceImple.crearCompra(crearCompraDTO));
@@ -135,7 +135,7 @@ public class CompraServiceTest {
 
         CrearCompraDTO crearCompraDTO = new CrearCompraDTO(
                 idUsuario,
-                List.of(new ItemCompra("66b2c1517f3b340441ffdebc", "PLATINO", 4, 180000.0)),
+                List.of(new InformacionItemCompraDTO("66b2c1517f3b340441ffdebc", "PLATINO", 4, 180000.0)),
                 codigoCupon
         );
         try{
@@ -149,7 +149,7 @@ public class CompraServiceTest {
 
     }
     @Test
-    void testCrearCompra_CuponExpiradoException() throws RecursoEncontradoException {
+    void testCrearCompra_CuponExpiradoException() throws Exception {
         String codigoCupon = "CUPONVENCIDO";
         //Creamos un cupon y le cambios la fecha de vencimiento por ayer para expirarlo
         CrearCuponDTO crearCuponDTO = new CrearCuponDTO(
@@ -158,7 +158,8 @@ public class CompraServiceTest {
                 1.0,
                 EstadoCupon.ACTIVO, //Aunque el estado esté activo, va a pasar a inactivo luego de expirarse  en la excepcion
                 TipoCupon.GENERAL,
-                LocalDate.now().minusDays(1) //Expiramos el cupon
+                LocalDate.now().minusDays(1), //Expiramos el cupon
+                null
         );
         cuponServiceImple.crearCupon(crearCuponDTO);
 
@@ -167,7 +168,7 @@ public class CompraServiceTest {
 
         CrearCompraDTO crearCompraDTO = new CrearCompraDTO(
                 idUsuario,
-                List.of(new ItemCompra("66b2c1517f3b340441ffdebc", "PLATINO", 4, 180000.0)),
+                List.of(new InformacionItemCompraDTO("66b2c1517f3b340441ffdebc", "PLATINO", 4, 180000.0)),
                 codigoCupon
         );
         try{
@@ -180,6 +181,7 @@ public class CompraServiceTest {
         }
 
     }
+
     @Test
     void testCrearCompra_CuponGeneralRedimidoException() {
         /*
@@ -192,7 +194,7 @@ public class CompraServiceTest {
 
         CrearCompraDTO crearCompraDTO = new CrearCompraDTO(
                 idUsuario,
-                List.of(new ItemCompra("66b2c1517f3b340441ffdebc", "PLATINO", 4, 180000.0)),
+                List.of(new InformacionItemCompraDTO("66b2c1517f3b340441ffdebc", "PLATINO", 4, 180000.0)),
                 codigoCupon
         );
         try{
@@ -218,7 +220,7 @@ public class CompraServiceTest {
 
         CrearCompraDTO crearCompraDTO = new CrearCompraDTO(
                 idUsuario,
-                List.of(new ItemCompra(idEvento, localidadNoExiste, 2, 40000.0)),
+                List.of(new InformacionItemCompraDTO(idEvento, localidadNoExiste, 2, 40000.0)),
                 null
         );
         try{
@@ -242,7 +244,7 @@ public class CompraServiceTest {
 
         CrearCompraDTO crearCompraDTO = new CrearCompraDTO(
                 idUsuario,
-                List.of(new ItemCompra(idEvento, localidadCorrecta, cantidadExcedida, 180000.0)),
+                List.of(new InformacionItemCompraDTO(idEvento, localidadCorrecta, cantidadExcedida, 180000.0)),
                 null
         );
         try{
@@ -269,7 +271,7 @@ public class CompraServiceTest {
         assertEquals(EstadoCompra.CANCELADA, compraCancelada.getEstadoCompra());
 
         //Evento 1 del primer item de la compra
-        String idEventoLocalidad1 = compraCancelada.getItemsCompra().get(0).getIdEvento();
+        String idEventoLocalidad1 = compraCancelada.getItemsCompra().get(0).getEvento().getId();
         Evento evento = eventoServiceImple.obtenerEvento(idEventoLocalidad1);
         //Antes de Cancelarla habia 98 entradas en la localidad 'VIP' del primer evento del item de la compra
         // al cancelarlo deberian quedar 100

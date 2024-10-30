@@ -242,17 +242,17 @@ db.carritos.insertMany([
                 //EVENTO 1
                 cantidad: 2,
                 nombreLocalidad: "VIP",
-                idEvento: ObjectId("66b2c1517f3b340441ffdeb9")
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdeb9')
             },
             {
                 //EVENTO 2
                 cantidad: 1,
                 nombreLocalidad: "GENERAL",
-                idEvento: ObjectId("66b2c1517f3b340441ffdeba")
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdeba')
             }
         ],
         //Usuario 1
-        idUsuario: ObjectId("66b2a9aaa8620e3c1c5437be"),
+        usuario: DBRef('usuarios', '66b2a9aaa8620e3c1c5437be'),
         _class: 'co.edu.uniquindio.unieventos.model.Carrito'
     },
     {
@@ -263,11 +263,11 @@ db.carritos.insertMany([
                 //EVENTO 3
                 cantidad: 3,
                 nombreLocalidad: "VIP",
-                idEvento: ObjectId("66b2c1517f3b340441ffdebb")
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdebb')
             }
         ],
         //Usuario 2
-        idUsuario: ObjectId("66b2b14dd9219911cd34f2c1"),
+        usuario: DBRef('usuarios', '66b2b14dd9219911cd34f2c1'),
         _class: 'co.edu.uniquindio.unieventos.model.Carrito'
     },
     {
@@ -278,17 +278,18 @@ db.carritos.insertMany([
                 //EVENTO 4
                 cantidad: 1,
                 nombreLocalidad: "PLATINO",
-                idEvento: ObjectId("66b2c1517f3b340441ffdebc")
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdebc')
+
             },
             {
                 //EVENTO 5
                 cantidad: 2,
                 nombreLocalidad: "ASISTENTE",
-                idEvento: ObjectId("66b2c1517f3b340441ffdebd")
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdebd')
             }
         ],
         //Usuario 3
-        idUsuario: ObjectId("66b2c1517f3b340441ffdeb1"),
+        usuario: DBRef('usuarios', '66b2c1517f3b340441ffdeb1'),
         _class: 'co.edu.uniquindio.unieventos.model.Carrito'
     },
     {
@@ -299,17 +300,17 @@ db.carritos.insertMany([
                 //EVENTO 1
                 cantidad: 2,
                 nombreLocalidad: "GENERAL",
-                idEvento: ObjectId("66b2c1517f3b340441ffdeb9")
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdeb9')
             },
             {
                 //EVENTO 4
                 cantidad: 1,
                 nombreLocalidad: "GENERAL",
-                idEvento: ObjectId("66b2c1517f3b340441ffdebc")
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdebc')
             }
         ],
         //Usuario 4
-        idUsuario: ObjectId("66b2c1517f3b340441ffdeb2"),
+        usuario: DBRef('usuarios', '66b2c1517f3b340441ffdeb2'),
         _class: 'co.edu.uniquindio.unieventos.model.Carrito'
     },
     {
@@ -320,11 +321,11 @@ db.carritos.insertMany([
                 //EVENTO 5
                 cantidad: 1,
                 nombreLocalidad: "EXPOSITOR",
-                idEvento: ObjectId("66b2c1517f3b340441ffdebd")
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdebd')
             }
         ],
         //Usuario 5
-        idUsuario: ObjectId("66b2c1517f3b340441ffdeb3"),
+        usuario: DBRef('usuarios', '66b2c1517f3b340441ffdeb3'),
         _class: 'co.edu.uniquindio.unieventos.model.Carrito'
     }
 ]);
@@ -333,18 +334,18 @@ db.compras.insertMany([
     {
         _id: ObjectId("66fc30f01f299be000110b36"),
         //Usuario 1
-        idUsuario: ObjectId("66b2a9aaa8620e3c1c5437be"),
+        usuario: DBRef('usuarios', '66b2a9aaa8620e3c1c5437be'),
         itemsCompra: [
             {
                 //Evento 1
-                idEvento: ObjectId("66b2c1517f3b340441ffdeb9"),
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdeb9'),
                 nombreLocalidad: "VIP",
                 cantidad: 2,
                 precioUnitario: 120000.0
             },
             {
                 //Evento 2
-                idEvento: ObjectId("66b2c1517f3b340441ffdeba"),
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdeba'),
                 nombreLocalidad: "GENERAL",
                 cantidad: 1,
                 precioUnitario: 50000.0
@@ -361,11 +362,11 @@ db.compras.insertMany([
     {
         _id: ObjectId("66fc30feae029f96175a21f3"),
         //Usuario 2
-        idUsuario: ObjectId("66b2b14dd9219911cd34f2c1"),
+        usuario: DBRef('usuarios', '66b2b14dd9219911cd34f2c1'),
         itemsCompra: [
             {
                 //Evento 3
-                idEvento: ObjectId("66b2c1517f3b340441ffdebb"),
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdebb'),
                 nombreLocalidad: "VIP",
                 cantidad: 3,
                 precioUnitario: 150000.0
@@ -387,18 +388,18 @@ db.compras.insertMany([
     {
         _id: ObjectId("66fc315670c1d4c30dc6a396"),
         //Usuario 3
-        idUsuario: ObjectId("66b2c1517f3b340441ffdeb1"),
+        usuario: DBRef('usuarios', '66b2c1517f3b340441ffdeb1'),
         itemsCompra: [
             {
                 //Evento 4
-                idEvento: ObjectId("66b2c1517f3b340441ffdebc"),
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdebc'),
                 nombreLocalidad: "PLATINO",
                 cantidad: 1,
                 precioUnitario: 180000.0
             },
             {
                 //Evento 5
-                idEvento: ObjectId("66b2c1517f3b340441ffdebd"),
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdebd'),
                 nombreLocalidad: "ASISTENTE",
                 cantidad: 2,
                 precioUnitario: 30000.0
@@ -412,18 +413,18 @@ db.compras.insertMany([
     {
         _id: ObjectId("66fc31634ed5f7a3186e0e19"),
         //Usuario 4
-        idUsuario: ObjectId("66b2c1517f3b340441ffdeb2"),
+        usuario: DBRef('usuarios', '66b2c1517f3b340441ffdeb2'),
         itemsCompra: [
             {
                 //Evento 1
-                idEvento: ObjectId("66b2c1517f3b340441ffdeb9"),
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdeb9'),
                 nombreLocalidad: "GENERAL",
                 cantidad: 2,
                 precioUnitario: 60000.0
             },
             {
                 //Evento 4
-                idEvento: ObjectId("66b2c1517f3b340441ffdebc"),
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdebc'),
                 nombreLocalidad: "GENERAL",
                 cantidad: 1,
                 precioUnitario: 90000.0
@@ -443,11 +444,11 @@ db.compras.insertMany([
     {
         _id: ObjectId("66fc316ca5458eca3e2f7ed8"),
         //Usuario 5
-        idUsuario: ObjectId("66b2c1517f3b340441ffdeb3"),
+        usuario: DBRef('usuarios', '66b2c1517f3b340441ffdeb3'),
         itemsCompra: [
             {
                 //Evento 5
-                idEvento: ObjectId("66b2c1517f3b340441ffdebd"),
+                evento: DBRef('eventos', '66b2c1517f3b340441ffdebd'),
                 nombreLocalidad: "EXPOSITOR",
                 cantidad: 1,
                 precioUnitario: 250000.0

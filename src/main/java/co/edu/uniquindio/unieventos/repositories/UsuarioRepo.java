@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface UsuarioRepo extends MongoRepository<Usuario, String> {
 
-    @Query("{ '_id': ?0, 'estadoUsuario': { $ne: ?1 } }")
+    @Query("{ '_id': ObjectId(?0), 'estadoUsuario': { $ne: ?1 } }")
     Optional<Usuario> findByIdAndEstadoUsuarioNot(String id, EstadoUsuario estadoUsuario);
 
     @Query("{ 'cedula': ?0, 'estadoUsuario': { $ne: ?1 } }")

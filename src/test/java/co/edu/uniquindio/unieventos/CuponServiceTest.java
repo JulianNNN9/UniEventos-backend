@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -88,7 +89,22 @@ public class CuponServiceTest {
 
         }
     }
-
+    @Test
+    public void obtenerCuponPorCodigoYIdUsuarioTest() {
+        //CODIGO DEL CUPON 2 DEL DATASET
+        String codigoCupon = "5URVPL";
+        String idUsuario = "6722b8784c1f6c5a95e01de0";
+        try {
+            List<Cupon> cupon = cuponServiceImple.obtenerListaCuponPorIdUsuario(idUsuario);
+            System.out.println(cupon.size());
+            assertDoesNotThrow(() -> {
+                Cupon resultado = cuponServiceImple.obtenerCuponPorCodigoYIdUsuario(codigoCupon, idUsuario);
+                assertNotNull(resultado);
+            });
+        } catch (Exception e) {
+            fail("Validacion de obtenerCuponPorCodigoTest Falló " + e.getMessage());
+        }
+    }
     @Test
     public void crearCuponTest() {
         CrearCuponDTO crearCuponDTO = new CrearCuponDTO(
@@ -97,7 +113,8 @@ public class CuponServiceTest {
                 15.5,
                 EstadoCupon.ACTIVO,
                 TipoCupon.GENERAL,
-                LocalDate.now().plusDays(30)
+                LocalDate.now().plusDays(30),
+                null
         );
         assertDoesNotThrow(() -> {
             String resultado = cuponServiceImple.crearCupon(crearCuponDTO);
@@ -115,7 +132,8 @@ public class CuponServiceTest {
                 10.0,
                 EstadoCupon.ACTIVO,
                 TipoCupon.GENERAL,
-                LocalDate.now().plusDays(30)
+                LocalDate.now().plusDays(30),
+                null
         );
         try {
             cuponServiceImple.crearCupon(crearCuponDTO);

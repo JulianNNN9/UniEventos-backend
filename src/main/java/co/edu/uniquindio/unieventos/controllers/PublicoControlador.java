@@ -61,20 +61,20 @@ public class PublicoControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.notificarNuevoEvento()));
     }
 
-    @PostMapping("/enviar-codigo-recuperacion")
-    public ResponseEntity<MensajeDTO<String>> enviarCodigoRecuperacionCuenta(@RequestBody EnviarCodigoRecuperacionAlCorreoDTO enviarCodigoRecuperacionAlCorreoDTO) throws Exception{
-        usuarioService.enviarCodigoRecuperacionCuenta(enviarCodigoRecuperacionAlCorreoDTO);
-        return ResponseEntity.ok().body( new MensajeDTO<>(false, "Código de recuperación enviado correctamente") );
+    @GetMapping("/enviar-codigo-recuperacion")
+    public ResponseEntity<MensajeDTO<String>> enviarCodigoRecuperacionCuenta(@RequestParam String correo) throws Exception{
+        usuarioService.enviarCodigoRecuperacionCuenta(correo);
+        return ResponseEntity.ok().body( new MensajeDTO<>(false, "Si su Correo está registrado con nosotros, su código de recuperacion fue enviado correctamente") );
     }
-    @PostMapping("/enviar-codigo-activacion")
-    public ResponseEntity<MensajeDTO<String>> enviarCodigoRecuperacionCuenta(@RequestBody EnviarCodigoActivacionAlCorreoDTO enviarCodigoActivacionAlCorreoDTO) throws Exception{
-        usuarioService.enviarCodigoActivacionCuenta(enviarCodigoActivacionAlCorreoDTO);
-        return ResponseEntity.ok().body( new MensajeDTO<>(false, "Código de activacion enviado correctamente") );
+    @GetMapping("/enviar-codigo-activacion")
+    public ResponseEntity<MensajeDTO<String>> enviarCodigoActicacionCuenta(@RequestParam String correo) throws Exception{
+        usuarioService.enviarCodigoActivacionCuenta(correo);
+        return ResponseEntity.ok().body( new MensajeDTO<>(false, "Si su Correo está registrado con nosotros, su código de activacion fue enviado correctamente") );
     }
 
-    @GetMapping("/activar-cuenta/{codigoActivacion}")
-    public ResponseEntity<MensajeDTO<String>> activarCuenta(@PathVariable String codigoActivacion) throws Exception{
-        usuarioService.activarCuenta(codigoActivacion);
+    @PostMapping("/activar-cuenta")
+    public ResponseEntity<MensajeDTO<String>> activarCuenta(@RequestBody ActivarCuentaDTO activarCuentaDTO) throws Exception{
+        usuarioService.activarCuenta(activarCuentaDTO);
         return ResponseEntity.ok().body( new MensajeDTO<>(false, "Cuenta activada correctamente") );
     }
 

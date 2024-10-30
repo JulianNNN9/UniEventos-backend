@@ -114,7 +114,15 @@ public class EventoServiceImple implements EventoService {
 
 
     public Evento obtenerEvento(String idEvento) throws RecursoNoEncontradoException {
-
+        if (idEvento.length() != 24) {
+            if (idEvento.length() < 24) {
+                // Si es más corto, completar con ceros al final
+                idEvento = String.format("%-24s", idEvento).replace(' ', '0');
+            } else {
+                // Si es más largo, recortar a 24 caracteres
+                idEvento = idEvento.substring(0, 24);
+            }
+        }
         Optional<Evento> eventoExistente = eventoRepo.findByIdAndEstadoNot(idEvento, EstadoEvento.ELIMINADO);
 
         if (eventoExistente.isEmpty()) {

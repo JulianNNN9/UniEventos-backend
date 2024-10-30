@@ -11,13 +11,17 @@ import java.util.List;
 
 public interface CuponService {
 
-    String crearCupon(CrearCuponDTO crearCuponDTO) throws RecursoEncontradoException;
+    String crearCupon(CrearCuponDTO crearCuponDTO) throws Exception;
 
     String editarCupon(EditarCuponDTO editarCuponDTO)throws RecursoNoEncontradoException;
 
     String eliminarCupon(String idCupon)throws RecursoNoEncontradoException;
 
     Cupon obtenerCuponPorCodigo(String id) throws RecursoNoEncontradoException;
+
+    List<Cupon> obtenerListaCuponPorIdUsuario(String idUsuario);
+
+    Cupon obtenerCuponPorCodigoYIdUsuario(String codigo, String idUsuario) throws RecursoNoEncontradoException;
 
     Cupon obtenerCuponPorId(String id) throws RecursoNoEncontradoException;
 

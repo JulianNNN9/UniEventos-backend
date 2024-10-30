@@ -2,6 +2,7 @@ package co.edu.uniquindio.unieventos.model;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -19,7 +20,8 @@ public class Compra {
     @EqualsAndHashCode.Include
     private String id;
 
-    private String idUsuario;
+    @DBRef
+    private Usuario usuario;
     private List<ItemCompra> itemsCompra;
     private Double total;
     private LocalDateTime fechaCompra;
