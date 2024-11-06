@@ -39,9 +39,18 @@ public class FiltroToken extends OncePerRequestFilter {
             String token = getToken(request);
             boolean error = true;
             try {
-                //Si la petición es para la ruta /api/clientes se verifica que el token sea
-                //correcto y que el rol sea CLIENTE
-                if (requestURI.startsWith("/api/usuario")) {
+                if (requestURI.startsWith("/api/auth")) {
+                    // Permitir paso de token expirado en /refresh para poder emitir uno nuevo
+                    if (token != null) {
+                        Jws<Claims> jws = jwtUtils.parseJwt(token);  // Aquí no lanzará excepción por vencido
+                        // Continuar con el filtro ya que es válido para refrescar
+                        error = false;
+                    } else {
+                        crearRespuestaError("No se encontró el token para refrescar", HttpServletResponse.SC_UNAUTHORIZED, response);
+                    }
+                    //Si la petición es para la ruta /api/clientes se verifica que el token sea
+                    //correcto y que el rol sea CLIENTE
+                } else if (requestURI.startsWith("/api/usuario")) {
                     if (token != null) {
                         Jws<Claims> jws = jwtUtils.parseJwt(token);
                         if (!jws.getPayload().get("rol").equals("CLIENTE")) {
@@ -54,9 +63,7 @@ public class FiltroToken extends OncePerRequestFilter {
                         crearRespuestaError("No tiene permisos para acceder a este recurso",
                                 HttpServletResponse.SC_FORBIDDEN, response);
                     }
-                }
-
-                if (requestURI.startsWith("/api/admin")) {
+                }else if (requestURI.startsWith("/api/admin")) {
                     if (token != null) {
                         Jws<Claims> jws = jwtUtils.parseJwt(token);
                         if (!jws.getPayload().get("rol").equals("ADMINISTRADOR")) {
@@ -77,8 +84,11 @@ public class FiltroToken extends OncePerRequestFilter {
                 crearRespuestaError("El token es incorrecto",
                         HttpServletResponse.SC_INTERNAL_SERVER_ERROR, response);
             } catch (ExpiredJwtException e) {
-                crearRespuestaError("El token está vencido",
-                        HttpServletResponse.SC_INTERNAL_SERVER_ERROR, response);
+                if (requestURI.startsWith("/api/auth")) {
+                    error = false;  // Permitir token expirado en refresh
+                } else {
+                    crearRespuestaError("El token esta vencido", HttpServletResponse.SC_UNAUTHORIZED, response);
+                }
             } catch (Exception e) {
                 crearRespuestaError(e.getMessage(),
                         HttpServletResponse.SC_INTERNAL_SERVER_ERROR, response);

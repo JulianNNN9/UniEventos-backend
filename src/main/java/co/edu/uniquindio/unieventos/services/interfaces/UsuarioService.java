@@ -6,6 +6,7 @@ import co.edu.uniquindio.unieventos.exceptions.*;
 import co.edu.uniquindio.unieventos.model.Usuario;
 
 public interface UsuarioService {
+    TokenDTO refreshToken(String expiredToken);
 
     String crearUsuario(CrearUsuarioDTO crearCuentaDTO) throws Exception;
 

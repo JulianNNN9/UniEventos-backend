@@ -103,7 +103,7 @@ public class EventoServiceTest {
     }
     @Test
     void testListarEventos() throws Exception {
-        List<ItemEventoDTO>itemEventoDTOList = eventoServiceImple.listarEventos();
+        List<InformacionEventoDTO>itemEventoDTOList = eventoServiceImple.listarEventos();
         //Deben haber mas 5 de eventos en la coleccion de eventos
         assertTrue(itemEventoDTOList.size() >= 5);
     }

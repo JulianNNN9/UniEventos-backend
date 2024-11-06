@@ -2,6 +2,7 @@ package co.edu.uniquindio.unieventos.dto.evento;
 
 import co.edu.uniquindio.unieventos.model.EstadoEvento;
 import co.edu.uniquindio.unieventos.model.Localidad;
+import co.edu.uniquindio.unieventos.model.TipoEvento;
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,9 @@ public record EditarEventoDTO(
         @NotBlank(message = "La descripción del evento no puede estar vacía")
         @Size(max = 500, message = "La descripción del evento no puede tener más de 500 caracteres")
         String descripcionEvento,
+
+        @NotNull(message = "La dirección del evento no puede estar vacía")
+        TipoEvento tipoEvento,
 
         @FutureOrPresent(message = "La fecha del evento debe ser hoy o en el futuro")
         LocalDateTime fechaEvento,

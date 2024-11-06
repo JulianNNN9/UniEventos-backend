@@ -153,13 +153,13 @@ db.eventos.insertMany([
         fechaEvento: ISODate('2025-07-20T00:00:00.000Z'),
         tipoEvento: 'FESTIVAL',
         direccionEvento: 'Parque Central',
-        ciudadEvento: 'Medellin',
+        ciudadEvento: 'MEDELLIN',
         localidades: [
             { nombreLocalidad: 'VIP', precioLocalidad: 120000, capacidadMaxima: 100, entradasRestantes: 98 },
             { nombreLocalidad: 'GENERAL', precioLocalidad: 60000, capacidadMaxima: 500, entradasRestantes: 498 }
         ],
-        imagenPortada: 'url_imagen_festival',
-        imagenLocalidades: 'url_imagen_localidades_festival',
+        imagenPortada: 'https://picsum.photos/200/100?random=1',
+        imagenLocalidades: 'https://picsum.photos/200/100?random=2',
         estadoEvento: 'ACTIVO',
         _class: 'co.edu.uniquindio.unieventos.model.Evento'
     },
@@ -170,13 +170,13 @@ db.eventos.insertMany([
         fechaEvento: ISODate('2025-09-15T00:00:00.000Z'),
         tipoEvento: 'CONCIERTO',
         direccionEvento: 'Estadio Municipal',
-        ciudadEvento: 'Bogota',
+        ciudadEvento: 'BOGOTA',
         localidades: [
             { nombreLocalidad: 'PLATEA', precioLocalidad: 80000, capacidadMaxima: 200, entradasRestantes: 200 },
             { nombreLocalidad: 'GENERAL', precioLocalidad: 50000, capacidadMaxima: 1000, entradasRestantes: 999 }
         ],
-        imagenPortada: 'url_imagen_rock',
-        imagenLocalidades: 'url_imagen_localidades_rock',
+        imagenPortada: 'https://picsum.photos/200/100?random=3',
+        imagenLocalidades: 'https://picsum.photos/200/100?random=4',
         estadoEvento: 'ACTIVO',
         _class: 'co.edu.uniquindio.unieventos.model.Evento'
     },
@@ -187,13 +187,13 @@ db.eventos.insertMany([
         fechaEvento: ISODate('2025-10-10T00:00:00.000Z'),
         tipoEvento: 'FESTIVAL',
         direccionEvento: 'Teatro Nacional',
-        ciudadEvento: 'Cali',
+        ciudadEvento: 'CALI',
         localidades: [
             { nombreLocalidad: 'VIP', precioLocalidad: 150000, capacidadMaxima: 50, entradasRestantes: 47 },
             { nombreLocalidad: 'GENERAL', precioLocalidad: 70000, capacidadMaxima: 300, entradasRestantes: 300 }
         ],
-        imagenPortada: 'url_imagen_jazz',
-        imagenLocalidades: 'url_imagen_localidades_jazz',
+        imagenPortada: 'https://picsum.photos/200/100?random=9',
+        imagenLocalidades: 'https://picsum.photos/200/100?random=10',
         estadoEvento: 'ACTIVO',
         _class: 'co.edu.uniquindio.unieventos.model.Evento'
     },
@@ -204,13 +204,13 @@ db.eventos.insertMany([
         fechaEvento: ISODate('2025-03-25T00:00:00.000Z'),
         tipoEvento: 'CONCIERTO',
         direccionEvento: 'Coliseo Central',
-        ciudadEvento: 'Barranquilla',
+        ciudadEvento: 'BARRANQUILLA',
         localidades: [
             { nombreLocalidad: 'PLATINO', precioLocalidad: 180000, capacidadMaxima: 100, entradasRestantes: 99 },
             { nombreLocalidad: 'GENERAL', precioLocalidad: 90000, capacidadMaxima: 600, entradasRestantes: 599 }
         ],
-        imagenPortada: 'url_imagen_pop',
-        imagenLocalidades: 'url_imagen_localidades_pop',
+        imagenPortada: 'https://picsum.photos/200/100?random=5',
+        imagenLocalidades: 'https://picsum.photos/200/100?random=6',
         estadoEvento: 'ACTIVO',
         _class: 'co.edu.uniquindio.unieventos.model.Evento'
     },
@@ -221,13 +221,13 @@ db.eventos.insertMany([
         fechaEvento: ISODate('2025-02-30T00:00:00.000Z'),
         tipoEvento: 'FERIA',
         direccionEvento: 'Centro de Convenciones',
-        ciudadEvento: 'Cartagena',
+        ciudadEvento: 'CARTAGENA',
         localidades: [
             { nombreLocalidad: 'EXPOSITOR', precioLocalidad: 250000, capacidadMaxima: 40, entradasRestantes: 39 },
             { nombreLocalidad: 'ASISTENTE', precioLocalidad: 30000, capacidadMaxima: 1000, entradasRestantes: 999 }
         ],
-        imagenPortada: 'url_imagen_feria_libro',
-        imagenLocalidades: 'url_imagen_localidades_feria_libro',
+        imagenPortada: 'https://picsum.photos/200/100?random=7',
+        imagenLocalidades: 'https://picsum.photos/200/100?random=8',
         estadoEvento: 'ACTIVO',
         _class: 'co.edu.uniquindio.unieventos.model.Evento'
     }

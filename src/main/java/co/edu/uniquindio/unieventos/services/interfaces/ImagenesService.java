@@ -5,6 +5,6 @@ import org.springframework.web.multipart.MultipartFile;
 public interface ImagenesService {
 
     String subirImagen(MultipartFile imagen) throws Exception;
-    void eliminarImagen(String nombreImagen) throws Exception;
+    void eliminarImagen(String urlImagen) throws Exception;
 }
 
