@@ -9,6 +9,7 @@ import co.edu.uniquindio.unieventos.dto.carrito.InformacionCarritoDTO;
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
 import co.edu.uniquindio.unieventos.dto.compra.InformacionCompraDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
+import co.edu.uniquindio.unieventos.dto.cupon.InformacionCuponDTO;
 import co.edu.uniquindio.unieventos.model.Carrito;
 import co.edu.uniquindio.unieventos.model.Compra;
 import co.edu.uniquindio.unieventos.model.Cupon;
@@ -113,6 +114,10 @@ public class UsuarioControlador {
     @GetMapping("/carrito/obtener-carrito/{idUsuario}")
     public ResponseEntity<MensajeDTO<InformacionCarritoDTO>> obtenerCarrito(@PathVariable String idUsuario) throws Exception {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.obtenerCarritoPorIdUsuarioDTO(idUsuario)));
+    }
+    @GetMapping("/carrito/validar-cupon/{codigoCupon}/{idUsuario}")
+    public ResponseEntity<MensajeDTO<InformacionCuponDTO>> validarCupon(@PathVariable String codigoCupon, @PathVariable String idUsuario) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, compraService.validarYObtenerCupon(codigoCupon, idUsuario)));
     }
 
     @PostMapping("/carrito/vaciar-carrito/{idUsuario}")

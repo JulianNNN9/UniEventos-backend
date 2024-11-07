@@ -46,7 +46,6 @@ public class EventoServiceImple implements EventoService {
                 .imagenLocalidades(crearEventoDTO.imagenLocalidades())
                 .estadoEvento(EstadoEvento.ACTIVO)
                 .build();
-
         Evento evento1 = eventoRepo.save(evento);
 
         return evento1.getId();

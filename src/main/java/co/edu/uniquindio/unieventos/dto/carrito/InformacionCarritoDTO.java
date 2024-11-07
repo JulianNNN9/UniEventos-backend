@@ -10,7 +10,7 @@ public record InformacionCarritoDTO(
         String id,
 
         LocalDateTime fecha,
-        List<DetalleCarrito>itemsCarrito,
+        List<InformacionDetalleCarritoDTO>itemsCarrito,
         String idUsuario
 ){
 }

@@ -27,29 +27,47 @@ public class CarritoServiceImple implements CarritoService {
 
     @Override
     public String agregarAlCarrito(AgregarItemDTO agregarItemDTO) throws RecursoNoEncontradoException, IllegalArgumentException {
-
+        // Obtener el carrito correspondiente
         Carrito carrito = obtenerCarrito(agregarItemDTO.idCarrito());
+
+        // Obtener el evento asociado
         Evento evento = eventoService.obtenerEvento(agregarItemDTO.informacionDetalleCarritoDTO().idEvento());
+
+        // Buscar la localidad seleccionada dentro del evento
         Optional<Localidad> localidadOptional = evento.getLocalidades().stream()
                 .filter(localidad -> localidad.getNombreLocalidad().equals(agregarItemDTO.informacionDetalleCarritoDTO().nombreLocalidad()))
                 .findFirst();
 
+        // Si la localidad no existe, lanzar excepción
         if (localidadOptional.isEmpty()) {
             throw new RecursoNoEncontradoException("Localidad no encontrada");
         }
 
         Localidad localidad = localidadOptional.get();
 
-        // Verificar si hay suficientes entradas restantes
+        // Verificar si hay suficientes entradas disponibles
         if (localidad.getEntradasRestantes() < agregarItemDTO.informacionDetalleCarritoDTO().cantidad()) {
             throw new IllegalArgumentException("No hay suficientes entradas disponibles en la localidad seleccionada");
         }
 
-        if(carrito.getItemsCarrito() != null){
+        // Verificar si ya existe un item con la misma localidad en el carrito
+        boolean existeItemEnCarrito = carrito.getItemsCarrito().stream()
+                .anyMatch(item -> item.getNombreLocalidad().equals(agregarItemDTO.informacionDetalleCarritoDTO().nombreLocalidad())
+                        && item.getEvento().getId().equals(agregarItemDTO.informacionDetalleCarritoDTO().idEvento()));
+
+        // Si ya existe, lanzar una excepción
+        if (existeItemEnCarrito) {
+            throw new IllegalArgumentException("Este item ya se encuentra en el carrito");
+        }
+
+        // Si no existe, agregar el item al carrito
+        if (carrito.getItemsCarrito() != null) {
             carrito.getItemsCarrito().add(convertirDetalleCarritoDTO(agregarItemDTO.informacionDetalleCarritoDTO()));
-        }else{
+        } else {
             carrito.setItemsCarrito(List.of(convertirDetalleCarritoDTO(agregarItemDTO.informacionDetalleCarritoDTO())));
         }
+
+        // Guardar el carrito actualizado
         carritoRepo.save(carrito);
 
         return "Item agregado al carrito con éxito";
@@ -109,7 +127,21 @@ public class CarritoServiceImple implements CarritoService {
     @Override
     public InformacionCarritoDTO obtenerCarritoPorIdUsuarioDTO(String idUsuario) throws RecursoNoEncontradoException {
         Carrito carrito = obtenerCarritoPorIdUsuario(idUsuario);
-        return new InformacionCarritoDTO(carrito.getId(), carrito.getFecha(), carrito.getItemsCarrito(), carrito.getUsuario().getId());
+        List<InformacionDetalleCarritoDTO> informacionDetalleCarritoDTOS = convertirListaDellateCarritoDTO(carrito.getItemsCarrito());
+
+        return new InformacionCarritoDTO(carrito.getId(), carrito.getFecha(), informacionDetalleCarritoDTOS, carrito.getUsuario().getId());
+    }
+    private List<InformacionDetalleCarritoDTO> convertirListaDellateCarritoDTO(List<DetalleCarrito> detalleCarritos) {
+        if(detalleCarritos != null){
+            return detalleCarritos.stream()
+                    .map(detalleCarrito -> new InformacionDetalleCarritoDTO(
+                            detalleCarrito.getCantidad(),
+                            detalleCarrito.getNombreLocalidad(),
+                            detalleCarrito.getEvento().getId()
+                    ))
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
     @Override

@@ -12,9 +12,8 @@ import java.util.List;
 public record InformacionCompraDTO(
 
         String id,
-
         String idUsuario,
-        List<ItemCompra> itemsCompra,
+        List<InformacionItemCompraDTO> informacionItemCompraDTOS,
         Double total,
         LocalDateTime fechaCompra,
         String codigoCupon,

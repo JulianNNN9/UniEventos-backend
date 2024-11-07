@@ -5,6 +5,7 @@ import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
 import co.edu.uniquindio.unieventos.dto.compra.InformacionCompraDTO;
 import co.edu.uniquindio.unieventos.dto.compra.InformacionItemCompraDTO;
 import co.edu.uniquindio.unieventos.dto.cupon.CrearCuponDTO;
+import co.edu.uniquindio.unieventos.dto.cupon.InformacionCuponDTO;
 import co.edu.uniquindio.unieventos.exceptions.EntradasInsuficientesException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
@@ -28,7 +29,6 @@ import com.mercadopago.client.preference.PreferenceRequest;
 import com.mercadopago.resources.payment.Payment;
 import com.mercadopago.resources.preference.Preference;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,23 +73,13 @@ public class CompraServiceImple implements CompraService {
                 throw new IllegalArgumentException("El cupón no está disponible o ha expirado");
             }
             if(cupon.getFechaVencimiento().isBefore(LocalDate.now())){
-                cupon.setEstadoCupon(EstadoCupon.INACTIVO);
-                cuponRepo.save(cupon);
                 throw new IllegalArgumentException("El cupon ha expirado");
             }
 
-            // Validación para cupón único
-            if (cupon.getTipoCupon() == TipoCupon.UNICO) {
-                // Cambiar el estado del cupón a inactivo una vez utilizado
-                cupon.setEstadoCupon(EstadoCupon.INACTIVO);
+            Optional<Compra> compraOptional = obtenerComprasPorCodigoCuponYIdUsuario(crearCompraDTO.codigoCupon(), crearCompraDTO.idUsuario());
 
-            } else {
-                // Validación para cupones generales (múltiples)
-                Optional<Compra> compraOptional = obtenerComprasPorCodigoCuponYIdUsuario(crearCompraDTO.codigoCupon(), crearCompraDTO.idUsuario());
-
-                if (compraOptional.isPresent()) {
-                    throw new RecursoEncontradoException("Este cupón ya ha sido redimido por el usuario");
-                }
+            if (compraOptional.isPresent()) {
+                throw new RecursoEncontradoException("Este cupón ya ha sido redimido por el usuario");
             }
         }else{
             isCupon = false;
@@ -98,7 +88,7 @@ public class CompraServiceImple implements CompraService {
     /*
         VALIDACIÓN DE ENTRADAS Y ANTICIPACIÓN PARA LA LOCALIDAD
      */
-        List<ItemCompra> itemsCompra = convertirListaItemCompraDTO(crearCompraDTO.informacionItemCompraDTOS());
+        List<ItemCompra> itemsCompra = convertirListaItemCompraDTOToListaItemCompra(crearCompraDTO.informacionItemCompraDTOS());
 
         // Iterar sobre cada item de la compra
         for (ItemCompra item : itemsCompra) {
@@ -139,7 +129,7 @@ public class CompraServiceImple implements CompraService {
         Compra compra = Compra.builder()
                 .usuario(usuario)
                 .itemsCompra(itemsCompra)
-                //.total(total) // calcular el total acá
+                .total(total)
                 .fechaCompra(LocalDateTime.now())
                 .codigoCupon(crearCompraDTO.codigoCupon())
                 .estadoCompra(EstadoCompra.PENDIENTE)
@@ -149,7 +139,37 @@ public class CompraServiceImple implements CompraService {
 
         return compra.getId();
     }
-    private List<ItemCompra> convertirListaItemCompraDTO(List<InformacionItemCompraDTO> informacionItemCompraDTOList) throws RecursoNoEncontradoException {
+    public InformacionCuponDTO validarYObtenerCupon(String codigoCupon, String idUsuario) throws RecursoNoEncontradoException {
+        // Verificar que el código del cupón no sea nulo o vacío
+        if (codigoCupon == null || codigoCupon.trim().isEmpty()) {
+            throw new IllegalArgumentException("El código del cupón es inválido");
+        }
+
+        // Obtener el cupón por su código
+        Cupon cupon = cuponService.obtenerCuponPorCodigo(codigoCupon);
+        if (cupon == null) {
+            throw new IllegalArgumentException("El cupón no existe");
+        }
+
+        // Validar si el cupón está activo
+        if (cupon.getEstadoCupon() != EstadoCupon.ACTIVO) {
+            throw new IllegalArgumentException("El cupón no está disponible o ha expirado");
+        }
+
+        // Validar si el cupón ha expirado
+        if (cupon.getFechaVencimiento().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("El cupón ha expirado");
+        }
+
+        Optional<Compra> compraOptional = obtenerComprasPorCodigoCuponYIdUsuario(codigoCupon, idUsuario);
+        if (compraOptional.isPresent()) {
+            throw new IllegalArgumentException("Este cupón ya ha sido redimido por el usuario");
+        }
+
+        // Si todas las validaciones pasan, devolvemos el cupón
+        return new InformacionCuponDTO(cupon.getCodigo(), cupon.getPorcentajeDescuento());
+    }
+    private List<ItemCompra> convertirListaItemCompraDTOToListaItemCompra(List<InformacionItemCompraDTO> informacionItemCompraDTOList) throws RecursoNoEncontradoException {
         List<ItemCompra> itemCompraList = new ArrayList<>();
         for (InformacionItemCompraDTO informacionItemCompraDTO : informacionItemCompraDTOList){
             Evento evento = eventoService.obtenerEvento(informacionItemCompraDTO.idEvento());
@@ -162,6 +182,19 @@ public class CompraServiceImple implements CompraService {
             itemCompraList.add(itemCompra);
         }
         return itemCompraList;
+    }
+    private List<InformacionItemCompraDTO> convertirListaItemCompraToListaItemCompraDTO(List<ItemCompra> informacionItemCompraList) {
+        List<InformacionItemCompraDTO> informacionitemCompraDtoList = new ArrayList<>();
+        for (ItemCompra itemCompra : informacionItemCompraList){
+            InformacionItemCompraDTO informacionItemCompraDTO = new InformacionItemCompraDTO(
+                    itemCompra.getEvento().getId(),
+                    itemCompra.getNombreLocalidad(),
+                    itemCompra.getCantidad(),
+                    itemCompra.getPrecioUnitario()
+            );
+            informacionitemCompraDtoList.add(informacionItemCompraDTO);
+        }
+        return informacionitemCompraDtoList;
     }
 
     private double calcularTotalConDescuentoCupon(Cupon cupon, double total) {
@@ -194,12 +227,12 @@ public class CompraServiceImple implements CompraService {
     public InformacionCompraDTO obtenerCompraDTO(String idCompra) throws Exception {
 
         Compra compra = obtenerCompra(idCompra);
-
+        List<InformacionItemCompraDTO> informacionItemCompraDTO = convertirListaItemCompraToListaItemCompraDTO(compra.getItemsCompra());
         return new InformacionCompraDTO(
                 compra.getId(),
                 compra.getUsuario().getId(),
-                compra.getItemsCompra(),
-                calcularTotal(compra.getItemsCompra()),
+                informacionItemCompraDTO,
+                compra.getTotal(),
                 compra.getFechaCompra(),
                 compra.getCodigoCupon(),
                 compra.getEstadoCompra(),
@@ -221,21 +254,26 @@ public class CompraServiceImple implements CompraService {
         return compraRepo.findAllByIdUsuario(idUsuario);
     }
     @Override
-    public List<InformacionCompraDTO> obtenerComprasUsuarioDTO(String idUsuario){
-
-        return obtenerComprasUsuario(idUsuario).stream()
-                .map(compra -> new InformacionCompraDTO(
-                        compra.getId(),
-                        compra.getUsuario().getId(),
-                        compra.getItemsCompra(),
-                        calcularTotal(compra.getItemsCompra()),
-                        compra.getFechaCompra(),
-                        compra.getCodigoCupon(),
-                        compra.getEstadoCompra(),
-                        compra.getCodigoPasarela(),
-                        compra.getPago()
-                ))
-                .toList();
+    public List<InformacionCompraDTO> obtenerComprasUsuarioDTO(String idUsuario) {
+        List<InformacionCompraDTO> informacionCompraDTOList = new ArrayList<>();
+        List<Compra> comprasUsuario = obtenerComprasUsuario(idUsuario);
+        InformacionCompraDTO informacionCompraDTO = null;
+        for (Compra compra : comprasUsuario){
+            List<InformacionItemCompraDTO> informacionItemCompraDTOList = convertirListaItemCompraToListaItemCompraDTO(compra.getItemsCompra());
+            informacionCompraDTO = new InformacionCompraDTO(
+                    compra.getId(),
+                    compra.getUsuario().getId(),
+                    informacionItemCompraDTOList,
+                    compra.getTotal(),
+                    compra.getFechaCompra(),
+                    compra.getCodigoCupon(),
+                    compra.getEstadoCompra(),
+                    compra.getCodigoPasarela(),
+                    compra.getPago()
+            );
+            informacionCompraDTOList.add(informacionCompraDTO);
+        }
+        return informacionCompraDTOList;
     }
 
     @Override
@@ -288,6 +326,20 @@ public class CompraServiceImple implements CompraService {
 
         // Obtener la orden guardada en la base de datos y los ítems de la orden
         Compra compraGuardada = obtenerCompra(idCompra);
+        Cupon cupon = null;
+        if(compraGuardada.getCodigoCupon() != null && !compraGuardada.getCodigoCupon().isEmpty()){
+            cupon = cuponService.obtenerCuponPorCodigo(compraGuardada.getCodigoCupon());
+            if(cupon.getEstadoCupon() == EstadoCupon.ACTIVO){
+                if(cupon.getTipoCupon() == TipoCupon.UNICO){
+                    cupon.setEstadoCupon(EstadoCupon.INACTIVO);
+                    cuponRepo.save(cupon);
+                }
+            }else{
+                cupon = null;
+            }
+        }
+
+
         List<PreferenceItemRequest> itemsPasarela = new ArrayList<>();
 
 
@@ -302,6 +354,10 @@ public class CompraServiceImple implements CompraService {
                     .findFirst()
                     .orElse(null);
 
+            double precioLocalidad = localidad.getPrecioLocalidad();
+            if(cupon != null){
+                precioLocalidad = calcularPrecioDescuentoCupon(cupon, precioLocalidad);
+            }
 
             // Crear el item de la pasarela
             PreferenceItemRequest itemRequest =
@@ -312,7 +368,7 @@ public class CompraServiceImple implements CompraService {
                             .categoryId(evento.getTipoEvento().name())
                             .quantity(item.getCantidad())
                             .currencyId("COP")
-                            .unitPrice(BigDecimal.valueOf(localidad.getPrecioLocalidad()))
+                            .unitPrice(BigDecimal.valueOf(precioLocalidad))
                             .build();
 
 
@@ -440,7 +496,9 @@ public class CompraServiceImple implements CompraService {
 
         return preference;
     }
-
+    private double calcularPrecioDescuentoCupon(Cupon cupon, double precio) {
+        return precio - (precio*cupon.getPorcentajeDescuento() / 100);
+    }
     @Override
     public void recibirNotificacionMercadoPago(Map<String, Object> request) {
         try {
