@@ -11,6 +11,7 @@ import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,9 +42,13 @@ public class PublicoControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.obtenerInformacionEvento(idEvento)));
     }
 
-    @PostMapping("/eventos/filtrar-evento")
-    public ResponseEntity<MensajeDTO<List<ItemEventoDTO>>> filtrarEvento(@Valid @RequestBody FiltrosEventosDTO filtrosEventos) throws Exception {
-        return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.filtrarEvento(filtrosEventos)));
+    @PostMapping("/eventos/filtrar-evento-item")
+    public ResponseEntity<MensajeDTO<List<ItemEventoDTO>>> filtrarEventoItem(@Valid @RequestBody FiltrosEventosDTO filtrosEventos) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.filtrarEventoItem(filtrosEventos)));
+    }
+    @PostMapping("/eventos/filtrar-evento-info")
+    public ResponseEntity<MensajeDTO<List<InformacionEventoDTO>>> filtrarEventoInfo(@Valid @RequestBody FiltrosEventosDTO filtrosEventos) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.filtrarEventoInfo(filtrosEventos)));
     }
 
     @GetMapping ("/eventos/buscar-evento/{nombreEvento}")
@@ -51,10 +56,39 @@ public class PublicoControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.buscarEventoPorNombre(nombreEvento)));
     }
 
+    @GetMapping("/eventos/listar-eventos-paginados-item")
+    public ResponseEntity<MensajeDTO<List<ItemEventoDTO>>> listarEventosPaginadosItem(
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "12") int tamano) throws Exception {
+
+        List<ItemEventoDTO> eventosPaginados = eventoService.listarEventosPaginadosItem(pagina, tamano);
+        return ResponseEntity.ok(new MensajeDTO<>(false, eventosPaginados));
+    }
+    @GetMapping("/eventos/listar-eventos-paginados-info")
+    public ResponseEntity<MensajeDTO<List<InformacionEventoDTO>>> listarEventosPaginadosInfo(
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "12") int tamano) throws Exception {
+
+        List<InformacionEventoDTO> eventosPaginados = eventoService.listarEventosPaginadosInfo(pagina, tamano);
+        return ResponseEntity.ok(new MensajeDTO<>(false, eventosPaginados));
+    }
     @GetMapping ("/eventos/listar-eventos")
-    public ResponseEntity<MensajeDTO<List<ItemEventoDTO>>> listarEventos() throws Exception {
+    public ResponseEntity<MensajeDTO<List<InformacionEventoDTO>>> listarEventos() throws Exception {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.listarEventos()));
     }
+    @GetMapping ("/eventos/listar-ciudades")
+    public ResponseEntity<MensajeDTO<List<String>>> listarCiudades() throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.obtenerTipoCiudades()));
+    }
+    @GetMapping ("/eventos/listar-tipo-eventos")
+    public ResponseEntity<MensajeDTO<List<String>>> listarTipoEventos() throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.obtenerTiposEventos()));
+    }
+    @GetMapping ("/eventos/listar-estado-eventos")
+    public ResponseEntity<MensajeDTO<List<String>>> listarEstadoEventos() throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.obtenerEstadoEventos()));
+    }
+
 
     @GetMapping ("/eventos/notificar-nuevo-evento")
     public ResponseEntity<MensajeDTO<List<NotificacionEventoDTO>>> notificarNuevoEvento() throws Exception {

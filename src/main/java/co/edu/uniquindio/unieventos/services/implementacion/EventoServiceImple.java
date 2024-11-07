@@ -6,19 +6,20 @@ import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.EstadoEvento;
 import co.edu.uniquindio.unieventos.model.Evento;
 import co.edu.uniquindio.unieventos.dto.FiltrosEventosDTO;
+import co.edu.uniquindio.unieventos.model.TipoCiudad;
+import co.edu.uniquindio.unieventos.model.TipoEvento;
 import co.edu.uniquindio.unieventos.repositories.EventoRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
 import co.edu.uniquindio.unieventos.utils.TextUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -45,9 +46,9 @@ public class EventoServiceImple implements EventoService {
                 .imagenLocalidades(crearEventoDTO.imagenLocalidades())
                 .estadoEvento(EstadoEvento.ACTIVO)
                 .build();
+        Evento evento1 = eventoRepo.save(evento);
 
-        eventoRepo.save(evento);
-        return "Evento creado exitosamente";
+        return evento1.getId();
     }
 
     @Override
@@ -59,6 +60,7 @@ public class EventoServiceImple implements EventoService {
         evento.setDireccionEvento(TextUtils.normalizarTexto(editarEventoDTO.direccionEvento()));
         evento.setCiudadEvento(TextUtils.normalizarTexto(editarEventoDTO.ciudadEvento()));
         evento.setDescripcionEvento(editarEventoDTO.descripcionEvento());
+        evento.setTipoEvento(editarEventoDTO.tipoEvento());
         evento.setFechaEvento(editarEventoDTO.fechaEvento());
         evento.setFechaCreacion(LocalDate.now());
         evento.setLocalidades(editarEventoDTO.localidades());
@@ -79,6 +81,16 @@ public class EventoServiceImple implements EventoService {
         eventoRepo.save(evento);
         return "Evento eliminado exitosamente";
     }
+    @Override
+    public String eliminarEventos(EliminarEventosDTO eliminarEventosDTO) throws Exception {
+        for (String idEvento : eliminarEventosDTO.listaIdEventos()) {
+            Evento evento = obtenerEvento(idEvento);
+            evento.setEstadoEvento(EstadoEvento.ELIMINADO);
+            eventoRepo.save(evento);
+        }
+        return "Eventos eliminados exitosamente";
+    }
+
 
     @Override
     public InformacionEventoDTO obtenerInformacionEvento(String idEvento) throws Exception {
@@ -86,32 +98,79 @@ public class EventoServiceImple implements EventoService {
         Evento evento = obtenerEvento(idEvento);
 
         return new InformacionEventoDTO(
+                evento.getId(),
                 evento.getNombreEvento(),
                 evento.getDireccionEvento(),
                 evento.getCiudadEvento(),
                 evento.getDescripcionEvento(),
+                ""+evento.getTipoEvento(),
                 evento.getFechaEvento(),
                 evento.getLocalidades(),
-                evento.getEstadoEvento()
+                evento.getImagenPortada(),
+                evento.getImagenLocalidades(),
+                "" + evento.getEstadoEvento()
         );
     }
 
     @Override
-    public List<ItemEventoDTO> listarEventos() {
+    public List<InformacionEventoDTO> listarEventos() {
 
         List<Evento> eventos = eventoRepo.findByFechaEventoAfterAndEstadoEvento(LocalDateTime.now(), EstadoEvento.ACTIVO);
+
+        return eventos.stream()
+                .map(evento -> new InformacionEventoDTO(
+                        evento.getId(),
+                        evento.getNombreEvento(),
+                        evento.getDireccionEvento(),
+                        evento.getCiudadEvento(),
+                        evento.getDescripcionEvento(),
+                        "" + evento.getTipoEvento(),
+                        evento.getFechaEvento(),
+                        evento.getLocalidades(),
+                        evento.getImagenPortada(),
+                        evento.getImagenLocalidades(),
+                        "" + evento.getEstadoEvento()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ItemEventoDTO> listarEventosPaginadosItem(int pagina, int tamano) {
+        Pageable pageable = PageRequest.of(pagina, tamano);
+        List<Evento> eventos = eventoRepo.findByFechaEventoAfterAndEstadoEventoPaginado(LocalDateTime.now(), EstadoEvento.ACTIVO, pageable);
 
         return eventos.stream()
                 .map(evento -> new ItemEventoDTO(
                         evento.getId(),
                         evento.getNombreEvento(),
+                        evento.getDireccionEvento(),
                         evento.getCiudadEvento(),
-                        evento.getFechaEvento()
+                        evento.getFechaEvento(),
+                        evento.getImagenPortada()
                 ))
                 .collect(Collectors.toList());
     }
+    @Override
+    public List<InformacionEventoDTO> listarEventosPaginadosInfo(int pagina, int tamano) {
+        Pageable pageable = PageRequest.of(pagina, tamano);
+        List<Evento> eventos = eventoRepo.findByFechaEventoAfterAndEstadoEventoPaginado(LocalDateTime.now(), EstadoEvento.ACTIVO, pageable);
 
-
+        return eventos.stream()
+                .map(evento -> new InformacionEventoDTO(
+                        evento.getId(),
+                        evento.getNombreEvento(),
+                        evento.getDireccionEvento(),
+                        evento.getCiudadEvento(),
+                        evento.getDescripcionEvento(),
+                        ""+evento.getTipoEvento(),
+                        evento.getFechaEvento(),
+                        evento.getLocalidades(),
+                        evento.getImagenPortada(),
+                        evento.getImagenLocalidades(),
+                        "" + evento.getEstadoEvento()
+                ))
+                .collect(Collectors.toList());
+    }
 
     public Evento obtenerEvento(String idEvento) throws RecursoNoEncontradoException {
         if (idEvento.length() != 24) {
@@ -143,11 +202,22 @@ public class EventoServiceImple implements EventoService {
     */
     @Override
     public List<NotificacionEventoDTO> notificarNuevoEvento() throws Exception {
-        return eventoRepo.findNuevosEventosAyerHoyAndEstadoNot(LocalDate.now().minusDays(1), LocalDate.now(), EstadoEvento.ELIMINADO);
+        List<Evento> eventos = eventoRepo.findNuevosEventosAyerHoyAndEstadoNot(LocalDate.now().minusDays(1), LocalDate.now(), EstadoEvento.ELIMINADO);
+
+        return eventos.stream()
+                .map(evento -> new NotificacionEventoDTO(
+                        evento.getId(),
+                        evento.getNombreEvento(),
+                        "" + evento.getFechaEvento(),
+                        evento.getDescripcionEvento(),
+                        evento.getCiudadEvento(),
+                        evento.getImagenPortada()
+
+                ))
+                .collect(Collectors.toList());
     }
 
-    @Override
-    public List<ItemEventoDTO> filtrarEvento(FiltrosEventosDTO filtrosEventos) {
+    private List<Evento> filtrarEvento(FiltrosEventosDTO filtrosEventos) {
         String nombreEvento = filtrosEventos.nombreEvento();
         String tipoEvento = filtrosEventos.tipoEvento();
         String ciudadEvento = filtrosEventos.ciudadEvento();
@@ -205,13 +275,68 @@ public class EventoServiceImple implements EventoService {
         // Si no se encontraron resultados, retorna una lista vacía o un valor por defecto
         return Collections.emptyList();
     }
+    @Override
+    public List<ItemEventoDTO> filtrarEventoItem(FiltrosEventosDTO filtrosEventos){
+        List<Evento> eventos = filtrarEvento(filtrosEventos);
+        return eventos.stream().map((evento) -> new ItemEventoDTO(
+                evento.getId(),
+                evento.getNombreEvento(),
+                evento.getDireccionEvento(),
+                evento.getCiudadEvento(),
+                evento.getFechaEvento(),
+                evento.getImagenPortada()
+        )).collect(Collectors.toList());
+    }
+    @Override
+    public List<String> obtenerTipoCiudades() {
+        return Arrays.stream(TipoCiudad.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> obtenerTiposEventos() {
+        return Arrays.stream(TipoEvento.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+    }
+    @Override
+    public List<String> obtenerEstadoEventos() {
+        return Arrays.stream(EstadoEvento.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+    }
+    @Override
+    public List<InformacionEventoDTO> filtrarEventoInfo(FiltrosEventosDTO filtrosEventos){
+        List<Evento> eventos = filtrarEvento(filtrosEventos);
+        return eventos.stream().map((evento) -> new InformacionEventoDTO(
+                evento.getId(),
+                evento.getNombreEvento(),
+                evento.getDireccionEvento(),
+                evento.getCiudadEvento(),
+                evento.getDescripcionEvento(),
+                ""+evento.getTipoEvento(),
+                evento.getFechaEvento(),
+                evento.getLocalidades(),
+                evento.getImagenPortada(),
+                evento.getImagenLocalidades(),
+                "" + evento.getEstadoEvento()
+        )).collect(Collectors.toList());
+    }
 
     @Override
     public List<ItemEventoDTO> buscarEventoPorNombre(String nombreEvento) {
-        List<ItemEventoDTO> eventosEncontrados = new ArrayList<>();
-        if (!nombreEvento.isEmpty()) {
+        List<Evento> eventosEncontrados = null;
+        if (nombreEvento != null && !nombreEvento.isEmpty()) {
             eventosEncontrados = eventoRepo.findByNombreEventoAndEstadoNot(nombreEvento, EstadoEvento.ELIMINADO);
         }
-        return eventosEncontrados;
+        return eventosEncontrados.stream().map((evento) -> new ItemEventoDTO(
+                evento.getId(),
+                evento.getNombreEvento(),
+                evento.getDireccionEvento(),
+                evento.getCiudadEvento(),
+                evento.getFechaEvento(),
+                evento.getImagenPortada()
+        )).collect(Collectors.toList());
     }
 }

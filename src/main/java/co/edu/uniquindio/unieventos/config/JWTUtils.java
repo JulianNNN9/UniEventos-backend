@@ -31,6 +31,28 @@ public class JWTUtils {
         JwtParser jwtParser = Jwts.parser().verifyWith( getKey() ).build();
         return jwtParser.parseSignedClaims(jwtString);
     }
+    // Refresca un token JWT expirado generando uno nuevo con los mismos claims
+    public String refreshToken(String expiredToken) {
+        try {
+            // Intenta parsear el token, permitiendo que esté expirado
+            Jws<Claims> claims = parseJwt(expiredToken);
+
+            // Si el token no ha expirado, usa los mismos claims para generar un nuevo token
+            String email = claims.getPayload().getSubject();
+            Map<String, Object> currentClaims = claims.getPayload();
+            return generarToken(email, currentClaims);
+
+        } catch (ExpiredJwtException e) {
+            // Si el token ha expirado, recupera los claims desde la excepción
+            Claims expiredClaims = e.getClaims();
+            String email = expiredClaims.getSubject();
+            return generarToken(email, expiredClaims); // Genera un nuevo token usando los claims anteriores
+
+        } catch (JwtException e) {
+            // Si el token es inválido, retorna null
+            return null;
+        }
+    }
 
     private SecretKey getKey(){
         String claveSecreta = "secretsecretsecretsecretsecretsecretsecretsecret";

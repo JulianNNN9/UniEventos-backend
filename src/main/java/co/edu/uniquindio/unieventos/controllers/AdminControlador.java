@@ -6,6 +6,7 @@ import co.edu.uniquindio.unieventos.dto.cupon.CuponDTO;
 import co.edu.uniquindio.unieventos.dto.cupon.EditarCuponDTO;
 import co.edu.uniquindio.unieventos.dto.evento.CrearEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.EditarEventoDTO;
+import co.edu.uniquindio.unieventos.dto.evento.EliminarEventosDTO;
 import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
 import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
 import co.edu.uniquindio.unieventos.services.interfaces.ImagenesService;
@@ -41,6 +42,10 @@ public class AdminControlador {
     @GetMapping ("/eventos/eliminar-evento/{idEvento}")
     public ResponseEntity<MensajeDTO<String>> eliminarEvento(@PathVariable String idEvento) throws Exception {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.eliminarEvento(idEvento)));
+    }
+    @PostMapping("/eventos/eliminar-eventos")
+    public ResponseEntity<MensajeDTO<String>> eliminarEventos(@RequestBody EliminarEventosDTO eliminarEventosDTO) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.eliminarEventos(eliminarEventosDTO)));
     }
 
     @PostMapping("/imagenes/subir-imagen")

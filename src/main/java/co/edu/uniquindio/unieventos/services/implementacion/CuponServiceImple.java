@@ -3,10 +3,7 @@ package co.edu.uniquindio.unieventos.services.implementacion;
 import co.edu.uniquindio.unieventos.dto.cupon.*;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
-import co.edu.uniquindio.unieventos.model.Cupon;
-import co.edu.uniquindio.unieventos.model.EstadoCupon;
-import co.edu.uniquindio.unieventos.model.TipoCupon;
-import co.edu.uniquindio.unieventos.model.Usuario;
+import co.edu.uniquindio.unieventos.model.*;
 import co.edu.uniquindio.unieventos.repositories.CuponRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
@@ -55,6 +52,7 @@ public class CuponServiceImple implements CuponService {
 
         return "Cupon creado exitosamente";
     }
+
 
     @Override
     public String editarCupon(EditarCuponDTO editarCuponDTO) throws RecursoNoEncontradoException {

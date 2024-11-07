@@ -14,6 +14,8 @@ public interface EventoService {
 
     String eliminarEvento(String idEvento) throws Exception;
 
+    String eliminarEventos(EliminarEventosDTO eliminarEventosDTO) throws Exception;
+
     InformacionEventoDTO obtenerInformacionEvento(String idEvento) throws Exception;
 
     /* Se usaría cada vez que se cree un nuevo evento
@@ -21,14 +23,25 @@ public interface EventoService {
     */
     List<NotificacionEventoDTO> notificarNuevoEvento() throws Exception;
 
-    List<ItemEventoDTO> filtrarEvento(FiltrosEventosDTO filtrosEventos);
+    List<ItemEventoDTO> filtrarEventoItem(FiltrosEventosDTO filtrosEventos);
+
+    List<InformacionEventoDTO> filtrarEventoInfo(FiltrosEventosDTO filtrosEventos);
 
     List<ItemEventoDTO> buscarEventoPorNombre(String nombreEvento);
 
-    List<ItemEventoDTO> listarEventos() throws Exception;
+    List<InformacionEventoDTO> listarEventos() throws Exception;
+
+    List<ItemEventoDTO> listarEventosPaginadosItem(int pagina, int tamano);
+
+    List<InformacionEventoDTO> listarEventosPaginadosInfo(int pagina, int tamano);
 
     Evento obtenerEvento(String idEvento) throws RecursoNoEncontradoException;
 
     void saveEvento(Evento evento);
 
+    List<String> obtenerTiposEventos();
+
+    List<String> obtenerTipoCiudades();
+
+    List<String> obtenerEstadoEventos();
 }

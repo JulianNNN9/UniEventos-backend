@@ -6,13 +6,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record InformacionEventoDTO(
-
+        String id,
         String nombreEvento,
         String direccionEvento,
         String ciudadEvento,
         String descripcionEvento,
+        String tipoEvento,
         LocalDateTime fechaEvento,
         List<Localidad> localidades,
-        EstadoEvento estadoEvento
+        String imagenPortada,
+        String imagenLocalidades,
+        String estadoEvento
 ) {
 }

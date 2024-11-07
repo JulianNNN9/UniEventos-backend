@@ -12,6 +12,8 @@ import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
 import co.edu.uniquindio.unieventos.services.interfaces.EmailService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -232,6 +234,9 @@ public class UsuarioServiceImple implements UsuarioService {
         Map<String, Object> map = construirClaims(usuario);
 
         return new TokenDTO( jwtUtils.generarToken(usuario.getEmail(), map) );
+    }
+    public TokenDTO refreshToken(String expiredToken) {
+        return new TokenDTO(jwtUtils.refreshToken(expiredToken));
     }
 
     @Override
