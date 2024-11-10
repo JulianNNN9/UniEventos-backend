@@ -1,6 +1,7 @@
 package co.edu.uniquindio.unieventos.services.implementacion;
 
 import co.edu.uniquindio.unieventos.dto.EmailDTO;
+import co.edu.uniquindio.unieventos.dto.EnviarCuponCorreoDTO;
 import co.edu.uniquindio.unieventos.dto.compra.CrearCompraDTO;
 import co.edu.uniquindio.unieventos.dto.compra.InformacionCompraDTO;
 import co.edu.uniquindio.unieventos.dto.compra.InformacionItemCompraDTO;
@@ -251,6 +252,18 @@ public class CompraServiceImple implements CompraService {
                 idUsuario = idUsuario.substring(0, 24);
             }
         }
+        return compraRepo.findAllByIdUsuarioAndEstadoNoy(idUsuario, EstadoCompra.PENDIENTE);
+    }
+    private List<Compra> obtenerTodasLasComprasUsuario(String idUsuario){
+        if (idUsuario.length() != 24) {
+            if (idUsuario.length() < 24) {
+                // Si es más corto, completar con ceros al final
+                idUsuario = String.format("%-24s", idUsuario).replace(' ', '0');
+            } else {
+                // Si es más largo, recortar a 24 caracteres
+                idUsuario = idUsuario.substring(0, 24);
+            }
+        }
         return compraRepo.findAllByIdUsuario(idUsuario);
     }
     @Override
@@ -423,19 +436,23 @@ public class CompraServiceImple implements CompraService {
         // Metodo que envia el correo con el cupon de primera compra
         Optional<Usuario> usuarioOptional = Optional.ofNullable(usuarioService.obtenerUsuario(compraGuardada.getUsuario().getId()));
         Usuario usuario = usuarioOptional.get();
+
         if (!usuario.getPrimeraCompraRealizada()){
             String codigoCupon = cuponService.generarCodigoCupon();
-            CrearCuponDTO cuponDTO = new CrearCuponDTO(codigoCupon, "CUPONPRIMERACOMPRA", 25.0, EstadoCupon.ACTIVO, TipoCupon.UNICO, LocalDate.now().plusDays(30), usuario);
+            CrearCuponDTO cuponDTO = new CrearCuponDTO(codigoCupon, "CUPONPRIMERACOMPRA", 25.0, TipoCupon.UNICO, LocalDate.now().plusDays(30), usuario);
             cuponService.crearCupon(cuponDTO);
             usuario.getCuponesUsuario().add(cuponService.obtenerCuponPorCodigo(cuponDTO.codigo()));
             usuario.setPrimeraCompraRealizada(true);
             usuarioRepo.save(usuario);
 
-            EmailDTO emailDTO = new EmailDTO(
-                    "Tu nuevo cupón",
-                    "Felicidades, hiciste tu primera compra. Tu Codigo de por tu primera compra es: " + codigoCupon, usuario.getEmail());
-            emailService.enviarCorreo(emailDTO);
-
+            EnviarCuponCorreoDTO enviarCuponCorreoDTO = new EnviarCuponCorreoDTO(
+                    "Tu nuevo cupon",
+                    "Felicidades, por realizar tu primera obtienes " + cuponDTO.porcentajeDescuento()
+                            + "% de descuento en tu próxima compra",
+                    cuponDTO.nombre(),
+                    cuponDTO.codigo()
+            );
+            emailService.enviarCuponCorreo(usuario.getEmail(), enviarCuponCorreoDTO);
         }
 
         // Metodo que envia el correo con la confirmacion de la compra
@@ -447,12 +464,7 @@ public class CompraServiceImple implements CompraService {
 
             // Crear el contenido del correo con el código QR
             String emailContent = "Tu compra ha sido completada con exito. Aquí está tu código QR: <img src='data:image/png;base64," + qrCodeBase64 + "' />";
-
-            // Se envia el correo
-            EmailDTO emailDTO = new EmailDTO(
-                    "Confirmacion de compra",
-                    emailContent, usuario.getEmail());
-            emailService.enviarCorreo(emailDTO);
+            emailService.enviarCorreoSimple(usuario.getEmail(), "Confirmacion de compra", emailContent);
         }
 
 

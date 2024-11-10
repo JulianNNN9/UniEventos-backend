@@ -2,6 +2,8 @@ package co.edu.uniquindio.unieventos.services.implementacion;
 
 import co.edu.uniquindio.unieventos.config.JWTUtils;
 import co.edu.uniquindio.unieventos.dto.EmailDTO;
+import co.edu.uniquindio.unieventos.dto.EnviarCodigoCorreoDTO;
+import co.edu.uniquindio.unieventos.dto.EnviarCuponCorreoDTO;
 import co.edu.uniquindio.unieventos.dto.TokenDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
 import co.edu.uniquindio.unieventos.dto.cupon.CrearCuponDTO;
@@ -12,8 +14,7 @@ import co.edu.uniquindio.unieventos.repositories.UsuarioRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
 import co.edu.uniquindio.unieventos.services.interfaces.EmailService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -126,12 +127,14 @@ public class UsuarioServiceImple implements UsuarioService {
             usuario.setCodigoRecuperacion(codigoRecuperacion);
             usuarioRepo.save(usuario);
 
-            EmailDTO emailDTO = new EmailDTO(
-                    "Recuperacion de Cuenta",
-                    "Su Codigo de Recuperacion es: " + codigoRecuperacion.getCodigo(),
-                    correo);
+            EnviarCodigoCorreoDTO enviarCodigoCorreoDTO = new EnviarCodigoCorreoDTO(
+                    "Recuperación de Contraseña",
+                    "Olvidaste tu Contraseña?",
+                    "Este es tu código de recueración. Por favor no lo compartas con nadie",
+                    codigoRecuperacion.getCodigo()
+            );
 
-            emailService.enviarCorreo(emailDTO);
+            emailService.enviarCodigoCorreo(correo, enviarCodigoCorreoDTO);
         }catch (Exception e){
             return;
         }
@@ -151,12 +154,13 @@ public class UsuarioServiceImple implements UsuarioService {
             usuarioActivacion.setCodigoActivacion(codigoActivacion);
             usuarioRepo.save(usuarioActivacion);
 
-            EmailDTO emailDTO = new EmailDTO(
+            EnviarCodigoCorreoDTO enviarCodigoCorreoDTO = new EnviarCodigoCorreoDTO(
                     "Activacion de Cuenta",
-                    "Su Codigo de Activacion es: " + codigoActivacion.getCodigo(),
-                    correo);
-
-            emailService.enviarCorreo(emailDTO);
+                    "Bienvenido a UniEventos",
+                    "Gracias por registrate en Unieventos. Tu código de activación es:",
+                    codigoActivacion.getCodigo()
+            );
+            emailService.enviarCodigoCorreo(correo, enviarCodigoCorreoDTO);
         }catch ( Exception e){
             return;
         }
@@ -256,7 +260,7 @@ public class UsuarioServiceImple implements UsuarioService {
         usuarioActivacion.setEstadoUsuario(EstadoUsuario.ACTIVA);
 
         String codigoCupon = cuponService.generarCodigoCupon();
-        CrearCuponDTO cuponDTO = new CrearCuponDTO(codigoCupon, "CUPONPRIMERINGRESO", 19.0, EstadoCupon.ACTIVO, TipoCupon.UNICO, LocalDate.now().plusDays(30), usuarioActivacion);
+        CrearCuponDTO cuponDTO = new CrearCuponDTO(codigoCupon, "CUPONPRIMERINGRESO", 19.0, TipoCupon.UNICO, LocalDate.now().plusDays(30), usuarioActivacion);
         cuponService.crearCupon(cuponDTO);
         if (usuarioActivacion.getCuponesUsuario() != null){
             usuarioActivacion.getCuponesUsuario().add(cuponService.obtenerCuponPorCodigoYIdUsuario(cuponDTO.codigo(), usuarioActivacion.getId()));
@@ -264,10 +268,14 @@ public class UsuarioServiceImple implements UsuarioService {
             usuarioActivacion.setCuponesUsuario(List.of(cuponService.obtenerCuponPorCodigoYIdUsuario(cuponDTO.codigo(), usuarioActivacion.getId())));
         }
         usuarioRepo.save(usuarioActivacion);
-        EmailDTO emailDTO = new EmailDTO(
+        EnviarCuponCorreoDTO enviarCuponCorreoDTO = new EnviarCuponCorreoDTO(
                 "Tu nuevo cupon",
-                "Por tu primer ingreso, tienes un nuevo cupon. Tu Codigo es: " + codigoCupon, usuarioActivacion.getEmail());
-        emailService.enviarCorreo(emailDTO);
+                "¡Disfruta tu cupón de descuento!, por activar tu cuenta obtienes " + cuponDTO.porcentajeDescuento()
+                        + "% de descuento en tu próxima compra",
+                cuponDTO.nombre(),
+                cuponDTO.codigo()
+        );
+        emailService.enviarCuponCorreo(usuarioActivacion.getEmail(), enviarCuponCorreoDTO);
 
     }
 

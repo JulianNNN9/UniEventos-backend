@@ -4,9 +4,11 @@ import co.edu.uniquindio.unieventos.dto.FiltrosEventosDTO;
 import co.edu.uniquindio.unieventos.dto.MensajeDTO;
 import co.edu.uniquindio.unieventos.dto.TokenDTO;
 import co.edu.uniquindio.unieventos.dto.cuenta.*;
+import co.edu.uniquindio.unieventos.dto.cupon.CuponDTO;
 import co.edu.uniquindio.unieventos.dto.evento.InformacionEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.ItemEventoDTO;
 import co.edu.uniquindio.unieventos.dto.evento.NotificacionEventoDTO;
+import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
 import co.edu.uniquindio.unieventos.services.interfaces.EventoService;
 import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
 import jakarta.validation.Valid;
@@ -24,6 +26,7 @@ public class PublicoControlador {
 
     private final EventoService eventoService;
     private final UsuarioService usuarioService;
+    private final CuponService cuponService;
 
     @PostMapping("/iniciar-sesion")
     public ResponseEntity<MensajeDTO<TokenDTO>> iniciarSesion(@RequestBody IniciarSesionDTO iniciarSesionDTO) throws Exception{
@@ -76,6 +79,14 @@ public class PublicoControlador {
     public ResponseEntity<MensajeDTO<List<InformacionEventoDTO>>> listarEventos() throws Exception {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.listarEventos()));
     }
+    @GetMapping("/cupon/obtener-cupon/{idCupon}")
+    public ResponseEntity<MensajeDTO<CuponDTO>> obtenerCuponDTO(@PathVariable String idCupon) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, cuponService.obtenerCuponDTO(idCupon)));
+    }
+    @GetMapping ("/cupon/listar-cupones")
+    public ResponseEntity<MensajeDTO<List<CuponDTO>>> listarCupones() throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, cuponService.listarCupones()));
+    }
     @GetMapping ("/eventos/listar-ciudades")
     public ResponseEntity<MensajeDTO<List<String>>> listarCiudades() throws Exception {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.obtenerTipoCiudades()));
@@ -88,8 +99,14 @@ public class PublicoControlador {
     public ResponseEntity<MensajeDTO<List<String>>> listarEstadoEventos() throws Exception {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.obtenerEstadoEventos()));
     }
-
-
+    @GetMapping ("/cupon/listar-tipo-cupones")
+    public ResponseEntity<MensajeDTO<List<String>>> listarTipoCupones() throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, cuponService.obtenerTiposCupones()));
+    }
+    @GetMapping ("/cupon/listar-estado-cupones")
+    public ResponseEntity<MensajeDTO<List<String>>> listarEstadoCupones() throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, cuponService.obtenerEstadoCupones()));
+    }
     @GetMapping ("/eventos/notificar-nuevo-evento")
     public ResponseEntity<MensajeDTO<List<NotificacionEventoDTO>>> notificarNuevoEvento() throws Exception {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, eventoService.notificarNuevoEvento()));

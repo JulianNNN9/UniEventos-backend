@@ -6,6 +6,7 @@ import co.edu.uniquindio.unieventos.model.TipoCupon;
 import java.time.LocalDate;
 
 public record CuponDTO(
+        String id,
         String codigo,
         String nombre,
         Double porcentajeDescuento,
