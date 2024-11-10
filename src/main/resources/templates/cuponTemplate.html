@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+        .email-container {
+            background-color: #f0f4ff; /* Azul claro suave */
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .email-content {
+            background-color: #ffffff; /* Fondo blanco para el contenido */
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            width: 90%;
+            margin: auto;
+        }
+        .coupon-header {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .coupon-name {
+            font-size: 18px;
+            color: #4a90e2; /* Azul claro */
+            margin-top: 10px;
+        }
+        .coupon-code-container {
+            background-color: #e8f0fe; /* Fondo suave para el código */
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: inline-block;
+            width: 70%;
+        }
+        .coupon-code {
+            font-size: 20px;
+            font-weight: bold;
+            color: #d32f2f; /* Rojo */
+            letter-spacing: 2px;
+        }
+        .email-footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="email-content">
+        <h2 th:text="${subject}">¡Disfruta tu cupón de descuento!</h2>
+        <p>Estamos encantados de ofrecerte un cupón exclusivo para tus próximas compras.</p>
+
+        <div class="coupon-name" th:text="${couponName}">Nombre del cupón</div>
+
+        <div class="coupon-code-container">
+            <span class="coupon-code" th:text="${couponCode}">CÓDIGO AQUÍ</span>
+        </div>
+
+        <p>Usa este código al finalizar tu compra para obtener un descuento especial.</p>
+    </div>
+    <div class="email-footer">
+        <p>Este es un mensaje automático. No respondas a este correo.</p>
+    </div>
+</div>
+</body>
+</html>

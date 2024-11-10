@@ -1,42 +1,91 @@
 package co.edu.uniquindio.unieventos.services.implementacion;
 
-import co.edu.uniquindio.unieventos.dto.EmailDTO;
+import co.edu.uniquindio.unieventos.dto.EnviarCodigoCorreoDTO;
+import co.edu.uniquindio.unieventos.dto.EnviarCuponCorreoDTO;
 import co.edu.uniquindio.unieventos.services.interfaces.EmailService;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.scheduling.annotation.Async;
-import org.simplejavamail.api.email.Email;
-import org.simplejavamail.api.mailer.Mailer;
-import org.simplejavamail.api.mailer.config.TransportStrategy;
-import org.simplejavamail.email.EmailBuilder;
-import org.simplejavamail.mailer.MailerBuilder;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+
+import java.util.HashMap;
+import java.util.Map;
+
 
 @Service
 public class EmailServiceImple implements EmailService {
 
+    private final JavaMailSender mailSender;
+    private final TemplateEngine templateEngine;
+
+    public EmailServiceImple(JavaMailSender mailSender, TemplateEngine templateEngine){
+        this.mailSender = mailSender;
+        this.templateEngine = templateEngine;
+    }
     @Override
     @Async
-    public void enviarCorreo(EmailDTO emailDTO) throws Exception {
+    public void enviarCodigoCorreo(String to, EnviarCodigoCorreoDTO enviarCodigoCorreoDTO) throws MessagingException {
+        Map<String, Object> templateModel = new HashMap<>();
+        templateModel.put("subject", enviarCodigoCorreoDTO.subjectTemplate());
+        templateModel.put("body", enviarCodigoCorreoDTO.body());
+        templateModel.put("code", enviarCodigoCorreoDTO.code());
 
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-        Email email = EmailBuilder.startingBlank()
-                .from("notificacionesunieventos@gmail.com")
-                .to(emailDTO.destinatario())
-                .withSubject(emailDTO.asunto())
-                .withPlainText(emailDTO.cuerpo())
-                .buildEmail();
+        Context context = new Context();
+        context.setVariables(templateModel);
 
+        String htmlBody = templateEngine.process("emailTemplate", context);
 
-        try (Mailer mailer = MailerBuilder
-                .withSMTPServer("smtp.gmail.com", 587, "notificacionesunieventos@gmail.com", "gsbn tmbi jdbt uxin")
-                .withTransportStrategy(TransportStrategy.SMTP_TLS)
-                .withDebugLogging(true)
-                .buildMailer()) {
+        helper.setTo(to);
+        helper.setSubject(enviarCodigoCorreoDTO.subjectCorreo());
+        helper.setText(htmlBody, true);
 
+        mailSender.send(message);
+    }
+    @Override
+    @Async
+    public void enviarCuponCorreo(String to, EnviarCuponCorreoDTO enviarCuponCorreoDTO) throws MessagingException {
+        Map<String, Object> templateModel = new HashMap<>();
+        templateModel.put("subject", enviarCuponCorreoDTO.subjectTemplate());
+        templateModel.put("couponName", enviarCuponCorreoDTO.couponName());
+        templateModel.put("couponCode", enviarCuponCorreoDTO.couponCode());
 
-            mailer.sendMail(email);
-        }
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
+        Context context = new Context();
+        context.setVariables(templateModel);
 
+        String htmlBody = templateEngine.process("cuponTemplate", context);
+
+        helper.setTo(to);
+        helper.setSubject(enviarCuponCorreoDTO.subjectCorreo());
+        helper.setText(htmlBody, true);
+
+        mailSender.send(message);
+    }
+    @Override
+    @Async
+    public void enviarCorreoSimple(String to, String subject, String emailContent, byte[] qrCode) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(emailContent, true); // true para interpretar HTML
+
+        // Adjunta el QR como contenido embebido
+        helper.addInline("qrCode", new ByteArrayResource(qrCode), "image/png");
+
+        mailSender.send(message);
     }
 
 

@@ -6,17 +6,13 @@ import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.model.*;
 import co.edu.uniquindio.unieventos.repositories.CuponRepo;
 import co.edu.uniquindio.unieventos.services.interfaces.CuponService;
-import co.edu.uniquindio.unieventos.services.interfaces.UsuarioService;
 import co.edu.uniquindio.unieventos.utils.TextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Random;
 
 @Service
 @Transactional
@@ -42,7 +38,7 @@ public class CuponServiceImple implements CuponService {
                 .codigo(TextUtils.normalizarTexto(crearCuponDTO.codigo()))
                 .nombre(TextUtils.normalizarTexto(crearCuponDTO.nombre()))
                 .porcentajeDescuento(crearCuponDTO.porcentajeDescuento())
-                .estadoCupon(crearCuponDTO.estadoCupon())
+                .estadoCupon(EstadoCupon.ACTIVO)
                 .tipoCupon(crearCuponDTO.tipoCupon())
                 .fechaVencimiento(crearCuponDTO.fechaVencimiento())
                 .usuario(crearCuponDTO.usuario())
@@ -69,6 +65,18 @@ public class CuponServiceImple implements CuponService {
         cuponRepo.save(cupon);
 
         return cupon.getId();
+    }
+    public CuponDTO obtenerCuponDTO(String id) throws RecursoNoEncontradoException {
+        Cupon cupon = obtenerCuponPorId(id);
+        return new CuponDTO(
+                cupon.getId(),
+                cupon.getCodigo(),
+                cupon.getNombre(),
+                cupon.getPorcentajeDescuento(),
+                cupon.getEstadoCupon(),
+                cupon.getTipoCupon(),
+                cupon.getFechaVencimiento()
+        );
     }
     @Override
     public Cupon obtenerCuponPorId(String id) throws RecursoNoEncontradoException {
@@ -134,6 +142,15 @@ public class CuponServiceImple implements CuponService {
 
         return "Cupón eliminado con éxito.";
     }
+    @Override
+    public String eliminarCupones(EliminarCuponesDTO eliminarCuponesDTO) throws Exception {
+        for (String idCupon : eliminarCuponesDTO.listaIdCupones()) {
+            Cupon cupon = obtenerCuponPorId(idCupon);
+            cupon.setEstadoCupon(EstadoCupon.ELIMINADO);
+            cuponRepo.save(cupon);
+        }
+        return "Cupones eliminados exitosamente";
+    }
 
     @Override
     public Cupon obtenerCuponPorCodigo(String codigo) throws RecursoNoEncontradoException {
@@ -149,8 +166,9 @@ public class CuponServiceImple implements CuponService {
 
     @Override
     public List<CuponDTO> listarCupones() {
-        return cuponRepo.findAll().stream()
+        return cuponRepo.findByEstadoNot(EstadoCupon.ELIMINADO).stream()
                 .map(cupon -> new CuponDTO(
+                        cupon.getId(),
                         cupon.getCodigo(),
                         cupon.getNombre(),
                         cupon.getPorcentajeDescuento(),
@@ -158,6 +176,18 @@ public class CuponServiceImple implements CuponService {
                         cupon.getTipoCupon(),
                         cupon.getFechaVencimiento()
                 ))
+                .collect(Collectors.toList());
+    }
+    @Override
+    public List<String> obtenerTiposCupones() {
+        return Arrays.stream(TipoCupon.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+    }
+    @Override
+    public List<String> obtenerEstadoCupones() {
+        return Arrays.stream(EstadoCupon.values())
+                .map(Enum::name)
                 .collect(Collectors.toList());
     }
 

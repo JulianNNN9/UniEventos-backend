@@ -1,6 +1,7 @@
 package co.edu.uniquindio.unieventos.services.interfaces;
 
 import co.edu.uniquindio.unieventos.dto.cupon.CuponDTO;
+import co.edu.uniquindio.unieventos.dto.cupon.EliminarCuponesDTO;
 import co.edu.uniquindio.unieventos.exceptions.RecursoEncontradoException;
 import co.edu.uniquindio.unieventos.exceptions.RecursoNoEncontradoException;
 import co.edu.uniquindio.unieventos.dto.cupon.CrearCuponDTO;
@@ -17,9 +18,13 @@ public interface CuponService {
 
     String eliminarCupon(String idCupon)throws RecursoNoEncontradoException;
 
+    String eliminarCupones(EliminarCuponesDTO eliminarCuponesDTO) throws Exception;
+
     Cupon obtenerCuponPorCodigo(String id) throws RecursoNoEncontradoException;
 
     List<Cupon> obtenerListaCuponPorIdUsuario(String idUsuario);
+
+    CuponDTO obtenerCuponDTO(String id) throws RecursoNoEncontradoException;
 
     Cupon obtenerCuponPorCodigoYIdUsuario(String codigo, String idUsuario) throws RecursoNoEncontradoException;
 
@@ -28,4 +33,8 @@ public interface CuponService {
     List<CuponDTO> listarCupones();
 
     String generarCodigoCupon();
+
+    List<String> obtenerTiposCupones();
+
+    List<String> obtenerEstadoCupones();
 }

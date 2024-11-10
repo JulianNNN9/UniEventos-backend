@@ -16,6 +16,9 @@ public interface CompraRepo extends MongoRepository<Compra, String> {
     @Query("{ 'usuario.$id': ObjectId(?0) }")
     List<Compra> findAllByIdUsuario(String usuarioId);
 
+    @Query("{ 'usuario.$id': ObjectId(?0), 'estadoCompra': { $ne: ?1 } }")
+    List<Compra> findAllByIdUsuarioAndEstadoNoy(String usuarioId, EstadoCompra estadoCompra);
+
     @Query("{ 'codigoCupon': ?0, 'usuario.$id': ObjectId(?1) }")
     Optional<Compra> findByCodigoCuponAndIdUsuario(String codigoCupon, String idUsuario);
 }

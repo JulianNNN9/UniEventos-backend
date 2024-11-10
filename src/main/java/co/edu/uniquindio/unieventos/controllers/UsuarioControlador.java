@@ -19,9 +19,11 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.el.parser.Token;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -86,11 +88,6 @@ public class UsuarioControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, compraService.realizarPago(idOrden)));
     }
 
-    @PostMapping("/compra/notificacion-pago")
-    public void recibirNotificacionMercadoPago(@RequestBody Map<String, Object> requestBody) {
-        compraService.recibirNotificacionMercadoPago(requestBody);
-    }
-
     @PostMapping("/carrito/agregar-carrito")
     public ResponseEntity<MensajeDTO<String>> agregarCarrito(@Valid @RequestBody AgregarItemDTO agregarItemDTO) throws Exception {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.agregarAlCarrito(agregarItemDTO)));
@@ -123,5 +120,11 @@ public class UsuarioControlador {
     @PostMapping("/carrito/vaciar-carrito/{idUsuario}")
     public ResponseEntity<MensajeDTO<String>> vaciarCarrito(@PathVariable String idUsuario) throws Exception {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, carritoService.vaciarCarrito(idUsuario)));
+    }
+    // Endpoint para verificar el estado de la compra
+    @GetMapping("/{idCompra}/estado")
+    public ResponseEntity<MensajeDTO<Map<String, Object>>> verificarEstadoCompra(@PathVariable String idCompra) throws Exception {
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, Map.of("compra", compraService.obtenerEstadoCompra(idCompra))));
+
     }
 }

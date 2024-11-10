@@ -22,9 +22,6 @@ public record CrearCuponDTO (
         @DecimalMax(value = "100.0", message = "El porcentaje de descuento no puede ser mayor a 100")
         Double porcentajeDescuento,
 
-        @NotNull(message = "El estado del cupón es obligatorio")
-        EstadoCupon estadoCupon,
-
         @NotNull(message = "El tipo de cupón es obligatorio")
         TipoCupon tipoCupon,
 
