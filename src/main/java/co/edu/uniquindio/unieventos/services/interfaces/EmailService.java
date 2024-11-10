@@ -8,5 +8,5 @@ public interface EmailService {
 
     void enviarCodigoCorreo(String to, EnviarCodigoCorreoDTO enviarCodigoCorreoDTO) throws MessagingException;
     void enviarCuponCorreo(String to, EnviarCuponCorreoDTO enviarCuponCorreoDTO) throws MessagingException;
-    void enviarCorreoSimple(String to, String subject, String emailContent) throws MessagingException;
+    void enviarCorreoSimple(String to, String subject, String emailContent, byte[] qrCode) throws MessagingException;
 }

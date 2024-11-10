@@ -3,8 +3,7 @@ package co.edu.uniquindio.unieventos.services.implementacion;
 import co.edu.uniquindio.unieventos.dto.EnviarCodigoCorreoDTO;
 import co.edu.uniquindio.unieventos.dto.EnviarCuponCorreoDTO;
 import co.edu.uniquindio.unieventos.services.interfaces.EmailService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -75,7 +74,7 @@ public class EmailServiceImple implements EmailService {
     }
     @Override
     @Async
-    public void enviarCorreoSimple(String to, String subject, String emailContent) throws MessagingException {
+    public void enviarCorreoSimple(String to, String subject, String emailContent, byte[] qrCode) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
@@ -83,7 +82,11 @@ public class EmailServiceImple implements EmailService {
         helper.setSubject(subject);
         helper.setText(emailContent, true); // true para interpretar HTML
 
+        // Adjunta el QR como contenido embebido
+        helper.addInline("qrCode", new ByteArrayResource(qrCode), "image/png");
+
         mailSender.send(message);
     }
+
 
 }

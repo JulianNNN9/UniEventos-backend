@@ -29,5 +29,7 @@ public interface CompraService {
 
     Preference realizarPago(String idOrden) throws Exception;
 
-    void recibirNotificacionMercadoPago(Map<String, Object> requestBody);
+    String obtenerEstadoCompra(String idCompra) throws Exception;
+
+    String procesarNotificacionDePago(Map<String, Object> request);
 }

@@ -130,7 +130,7 @@ public class UsuarioServiceImple implements UsuarioService {
             EnviarCodigoCorreoDTO enviarCodigoCorreoDTO = new EnviarCodigoCorreoDTO(
                     "Recuperación de Contraseña",
                     "Olvidaste tu Contraseña?",
-                    "Este es tu código de recueración. Por favor no lo compartas con nadie",
+                    "Este es tu código de recuperación. Por favor no lo compartas con nadie",
                     codigoRecuperacion.getCodigo()
             );
 

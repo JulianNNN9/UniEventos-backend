@@ -36,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -52,7 +54,7 @@ public class CompraServiceImple implements CompraService {
     private final EventoService eventoService;
     private final EmailService emailService;
     // Cambiar cada que se vaya a probar la pasarela de pagos
-    private final String urlNgrok = "https://01f8-181-53-99-0.ngrok-free.app/";
+    private final String urlNgrok = "https://53f0-2800-e2-7080-193b-81c0-8cd4-8767-407c.ngrok-free.app";
     private final CuponRepo cuponRepo;
     private final UsuarioRepo usuarioRepo;
 
@@ -101,7 +103,7 @@ public class CompraServiceImple implements CompraService {
             Evento evento = eventoService.obtenerEvento(idEvento);
 
             // Verificar si el evento ocurre con al menos dos días de anticipación
-            if (evento.getFechaEvento().isBefore(LocalDateTime.now().plusDays(2))) {
+            if (evento.getFechaEvento().isBefore(LocalDateTime.now().plusDays(1))) {
                 throw new IllegalArgumentException("Las compras deben realizarse con al menos dos días de anticipación.");
             }
 
@@ -116,6 +118,7 @@ public class CompraServiceImple implements CompraService {
             if (localidad.getEntradasRestantes() < cantidad) {
                 throw new EntradasInsuficientesException("No hay suficientes entradas restantes para la localidad");
             }
+            localidad.setEntradasRestantes(localidad.getEntradasRestantes() - cantidad);
 
             // Actualizar el evento
             eventoService.saveEvento(evento);
@@ -170,6 +173,7 @@ public class CompraServiceImple implements CompraService {
         // Si todas las validaciones pasan, devolvemos el cupón
         return new InformacionCuponDTO(cupon.getCodigo(), cupon.getPorcentajeDescuento());
     }
+
     private List<ItemCompra> convertirListaItemCompraDTOToListaItemCompra(List<InformacionItemCompraDTO> informacionItemCompraDTOList) throws RecursoNoEncontradoException {
         List<ItemCompra> itemCompraList = new ArrayList<>();
         for (InformacionItemCompraDTO informacionItemCompraDTO : informacionItemCompraDTOList){
@@ -223,6 +227,12 @@ public class CompraServiceImple implements CompraService {
         }
 
         return compraExistente.get();
+    }
+    @Override
+    public String obtenerEstadoCompra(String idCompra) throws Exception {
+        Compra compraEncontrada = obtenerCompra(idCompra);
+
+        return "" + compraEncontrada.getEstadoCompra();
     }
     @Override
     public InformacionCompraDTO obtenerCompraDTO(String idCompra) throws Exception {
@@ -297,8 +307,6 @@ public class CompraServiceImple implements CompraService {
             throw new IllegalArgumentException("La compra debe estar PENDIENTE");
         }
 
-        compra.setEstadoCompra(EstadoCompra.CANCELADA);
-
         /*
             DEVOLVER LAS ENTRADAS COMPRADAS NUEVAMENTE A LA LOCALIDAD
          */
@@ -327,7 +335,7 @@ public class CompraServiceImple implements CompraService {
                 eventoService.saveEvento(evento);
             }
         }
-
+        compra.setEstadoCompra(EstadoCompra.CANCELADA);
         compraRepo.save(compra);
 
         return "Compra cancelada exitosamente";
@@ -395,9 +403,9 @@ public class CompraServiceImple implements CompraService {
 
         // Configurar las urls de retorno de la pasarela (Frontend)
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                .success(urlNgrok + "compra/success")
-                .failure(urlNgrok + "compra/failure")
-                .pending(urlNgrok + "compra/pending")
+                .success("http://localhost:4200/detalle-compra/" + idCompra)
+                .failure("http://localhost:4200/detalle-compra/" + idCompra)
+                .pending("http://localhost:4200/detalle-compra/" + idCompra)
                 .build();
 
 
@@ -406,7 +414,7 @@ public class CompraServiceImple implements CompraService {
                 .backUrls(backUrls)
                 .items(itemsPasarela)
                 .metadata(Map.of("id_orden", compraGuardada.getId()))
-                .notificationUrl(urlNgrok)
+                .notificationUrl(urlNgrok + "/api/notificaciones/mercadopago")
                 .build();
 
 
@@ -447,28 +455,13 @@ public class CompraServiceImple implements CompraService {
 
             EnviarCuponCorreoDTO enviarCuponCorreoDTO = new EnviarCuponCorreoDTO(
                     "Tu nuevo cupon",
-                    "Felicidades, por realizar tu primera obtienes " + cuponDTO.porcentajeDescuento()
+                    "Felicidades, por realizar tu primera compra obtienes " + cuponDTO.porcentajeDescuento()
                             + "% de descuento en tu próxima compra",
                     cuponDTO.nombre(),
                     cuponDTO.codigo()
             );
             emailService.enviarCuponCorreo(usuario.getEmail(), enviarCuponCorreoDTO);
         }
-
-        // Metodo que envia el correo con la confirmacion de la compra
-        if (compraGuardada.getEstadoCompra() == EstadoCompra.COMPLETADA){
-
-            // Se crea un codigo QR con el codigo de la compra por medio de un servicio externo
-            byte[] qrCode = generateQRCodeImage(compraGuardada.getId(), 350, 350);
-            String qrCodeBase64 = Base64.getEncoder().encodeToString(qrCode);
-
-            // Crear el contenido del correo con el código QR
-            String emailContent = "Tu compra ha sido completada con exito. Aquí está tu código QR: <img src='data:image/png;base64," + qrCodeBase64 + "' />";
-            emailService.enviarCorreoSimple(usuario.getEmail(), "Confirmacion de compra", emailContent);
-        }
-
-
-
 
         // Obtiene las compra que realizó el usuario, recorre cada compra individual y sus
         // localidades, verifica que se puedan restar (por si alguien más las compró antes)
@@ -511,48 +504,7 @@ public class CompraServiceImple implements CompraService {
     private double calcularPrecioDescuentoCupon(Cupon cupon, double precio) {
         return precio - (precio*cupon.getPorcentajeDescuento() / 100);
     }
-    @Override
-    public void recibirNotificacionMercadoPago(Map<String, Object> request) {
-        try {
 
-
-            // Obtener el tipo de notificación
-            Object tipo = request.get("type");
-
-
-            // Si la notificación es de un pago entonces obtener el pago y la orden asociada
-            if ("payment".equals(tipo)) {
-
-
-                // Capturamos el JSON que viene en el request y lo convertimos a un String
-                String input = request.get("data").toString();
-
-
-                // Extraemos los números de la cadena, es decir, el id del pago
-                String idPago = input.replaceAll("\\D+", "");
-
-
-                // Se crea el cliente de MercadoPago y se obtiene el pago con el id
-                PaymentClient client = new PaymentClient();
-                Payment payment = client.get( Long.parseLong(idPago) );
-
-
-                // Obtener el id de la orden asociada al pago que viene en los metadatos
-                String idCompra = payment.getMetadata().get("id_orden").toString();
-
-
-                // Se obtiene la orden guardada en la base de datos y se le asigna el pago
-                Compra compra = obtenerCompra(idCompra);
-                Pago pago = crearPago(payment);
-                compra.setPago(pago);
-                compraRepo.save(compra);
-            }
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
     private Optional<Compra> obtenerComprasPorCodigoCuponYIdUsuario(String codigoCupon, String idUsuario) {
         if (idUsuario.length() != 24) {
             if (idUsuario.length() < 24) {
@@ -587,5 +539,84 @@ public class CompraServiceImple implements CompraService {
         MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
         return pngOutputStream.toByteArray();
     }
+    @Override
+    public String procesarNotificacionDePago(Map<String, Object> request) {
+        try {
+            MercadoPagoConfig.setAccessToken("APP_USR-1683778910738309-100810-244312086b9b60a77c052359c31c2376-2024325571");
+            // Obtener el tipo de notificación
+            Object tipo = request.get("type");
 
+            // Si la notificación es de un pago, obtenemos el pago y la orden asociada
+            if ("payment".equals(tipo)) {
+                // Capturamos el JSON que viene en el request y lo convertimos a String
+                String input = request.get("data").toString();
+
+                // Extraemos los números de la cadena, es decir, el id del pago
+                String idPago = input.replaceAll("\\D+", "");
+
+                // Se crea el cliente de MercadoPago y se obtiene el pago con el id
+                PaymentClient paymentClient = new PaymentClient();
+                Payment pago = paymentClient.get(Long.parseLong(idPago)); // Obtener el pago usando el paymentId
+
+                // Obtener el id de la orden asociada al pago que viene en los metadatos
+                String idOrden = pago.getMetadata().get("id_orden").toString(); // Obtener el id_orden de los metadatos
+
+                // Verifica el estado del pago
+                String estadoPago = pago.getStatus(); // Obtiene el estado del pago: approved, pending, rejected, etc.
+
+                // Busca la compra con el id_orden
+                Compra compra = obtenerCompra(idOrden); // Buscar la compra por el id_orden
+                if (compra != null) {
+                    // Actualiza el estado de la compra dependiendo del estado del pago
+                    switch (estadoPago.toLowerCase()) {
+                        case "approved":
+                            compra.setEstadoCompra(EstadoCompra.COMPLETADA); // Si el pago es aprobado, marca la compra como completada
+                            break;
+                        case "pending":
+                            compra.setEstadoCompra(EstadoCompra.PENDIENTE); // Si el pago está pendiente, marca la compra como pendiente
+                            break;
+                        case "rejected":
+                            compra.setEstadoCompra(EstadoCompra.RECHAZADA); // Si el pago fue rechazado, marca la compra como rechazada
+                            break;
+                        case "cancelled":
+                            compra.setEstadoCompra(EstadoCompra.CANCELADA); // Si el pago fue cancelado, marca la compra como cancelada
+                            break;
+                        default:
+                            compra.setEstadoCompra(EstadoCompra.PENDIENTE); // Por defecto, si el estado es desconocido, lo marcamos como pendiente
+                            break;
+                    }
+
+                    // Crea el objeto Pago y asocia a la compra
+                    Pago pagoBackend = crearPago(pago); // Crear el pago en el backend (almacena detalles del pago)
+                    compra.setPago(pagoBackend); // Asocia el pago con la compra
+
+                    // Guarda la compra con el nuevo estado
+                    compraRepo.save(compra);
+
+                    // Si el pago fue aprobado, se crea un código QR
+                    if ("approved".equalsIgnoreCase(estadoPago)) {
+                        // Se crea un código QR con el código de la compra por medio de un servicio externo
+                        byte[] qrCode = generateQRCodeImage(compra.getId(), 350, 350);
+
+                        // Crear el contenido del correo con el código QR embebido
+                        String emailContent = "<html><body>" +
+                                "Tu compra ha sido completada con éxito. Aquí está tu código QR:<br>" +
+                                "<img src='cid:qrCode' />" + // `cid` se refiere al contenido embebido adjuntado
+                                "</body></html>";
+
+                        // Enviar el correo con el código QR embebido
+                        emailService.enviarCorreoSimple(compra.getUsuario().getEmail(), "Confirmación de compra", emailContent, qrCode);
+                    }
+
+                    return "Notificación procesada y compra actualizada con éxito";
+                } else {
+                    return "Compra no encontrada con el id_orden proporcionado";
+                }
+            } else {
+                return "Tipo de notificación no soportado";
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al procesar la notificación de pago: " + e.getMessage());
+        }
+    }
 }
