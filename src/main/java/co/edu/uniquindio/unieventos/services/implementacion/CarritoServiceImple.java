@@ -51,10 +51,13 @@ public class CarritoServiceImple implements CarritoService {
         }
 
         // Verificar si ya existe un item con la misma localidad en el carrito
-        boolean existeItemEnCarrito = carrito.getItemsCarrito().stream()
-                .anyMatch(item -> item.getNombreLocalidad().equals(agregarItemDTO.informacionDetalleCarritoDTO().nombreLocalidad())
-                        && item.getEvento().getId().equals(agregarItemDTO.informacionDetalleCarritoDTO().idEvento()));
+        boolean existeItemEnCarrito = false;
 
+        if(carrito.getItemsCarrito() != null){
+            existeItemEnCarrito = carrito.getItemsCarrito().stream()
+                    .anyMatch(item -> item.getNombreLocalidad().equals(agregarItemDTO.informacionDetalleCarritoDTO().nombreLocalidad())
+                            && item.getEvento().getId().equals(agregarItemDTO.informacionDetalleCarritoDTO().idEvento()));
+        }
         // Si ya existe, lanzar una excepción
         if (existeItemEnCarrito) {
             throw new IllegalArgumentException("Este item ya se encuentra en el carrito");
