@@ -29,6 +29,7 @@ import com.mercadopago.client.preference.PreferenceItemRequest;
 import com.mercadopago.client.preference.PreferenceRequest;
 import com.mercadopago.resources.payment.Payment;
 import com.mercadopago.resources.preference.Preference;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +55,7 @@ public class CompraServiceImple implements CompraService {
     private final EventoService eventoService;
     private final EmailService emailService;
     // Cambiar cada que se vaya a probar la pasarela de pagos
-    private final String urlNgrok = "https://53f0-2800-e2-7080-193b-81c0-8cd4-8767-407c.ngrok-free.app";
+    private final String urlNgrok = "https://8c2c-2800-e2-7080-193b-2d57-947c-e467-c5b4.ngrok-free.app";
     private final CuponRepo cuponRepo;
     private final UsuarioRepo usuarioRepo;
 
@@ -118,8 +119,6 @@ public class CompraServiceImple implements CompraService {
             if (localidad.getEntradasRestantes() < cantidad) {
                 throw new EntradasInsuficientesException("No hay suficientes entradas restantes para la localidad");
             }
-            localidad.setEntradasRestantes(localidad.getEntradasRestantes() - cantidad);
-
             // Actualizar el evento
             eventoService.saveEvento(evento);
         }
@@ -305,35 +304,6 @@ public class CompraServiceImple implements CompraService {
         Compra compra = obtenerCompra(idCompra);
         if(compra.getEstadoCompra() != EstadoCompra.PENDIENTE){
             throw new IllegalArgumentException("La compra debe estar PENDIENTE");
-        }
-
-        /*
-            DEVOLVER LAS ENTRADAS COMPRADAS NUEVAMENTE A LA LOCALIDAD
-         */
-
-        for (ItemCompra item : compra.getItemsCompra()) {
-
-            String idEvento = item.getEvento().getId();
-            String nombreLocalidad = item.getNombreLocalidad();
-            Integer cantidad = item.getCantidad();
-
-            // Buscar el evento correspondiente
-            Evento evento = eventoService.obtenerEvento(item.getEvento().getId());
-
-            if(evento.getLocalidades() != null){
-                // Buscar la localidad en el evento
-                Localidad localidad = evento.getLocalidades().stream()
-                        .filter(loc -> loc.getNombreLocalidad().equals(nombreLocalidad))
-                        .findFirst()
-                        .orElseThrow(() ->
-                                new Exception("Localidad no encontrada"));
-
-                // Devolver las entradas canceladas
-                localidad.setEntradasRestantes(localidad.getEntradasRestantes() + cantidad);
-
-                // Guardar el evento con las entradas actualizadas
-                eventoService.saveEvento(evento);
-            }
         }
         compra.setEstadoCompra(EstadoCompra.CANCELADA);
         compraRepo.save(compra);
@@ -595,17 +565,8 @@ public class CompraServiceImple implements CompraService {
 
                     // Si el pago fue aprobado, se crea un código QR
                     if ("approved".equalsIgnoreCase(estadoPago)) {
-                        // Se crea un código QR con el código de la compra por medio de un servicio externo
-                        byte[] qrCode = generateQRCodeImage(compra.getId(), 350, 350);
-
-                        // Crear el contenido del correo con el código QR embebido
-                        String emailContent = "<html><body>" +
-                                "Tu compra ha sido completada con éxito. Aquí está tu código QR:<br>" +
-                                "<img src='cid:qrCode' />" + // `cid` se refiere al contenido embebido adjuntado
-                                "</body></html>";
-
-                        // Enviar el correo con el código QR embebido
-                        emailService.enviarCorreoSimple(compra.getUsuario().getEmail(), "Confirmación de compra", emailContent, qrCode);
+                        enviarCodigoQRIdCompra(compra); // Enviar el código QR al correo del usuario
+                        actualizarCantidadLocalidades(compra.getItemsCompra());
                     }
 
                     return "Notificación procesada y compra actualizada con éxito";
@@ -617,6 +578,45 @@ public class CompraServiceImple implements CompraService {
             }
         } catch (Exception e) {
             throw new RuntimeException("Error al procesar la notificación de pago: " + e.getMessage());
+        }
+    }
+    private void enviarCodigoQRIdCompra(Compra compra) throws IOException, WriterException, MessagingException {
+        byte[] qrCode = generateQRCodeImage(compra.getId(), 350, 350);
+
+        // Crear el contenido del correo con el código QR embebido
+        String emailContent = "<html><body>" +
+                "Tu compra ha sido completada con éxito. Aquí está tu código QR:<br>" +
+                "<img src='cid:qrCode' />" + // `cid` se refiere al contenido embebido adjuntado
+                "</body></html>";
+
+        // Enviar el correo con el código QR embebido
+        emailService.enviarCorreoSimple(compra.getUsuario().getEmail(), "Confirmación de compra", emailContent, qrCode);
+    }
+    private void actualizarCantidadLocalidades(List<ItemCompra> itemsCompra) throws RecursoNoEncontradoException, EntradasInsuficientesException {
+        // Iterar sobre cada item de la compra
+        for (ItemCompra item : itemsCompra) {
+            String idEvento = item.getEvento().getId();
+            String nombreLocalidad = item.getNombreLocalidad();
+            Integer cantidad = item.getCantidad();
+
+            // Buscar el evento correspondiente
+            Evento evento = eventoService.obtenerEvento(idEvento);
+
+            // Buscar la localidad en el evento
+            Localidad localidad = evento.getLocalidades().stream()
+                    .filter(loc -> loc.getNombreLocalidad().equals(nombreLocalidad))
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new RecursoNoEncontradoException("Localidad no encontrada"));
+
+            // Verificar si hay suficientes entradas restantes
+            if (localidad.getEntradasRestantes() < cantidad) {
+                throw new EntradasInsuficientesException("No hay suficientes entradas restantes para la localidad");
+            }
+            localidad.setEntradasRestantes(localidad.getEntradasRestantes() - cantidad);
+
+            // Actualizar el evento
+            eventoService.saveEvento(evento);
         }
     }
 }
